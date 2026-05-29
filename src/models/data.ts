@@ -408,12 +408,44 @@ export const DEV_PROFILE: DevProfile = {
 
 /* Stack técnico — agrúpalo como quieras */
 export const TECH_STACK: Record<string, string[]> = {
-  "Frontend": ["HTML", "CSS", "JavaScript", "TypeScript", "EJS"],
-  "Backend":  ["Node.js", "Express"],
-  "Tools":    ["Git", "GitHub", "Render"],
+  "Backend":      ["Node.js", "Express", "Python", "FastAPI", "PHP"],
+  "Frontend":     ["TypeScript", "JavaScript", "React", "Next.js", "EJS"],
+  "Databases":    ["PostgreSQL", "MySQL", "Oracle", "Prisma ORM"],
+  "Integrations": ["REST APIs", "SOAP", "SFTP", "Oracle ERP", "SAP ABAP"],
+  "AI / LLM":     ["LLM orchestration", "Intent resolution", "Ollama", "JSON Schema"],
+  "Tools":        ["Git", "GitHub", "Linux", "Google Cloud", "Render"],
 };
 
 export const DEV_PROJECTS: DevProject[] = [
+  {
+    title: "Hebe — Local AI Assistant",
+    description: {
+      en: "Modular AI companion combining natural language understanding with " +
+          "real-world system execution, running fully local. Orchestrator-based " +
+          "architecture separating intent, policy and execution, with hybrid " +
+          "rule + LLM intent resolution and a ~97% accuracy evaluation pipeline.",
+      es: "Compañera IA modular que combina comprensión de lenguaje natural con " +
+          "ejecución real de acciones del sistema, corriendo totalmente en local. " +
+          "Arquitectura basada en orquestador que separa intención, política y " +
+          "ejecución, con resolución de intención híbrida (reglas + LLM) y un " +
+          "pipeline de evaluación con ~97% de precisión.",
+    },
+    tech: ["Python", "FastAPI", "LLM", "Ollama", "Architecture"],
+  },
+  {
+    title: "Orders & Integrations Hub",
+    description: {
+      en: "Full-stack internal platform managing orders, customers, users and " +
+          "regions as a central hub for business workflows and system integrations. " +
+          "REST APIs, JWT auth with role-based access control, modular backend with " +
+          "Prisma ORM and a Next.js admin panel.",
+      es: "Plataforma interna full-stack que gestiona pedidos, clientes, usuarios y " +
+          "regiones como hub central de flujos de negocio e integraciones. APIs REST, " +
+          "autenticación JWT con control de acceso por roles, backend modular con " +
+          "Prisma ORM y panel de administración en Next.js.",
+    },
+    tech: ["Node.js", "TypeScript", "Express", "Prisma", "PostgreSQL", "Next.js"],
+  },
   {
     title: "Jotun's Lair — Creator Website",
     description: {
@@ -437,7 +469,6 @@ export const DEV_PROJECTS: DevProject[] = [
     tech: ["HTML", "CSS", "JavaScript"],
     repo: "https://github.com/emillandeveloper/stream-schedule",
   },
-  /* Añade más proyectos aquí siguiendo el mismo formato */
 ];
 
 /* Textos de interfaz del portfolio */
