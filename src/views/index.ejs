@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="<%= lang %>">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= profile.displayName %> — <%= profile.lairName[lang] %></title>
+  <meta name="description" content="<%= profile.bio[lang] %>">
+  <link rel="icon" type="image/png" href="<%= profile.logoStatic %>">
+  <link rel="stylesheet" href="/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Press+Start+2P&display=swap" rel="stylesheet">
+</head>
+<body style="--banner: url('<%= profile.banner %>')">
+
+  <!-- ===================== LANG TOGGLE ===================== -->
+  <div class="lang-toggle">
+    <a href="?lang=en" class="<%= lang === 'en' ? 'active' : '' %>">EN</a>
+    <span>/</span>
+    <a href="?lang=es" class="<%= lang === 'es' ? 'active' : '' %>">ES</a>
+  </div>
+
+  <!-- ===================== HERO / BANNER ===================== -->
+  <header class="hero">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <h1 class="hero-title">Leo Nifelheim</h1>
+      <p class="hero-tagline"><%= profile.tagline[lang] %></p>
+      <div class="hero-langs">
+        <span><%= profile.languages %></span>
+        <span class="divider">◆</span>
+        <span><%= profile.timezone %></span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===================== NAV ===================== -->
+  <nav class="nav">
+    <button class="nav-btn active" data-slide="0"><%= ui.navSchedule[lang] %></button>
+    <button class="nav-btn" data-slide="1"><%= ui.navAbout[lang] %></button>
+    <button class="nav-btn" data-slide="2"><%= ui.navNowPlaying[lang] %></button>
+    <button class="nav-btn" data-slide="3"><%= ui.navGames[lang] %></button>
+    <button class="nav-btn" data-slide="4"><%= ui.navSocials[lang] %></button>
+  </nav>
+
+  <!-- ===================== SLIDER ===================== -->
+  <div class="slider-viewport">
+    <div class="slider-track" id="track">
+
+      <!-- SLIDE 0: HORARIO -->
+      <section class="slide">
+        <div class="slide-inner">
+          <h2 class="section-title"><%= ui.schedTitle[lang] %></h2>
+          <div class="schedule-list">
+            <% schedule.forEach(function(day, i) { %>
+              <div class="day-row <%= (i === todayIndex) ? 'today' : '' %>"
+                   style="--cat-color: <%= catColors[day.category] %>">
+                <div class="day-badge"><%= catLabels[day.category] %></div>
+                <div class="day-info">
+                  <span class="day-name"><%= day.name[lang] %></span>
+                  <span class="day-sub"><%= day.subtitle[lang] %></span>
+                </div>
+                <div class="day-logo">
+                  <img src="<%= day.logo %>" alt="<%= day.game %>" onerror="this.style.display='none'">
+                </div>
+                <div class="day-time">
+                  <span><%= day.timeStart %></span>
+                  <span class="time-sep">—</span>
+                  <span><%= day.timeEnd %></span>
+                </div>
+              </div>
+            <% }); %>
+          </div>
+          <p class="schedule-note"><%= ui.schedNote[lang] %> · <%= profile.timezone %></p>
+        </div>
+      </section>
+
+      <!-- SLIDE 1: SOBRE MÍ -->
+      <section class="slide">
+        <div class="slide-inner">
+          <h2 class="section-title"><%= ui.aboutTitle[lang] %></h2>
+          <div class="about-card">
+            <img src="<%= profile.mascot %>" alt="Jotun" class="about-mascot" onerror="this.style.display='none'">
+            <p><%= profile.bio[lang] %></p>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 2: NOW PLAYING -->
+      <section class="slide">
+        <div class="slide-inner">
+          <h2 class="section-title"><%= ui.nowPlayingTitle[lang] %></h2>
+          <div class="games-grid">
+            <% nowPlayingGames.forEach(function(game) { %>
+              <div class="game-card">
+                <div class="game-cover">
+                  <img src="<%= game.cover %>" alt="<%= game.title %>" onerror="this.style.display='none'">
+                </div>
+                <div class="game-body">
+                  <h3 class="game-title"><%= game.title %></h3>
+                  <span class="game-status status-<%= game.status %>"><%= game.status %></span>
+                  <p class="game-desc"><%= game.description[lang] %></p>
+                </div>
+              </div>
+            <% }); %>
+          </div>
+        </div>
+      </section>
+
+      <!-- SLIDE 3: JUEGOS TERMINADOS -->
+      <section class="slide">
+        <div class="slide-inner">
+          <h2 class="section-title"><%= ui.gamesTitle[lang] %></h2>
+          <% if (completedGames.length === 0) { %>
+            <p class="empty-state"><%= ui.noCompletedGames[lang] %></p>
+          <% } else { %>
+            <div class="games-grid">
+              <% completedGames.forEach(function(game) { %>
+                <div class="game-card">
+                  <div class="game-cover">
+                    <img src="<%= game.cover %>" alt="<%= game.title %>" onerror="this.style.display='none'">
+                  </div>
+                  <div class="game-body">
+                    <h3 class="game-title"><%= game.title %></h3>
+                    <span class="game-status status-<%= game.status %>"><%= game.status %></span>
+                    <p class="game-desc"><%= game.description[lang] %></p>
+                  </div>
+                </div>
+              <% }); %>
+            </div>
+          <% } %>
+        </div>
+      </section>
+
+      <!-- SLIDE 4: REDES -->
+      <section class="slide">
+        <div class="slide-inner">
+          <h2 class="section-title"><%= ui.socialTitle[lang] %></h2>
+          <div class="socials-row">
+            <% socials.forEach(function(s) { %>
+              <a href="<%= s.url %>" target="_blank" rel="noopener"
+                 class="social-btn" style="--social-color: <%= s.color %>">
+                <span class="social-name"><%= s.name %></span>
+              </a>
+            <% }); %>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <footer class="footer">
+    <img src="<%= profile.logoStatic %>" alt="" class="footer-logo" onerror="this.style.display='none'">
+    <p>© <%= new Date().getFullYear() %> <%= profile.displayName %> · <%= ui.footer[lang] %></p>
+  </footer>
+
+  <script src="/js/slider.js"></script>
+</body>
+</html>

@@ -1,0 +1,377 @@
+/* ============================================================
+   LEO NIFELHEIM — JOTUN'S LAIR — dark fantasy stream hub
+   Tipografía: Press Start 2P (títulos) + Cinzel (textos)
+   Navegación: slider lateral
+   ============================================================ */
+
+:root {
+  --bg:          #07080c;
+  --bg-card:     #0c0d16;
+  --bg-elevated: #11131f;
+  --border:      #1c1c2c;
+  --border-glow: #2a2a45;
+  --text:        #c8c0a8;
+  --text-dim:    #8888a8;
+  --text-faint:  #4a4a6a;
+  --gold:        #c8920a;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body { height: 100%; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Cinzel', serif;
+  line-height: 1.6;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Helpers tipográficos */
+.pixel { font-family: 'Press Start 2P', monospace; }
+
+/* ===================== LANG TOGGLE ===================== */
+.lang-toggle {
+  position: fixed;
+  top: 16px; right: 20px;
+  z-index: 100;
+  display: flex; align-items: center; gap: 6px;
+  background: rgba(7,8,12,0.85);
+  border: 1px solid var(--border-glow);
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.55rem;
+  backdrop-filter: blur(6px);
+}
+.lang-toggle a { color: var(--text-faint); text-decoration: none; transition: color 0.2s; }
+.lang-toggle a.active { color: var(--gold); }
+.lang-toggle a:hover { color: var(--text); }
+
+/* ===================== HERO ===================== */
+.hero {
+  position: relative;
+  min-height: 25vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border-bottom: 2px solid var(--border-glow);
+  overflow: hidden;
+  background-image: var(--banner);
+  background-size: cover;
+  background-position: center;
+}
+.hero-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(7,8,12,0.45) 0%, rgba(7,8,12,0.55) 50%, rgba(7,8,12,0.95) 100%);
+}
+.hero-content { position: relative; z-index: 2; padding: 2.5rem 1.5rem; }
+
+.hero-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: clamp(1.6rem, 5vw, 3rem);
+  color: #e0d8c0;
+  text-shadow: 3px 3px 0 #000, 0 0 30px rgba(200,146,10,0.4);
+  letter-spacing: 2px;
+  line-height: 1.4;
+}
+.hero-tagline {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.65rem;
+  color: var(--text-dim);
+  letter-spacing: 1px;
+  margin: 1.2rem 0 0.8rem;
+}
+.hero-langs {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.55rem;
+  color: var(--text-faint);
+}
+.hero-langs .divider { color: var(--gold); margin: 0 8px; }
+
+/* ===================== NAV ===================== */
+.nav {
+  position: sticky; top: 0;
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  padding: 1rem;
+  background: rgba(7,8,12,0.95);
+  border-bottom: 1px solid var(--border);
+  z-index: 50;
+  backdrop-filter: blur(8px);
+  flex-wrap: wrap;
+}
+.nav-btn {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.6rem;
+  color: var(--text-dim);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  letter-spacing: 1px;
+  padding: 6px 4px;
+  border-bottom: 2px solid transparent;
+  transition: color 0.2s, border-color 0.2s, text-shadow 0.2s;
+}
+.nav-btn:hover { color: var(--text); }
+.nav-btn.active {
+  color: var(--gold);
+  border-bottom-color: var(--gold);
+  text-shadow: 0 0 12px rgba(200,146,10,0.4);
+}
+
+/* ===================== SLIDER ===================== */
+.slider-viewport {
+  flex: 1;
+  overflow: hidden;
+  width: 100%;
+}
+.slider-track {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.slide {
+  flex: 0 0 100%;
+  width: 100%;
+  overflow-y: auto;
+  padding: 3rem 1.5rem;
+}
+/* Ocultar scrollbar manteniendo el scroll */
+.slide {
+  scrollbar-width: none;        /* Firefox */
+  -ms-overflow-style: none;     /* IE/Edge */
+}
+.slide::-webkit-scrollbar {
+  display: none;                /* Chrome/Safari/Edge */
+}
+.slide-inner {
+  max-width: 980px;
+  margin: 0 auto;
+}
+
+.section-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 1.2rem;
+  text-align: center;
+  margin-bottom: 2.5rem;
+  color: #e0d8c0;
+  letter-spacing: 2px;
+  line-height: 1.5;
+}
+.section-title::after {
+  content: '◆ ◆ ◆';
+  display: block;
+  font-size: 0.5rem;
+  color: var(--text-faint);
+  margin-top: 1rem;
+  letter-spacing: 8px;
+}
+
+/* ===================== HORARIO ===================== */
+.schedule-list { display: flex; flex-direction: column; gap: 10px; }
+.day-row {
+  display: grid;
+  grid-template-columns: 110px 1fr 140px 90px;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 18px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--cat-color);
+  border-radius: 4px;
+  transition: background 0.25s, box-shadow 0.25s, transform 0.25s;
+}
+.day-row:hover, .day-row.today {
+  background: var(--bg-elevated);
+  box-shadow: 0 0 20px -4px var(--cat-color);
+  transform: translateX(4px);
+}
+.day-row.today { border-left-width: 6px; }
+.day-badge {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.5rem;
+  letter-spacing: 1px;
+  color: var(--cat-color);
+  border: 1px solid var(--cat-color);
+  padding: 8px 4px;
+  text-align: center;
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--cat-color) 8%, transparent);
+}
+.day-info { display: flex; flex-direction: column; gap: 6px; }
+.day-name {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.85rem;
+  color: var(--text);
+  letter-spacing: 1px;
+}
+.day-sub {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.5rem;
+  color: var(--cat-color);
+  letter-spacing: 1px;
+  opacity: 0.85;
+}
+.day-logo { display: flex; align-items: center; justify-content: center; height: 60px; }
+.day-logo img { max-width: 100%; max-height: 56px; object-fit: contain; }
+.day-time {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.65rem;
+  color: var(--text-dim);
+  text-align: center;
+  display: flex; flex-direction: column; gap: 4px;
+}
+.time-sep { color: var(--text-faint); }
+.schedule-note {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.5rem;
+  color: var(--text-faint);
+  text-align: center;
+  margin-top: 1.5rem;
+  letter-spacing: 1px;
+}
+
+/* ===================== ABOUT ===================== */
+.about-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 2rem;
+  font-size: 1.15rem;
+  color: var(--text-dim);
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  max-width: 760px;
+  margin: 0 auto;
+}
+.about-mascot { width: 90px; height: 90px; flex-shrink: 0; image-rendering: pixelated; }
+
+/* ===================== GAMES ===================== */
+.games-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 1.5rem;
+}
+.game-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+  transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
+}
+.game-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--gold);
+  box-shadow: 0 8px 30px -8px rgba(200,146,10,0.4);
+}
+.game-cover {
+  height: 120px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--bg-elevated);
+  padding: 1rem;
+}
+.game-cover img { max-width: 90%; max-height: 90px; object-fit: contain; }
+.game-body { padding: 1.2rem; }
+.game-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.8rem;
+  margin-bottom: 0.8rem;
+  color: var(--text);
+  line-height: 1.4;
+}
+.game-status {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.5rem;
+  padding: 4px 8px;
+  border-radius: 3px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.status-playing   { background: rgba(58,154,170,0.15); color: #5dcaa5; }
+.status-completed { background: rgba(99,153,34,0.15);  color: #97c459; }
+.status-upcoming  { background: rgba(200,146,10,0.15); color: var(--gold); }
+.game-desc { margin-top: 0.9rem; font-size: 1rem; color: var(--text-dim); }
+.empty-state {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+  color: var(--text-dim);
+  background: var(--bg-card);
+  border: 1px dashed var(--border-glow);
+  border-radius: 6px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.6rem;
+  line-height: 1.8;
+}
+
+/* ===================== SOCIALS ===================== */
+.socials-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.8rem;
+}
+.social-btn {
+  flex: 1 1 0;
+  min-width: 120px;
+  max-width: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.2rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-bottom: 3px solid var(--social-color);
+  border-radius: 6px;
+  text-decoration: none;
+  color: var(--text);
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 1px;
+  transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+}
+.social-btn:hover {
+  transform: translateY(-3px);
+  background: var(--bg-elevated);
+  box-shadow: 0 6px 24px -6px var(--social-color);
+}
+
+/* ===================== FOOTER ===================== */
+.footer {
+  text-align: center;
+  padding: 1.5rem;
+  border-top: 1px solid var(--border);
+  color: var(--text-faint);
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.5rem;
+  letter-spacing: 1px;
+}
+.footer-logo { width: 40px; height: 40px; margin-bottom: 0.6rem; opacity: 0.7; }
+
+/* ===================== RESPONSIVE ===================== */
+@media (max-width: 680px) {
+  .day-row {
+    grid-template-columns: 70px 1fr;
+    grid-template-areas: "badge info" "logo time";
+    gap: 10px;
+  }
+  .day-badge { grid-area: badge; }
+  .day-info  { grid-area: info; }
+  .day-name  { font-size: 0.7rem; }
+  .day-logo  { grid-area: logo; justify-content: flex-start; height: 40px; }
+  .day-logo img { max-height: 36px; }
+  .day-time  { grid-area: time; flex-direction: row; gap: 8px; align-items: center; justify-content: flex-end; }
+  .about-card { flex-direction: column; text-align: center; }
+  .nav { gap: 0.8rem; }
+  .nav-btn { font-size: 0.5rem; }
+}

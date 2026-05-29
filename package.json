@@ -1,0 +1,26 @@
+{
+  "name": "leo-nifelheim-site",
+  "version": "1.0.0",
+  "description": "Web de creador de Leo Nifelheim — dark fantasy stream hub",
+  "main": "dist/server.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
+    "watch": "tsc --watch"
+  },
+  "keywords": ["twitch", "streamer", "schedule", "mvc"],
+  "author": "Leo Nifelheim",
+  "license": "MIT",
+  "dependencies": {
+    "ejs": "^3.1.10",
+    "express": "^4.19.2"
+  },
+  "devDependencies": {
+    "@types/ejs": "^3.1.5",
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.14.0",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.4.5"
+  }
+}
