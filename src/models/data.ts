@@ -431,6 +431,7 @@ export const DEV_PROJECTS: DevProject[] = [
           "pipeline de evaluación con ~97% de precisión.",
     },
     tech: ["Python", "FastAPI", "LLM", "Ollama", "Architecture"],
+    repo: "https://github.com/emillandeveloper/hebe",
   },
   {
     title: "Orders & Integrations Hub",
@@ -445,6 +446,7 @@ export const DEV_PROJECTS: DevProject[] = [
           "Prisma ORM y panel de administración en Next.js.",
     },
     tech: ["Node.js", "TypeScript", "Express", "Prisma", "PostgreSQL", "Next.js"],
+    repo: "https://github.com/emillandeveloper/orderintegrationhub",
   },
   {
     title: "Jotun's Lair — Creator Website",
