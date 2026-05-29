@@ -369,6 +369,87 @@ export const GAMES: GameProject[] = [
 
 
 
+/* ============================================================
+   PORTFOLIO PROFESIONAL (ruta /portfolio)
+   Para entrevistas y CV. Edita aquí tu info de desarrollador.
+   ============================================================ */
+
+export interface DevProject {
+  title: string;
+  description: I18nText;
+  tech: string[];           // stack del proyecto
+  repo?: string;            // enlace al repositorio (opcional)
+  demo?: string;            // enlace a la demo (opcional)
+}
+
+export interface DevProfile {
+  fullName: string;
+  role: I18nText;
+  intro: I18nText;
+  email: string;
+  github: string;
+  linkedin: string;
+}
+
+export const DEV_PROFILE: DevProfile = {
+  fullName: "Eric Millán Rodríguez",
+  role: { en: "Fullstack Developer", es: "Desarrollador Fullstack" },
+  intro: {
+    en: "Fullstack developer who likes building real products end to end — " +
+        "from data modelling and backend APIs to polished, responsive frontends.",
+    es: "Desarrollador fullstack al que le gusta construir productos reales de " +
+        "principio a fin — del modelado de datos y las APIs de backend a frontends " +
+        "cuidados y responsive.",
+  },
+  email: "tucorreo@ejemplo.com",
+  github: "https://github.com/emillandeveloper",
+  linkedin: "https://linkedin.com/in/tu-perfil",
+};
+
+/* Stack técnico — agrúpalo como quieras */
+export const TECH_STACK: Record<string, string[]> = {
+  "Frontend": ["HTML", "CSS", "JavaScript", "TypeScript", "EJS"],
+  "Backend":  ["Node.js", "Express"],
+  "Tools":    ["Git", "GitHub", "Render"],
+};
+
+export const DEV_PROJECTS: DevProject[] = [
+  {
+    title: "Jotun's Lair — Creator Website",
+    description: {
+      en: "Bilingual creator hub with a lateral slider UI, auto-highlighted " +
+          "current stream day and a data-driven content model. This very site.",
+      es: "Hub de creador bilingüe con slider lateral, resaltado automático del " +
+          "día de stream actual y contenido dirigido por datos. Esta misma web.",
+    },
+    tech: ["Node.js", "Express", "TypeScript", "EJS", "MVC"],
+    repo: "https://github.com/emillandeveloper/creator-website",
+    demo: "/",
+  },
+  {
+    title: "Stream Weekly Schedule",
+    description: {
+      en: "Configurable overlay/panel generator for Twitch. Pixel-art themed, " +
+          "data-driven, exports to image and highlights the current day.",
+      es: "Generador configurable de panel/overlay para Twitch. Estética pixel-art, " +
+          "dirigido por datos, exporta a imagen y resalta el día actual.",
+    },
+    tech: ["HTML", "CSS", "JavaScript"],
+    repo: "https://github.com/emillandeveloper/stream-schedule",
+  },
+  /* Añade más proyectos aquí siguiendo el mismo formato */
+];
+
+/* Textos de interfaz del portfolio */
+export const DEV_UI: Record<string, I18nText> = {
+  backToHub:    { en: "← Stream Hub", es: "← Stream Hub" },
+  projectsTitle:{ en: "Projects",     es: "Proyectos" },
+  stackTitle:   { en: "Tech Stack",   es: "Tecnologías" },
+  contactTitle: { en: "Contact",      es: "Contacto" },
+  viewRepo:     { en: "Code",         es: "Código" },
+  viewDemo:     { en: "Live",         es: "Demo" },
+};
+
 /* ---------- COLORES Y ETIQUETAS POR CATEGORÍA ---------- */
 export const CAT_COLORS: Record<string, string> = {
   "challenge": "#c8920a",

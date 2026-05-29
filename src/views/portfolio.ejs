@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="<%= lang %>">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= dev.fullName %> — <%= dev.role[lang] %></title>
+  <meta name="description" content="<%= dev.intro[lang] %>">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/portfolio.css">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Press+Start+2P&display=swap" rel="stylesheet">
+</head>
+<body class="pf-body">
+
+  <!-- LANG TOGGLE + back -->
+  <div class="lang-toggle">
+    <a href="/" class="pf-back"><%= ui.backToHub[lang] %></a>
+    <span>·</span>
+    <a href="?lang=en" class="<%= lang === 'en' ? 'active' : '' %>">EN</a>
+    <span>/</span>
+    <a href="?lang=es" class="<%= lang === 'es' ? 'active' : '' %>">ES</a>
+  </div>
+
+  <!-- HERO -->
+  <header class="pf-hero">
+    <h1 class="pf-name"><%= dev.fullName %></h1>
+    <p class="pf-role"><%= dev.role[lang] %></p>
+    <p class="pf-intro"><%= dev.intro[lang] %></p>
+    <div class="pf-links">
+      <a href="<%= dev.github %>" target="_blank" rel="noopener">GitHub</a>
+      <a href="<%= dev.linkedin %>" target="_blank" rel="noopener">LinkedIn</a>
+      <a href="mailto:<%= dev.email %>"><%= ui.contactTitle[lang] %></a>
+    </div>
+  </header>
+
+  <main class="pf-container">
+
+    <!-- TECH STACK -->
+    <section class="pf-section">
+      <h2 class="pf-title"><%= ui.stackTitle[lang] %></h2>
+      <div class="pf-stack">
+        <% Object.keys(stack).forEach(function(group) { %>
+          <div class="pf-stack-group">
+            <h3 class="pf-stack-label"><%= group %></h3>
+            <div class="pf-tags">
+              <% stack[group].forEach(function(t) { %>
+                <span class="pf-tag"><%= t %></span>
+              <% }); %>
+            </div>
+          </div>
+        <% }); %>
+      </div>
+    </section>
+
+    <!-- PROJECTS -->
+    <section class="pf-section">
+      <h2 class="pf-title"><%= ui.projectsTitle[lang] %></h2>
+      <div class="pf-projects">
+        <% projects.forEach(function(p) { %>
+          <article class="pf-project">
+            <h3 class="pf-project-title"><%= p.title %></h3>
+            <p class="pf-project-desc"><%= p.description[lang] %></p>
+            <div class="pf-tags">
+              <% p.tech.forEach(function(t) { %>
+                <span class="pf-tag small"><%= t %></span>
+              <% }); %>
+            </div>
+            <div class="pf-project-links">
+              <% if (p.repo) { %>
+                <a href="<%= p.repo %>" target="_blank" rel="noopener"><%= ui.viewRepo[lang] %></a>
+              <% } %>
+              <% if (p.demo) { %>
+                <a href="<%= p.demo %>" target="_blank" rel="noopener"><%= ui.viewDemo[lang] %></a>
+              <% } %>
+            </div>
+          </article>
+        <% }); %>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <p>© <%= new Date().getFullYear() %> <%= dev.fullName %></p>
+  </footer>
+
+</body>
+</html>

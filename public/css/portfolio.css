@@ -1,0 +1,170 @@
+/* ============================================================
+   PORTFOLIO PROFESIONAL — más sobrio que la página de creador
+   Reutiliza variables de color de style.css
+   ============================================================ */
+
+.pf-body {
+  display: block;
+  background: var(--bg);
+  min-height: 100vh;
+}
+
+/* ===================== HERO ===================== */
+.pf-hero {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 6rem 1.5rem 3rem;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+}
+.pf-name {
+  font-family: 'Press Start 2P', monospace;
+  font-size: clamp(1.4rem, 4vw, 2.2rem);
+  color: #e0d8c0;
+  letter-spacing: 2px;
+  line-height: 1.4;
+  text-shadow: 2px 2px 0 #000;
+}
+.pf-role {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.7rem;
+  color: var(--gold);
+  letter-spacing: 2px;
+  margin: 1.2rem 0;
+}
+.pf-intro {
+  font-family: 'Cinzel', serif;
+  font-size: 1.15rem;
+  color: var(--text-dim);
+  max-width: 620px;
+  margin: 0 auto 1.8rem;
+  line-height: 1.7;
+}
+.pf-links {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.pf-links a {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.6rem;
+  color: var(--text);
+  text-decoration: none;
+  padding: 10px 16px;
+  border: 1px solid var(--border-glow);
+  border-radius: 4px;
+  letter-spacing: 1px;
+  transition: border-color 0.2s, color 0.2s, box-shadow 0.2s;
+}
+.pf-links a:hover {
+  color: var(--gold);
+  border-color: var(--gold);
+  box-shadow: 0 0 16px -4px var(--gold);
+}
+
+/* ===================== CONTAINER ===================== */
+.pf-container { max-width: 900px; margin: 0 auto; padding: 0 1.5rem; }
+.pf-section { padding: 3.5rem 0; }
+.pf-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 1rem;
+  color: #e0d8c0;
+  letter-spacing: 2px;
+  margin-bottom: 2rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 1px solid var(--border);
+}
+
+/* ===================== STACK ===================== */
+.pf-stack {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+}
+.pf-stack-group {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 1.2rem;
+}
+.pf-stack-label {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.6rem;
+  color: var(--gold);
+  letter-spacing: 1px;
+  margin-bottom: 1rem;
+}
+.pf-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.pf-tag {
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--text);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-glow);
+  border-radius: 4px;
+  padding: 5px 10px;
+}
+.pf-tag.small { font-size: 0.75rem; padding: 3px 8px; }
+
+/* ===================== PROJECTS ===================== */
+.pf-projects {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+.pf-project {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 1.5rem;
+  transition: transform 0.25s, border-color 0.25s, box-shadow 0.25s;
+}
+.pf-project:hover {
+  transform: translateY(-4px);
+  border-color: var(--gold);
+  box-shadow: 0 8px 30px -10px rgba(200,146,10,0.4);
+}
+.pf-project-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.75rem;
+  color: var(--text);
+  line-height: 1.5;
+  margin-bottom: 1rem;
+}
+.pf-project-desc {
+  font-family: 'Cinzel', serif;
+  font-size: 1rem;
+  color: var(--text-dim);
+  line-height: 1.6;
+  margin-bottom: 1.2rem;
+}
+.pf-project-links {
+  display: flex;
+  gap: 0.8rem;
+  margin-top: 1.2rem;
+}
+.pf-project-links a {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.5rem;
+  color: var(--gold);
+  text-decoration: none;
+  padding: 6px 12px;
+  border: 1px solid var(--gold);
+  border-radius: 3px;
+  letter-spacing: 1px;
+  transition: background 0.2s, color 0.2s;
+}
+.pf-project-links a:hover {
+  background: var(--gold);
+  color: var(--bg);
+}
+
+/* ===================== BACK LINK ===================== */
+.pf-back { color: var(--text-dim) !important; }
+.pf-back:hover { color: var(--gold) !important; }
+
+@media (max-width: 680px) {
+  .pf-hero { padding-top: 4rem; }
+}
