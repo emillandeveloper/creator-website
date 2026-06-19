@@ -99,8 +99,8 @@ export const SCHEDULE: ScheduleDay[] = [
   { name: { en: "Wednesday", es: "Mi\u00e9rcoles" }, category: "main-a", game: "Persona 5 Royal", subtitle: { en: "Persona 5 Royal", es: "Persona 5 Royal" }, logo: "/img/logos/p5r.png",  timeStart: "19:00", timeEnd: "22:00" },
   { name: { en: "Thursday",  es: "Jueves" },    category: "main-b",    game: "Baldur's Gate 3",  subtitle: { en: "Baldur's Gate 3",   es: "Baldur's Gate 3" }, logo: "/img/logos/bg3.png",  timeStart: "19:00", timeEnd: "22:00" },
   { name: { en: "Friday",    es: "Viernes" },   category: "main-b",    game: "Baldur's Gate 3",  subtitle: { en: "Baldur's Gate 3",   es: "Baldur's Gate 3" }, logo: "/img/logos/bg3.png",  timeStart: "19:00", timeEnd: "22:00" },
-  { name: { en: "Saturday",  es: "S\u00e1bado" }, category: "retro",   game: "Zwei",             subtitle: { en: "Zwei! The Arges Adventure", es: "Zwei! The Arges Adventure" }, logo: "/img/logos/zwei.png", timeStart: "19:00", timeEnd: "22:00" },
-  { name: { en: "Sunday",    es: "Domingo" },   category: "retro",     game: "Zwei",             subtitle: { en: "Zwei! The Arges Adventure", es: "Zwei! The Arges Adventure" }, logo: "/img/logos/zwei.png", timeStart: "19:00", timeEnd: "22:00" },
+  { name: { en: "Saturday",  es: "S\u00e1bado" }, category: "retro",   game: "Lumentale",             subtitle: { en: "Lumentale: Memories of Trey", es: "Lumentale: Memories of Trey" }, logo: "/img/logos/lumen.png", timeStart: "19:00", timeEnd: "22:00" },
+  { name: { en: "Sunday",    es: "Domingo" },   category: "retro",     game: "Lumentale",             subtitle: { en: "Lumentale: Memories of Trey", es: "Lumentale: Memories of Trey" }, logo: "/img/logos/lumen.png", timeStart: "19:00", timeEnd: "22:00" },
 ];
 
 /* ---------- JUEGOS / PROYECTOS ----------
@@ -139,12 +139,12 @@ export const GAMES: GameProject[] = [
     }
   },
   {
-    title: "Zwei",
+    title: "Lumentale",
     status: "playing",
-    cover: "/img/logos/zwei.png",
+    cover: "/img/logos/lumen.png",
     description: {
-      en: "Retro action and exploration gem.",
-      es: "Joya retro de acción y exploración."
+      en: "Monster collector with pokemon inspiration",
+      es: "Colector de monstruos con inspiración pokemon."
     }
   },
 
@@ -363,6 +363,15 @@ export const GAMES: GameProject[] = [
     description: {
       en: "Completed the full .hack//G.U. saga.",
       es: "Saga completa de .hack//G.U. terminada en directo."
+    }
+  },
+   {
+    title: "Zwei",
+    status: "completed",
+    cover: "/img/logos/zwei.png",
+    description: {
+      en: "Completed Zwei! The Arges Adventure",
+      es: "Zwei! The Arges Adventure terminado en directo."
     }
   }
 ];
