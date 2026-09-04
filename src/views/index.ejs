@@ -59,7 +59,13 @@
                   <span class="day-sub"><%= day.subtitle[lang] %></span>
                 </div>
                 <div class="day-logo">
-                  <img src="<%= day.logo %>" alt="<%= day.game %>" onerror="this.style.display='none'">
+                  <img
+                    src="<%= day.logo %>"
+                    alt="<%= day.game %>"
+                    class="<%= day.logoOutline === true ? 'logo-outline' : '' %>"
+                    style="transform: scale(<%= day.logoScale ?? 1 %>);"
+                    onerror="this.style.display='none'"
+                  >
                 </div>
                 <div class="day-time">
                   <span><%= day.timeStart %></span>

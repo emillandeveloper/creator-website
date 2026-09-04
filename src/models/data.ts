@@ -19,6 +19,8 @@ export interface ScheduleDay {
   game: string;
   subtitle: I18nText;
   logo: string;
+  logoScale?: number;
+  logoOutline?: boolean;
   timeStart: string;
   timeEnd: string;
 }
@@ -101,6 +103,7 @@ export const SCHEDULE: ScheduleDay[] = [
     game: "Final Fantasy V",
     subtitle: { en: "Crystal Roulette Fiesta", es: "Crystal Roulette Fiesta" },
     logo: "/img/logos/ff5.png",
+    logoScale: 0.78,
     timeStart: "19:00",
     timeEnd: "22:00"
   },
@@ -114,6 +117,7 @@ export const SCHEDULE: ScheduleDay[] = [
       es: "The Legend of Zelda: Tears of the Kingdom"
     },
     logo: "/img/logos/zelda.png",
+    logoScale: 1,
     timeStart: "19:00",
     timeEnd: "22:00"
   },
@@ -127,6 +131,7 @@ export const SCHEDULE: ScheduleDay[] = [
       es: "Baldur's Gate 3 - Collab"
     },
     logo: "/img/logos/bg3.png",
+    logoScale: 1,
     timeStart: "18:00",
     timeEnd: "22:00"
   },
@@ -140,6 +145,8 @@ export const SCHEDULE: ScheduleDay[] = [
       es: "The Adventures of Elliot: The Millennium Tales"
     },
     logo: "/img/logos/elliot.png",
+    logoScale: 1,
+    logoOutline: true,
     timeStart: "19:00",
     timeEnd: "22:00"
   },
@@ -153,6 +160,8 @@ export const SCHEDULE: ScheduleDay[] = [
       es: "The Adventures of Elliot: The Millennium Tales"
     },
     logo: "/img/logos/elliot.png",
+    logoScale: 1,
+    logoOutline: true,
     timeStart: "19:00",
     timeEnd: "22:00"
   },
@@ -166,6 +175,8 @@ export const SCHEDULE: ScheduleDay[] = [
       es: "Final Fantasy VI"
     },
     logo: "/img/logos/ff6.png",
+    logoScale: 1.8,
+    logoOutline: true,
     timeStart: "19:00",
     timeEnd: "22:00"
   },
@@ -179,6 +190,8 @@ export const SCHEDULE: ScheduleDay[] = [
       es: "Final Fantasy VI"
     },
     logo: "/img/logos/ff6.png",
+    logoScale: 1.8,
+    logoOutline: true,
     timeStart: "19:00",
     timeEnd: "22:00"
   }
