@@ -94,13 +94,95 @@ export const SOCIALS: SocialLink[] = [
 
 /* ---------- HORARIO SEMANAL ---------- */
 export const SCHEDULE: ScheduleDay[] = [
-  { name: { en: "Monday",    es: "Lunes" },     category: "challenge", game: "Final Fantasy IX", subtitle: { en: "Lv.1 Challenge Run", es: "Reto Nivel 1" },   logo: "/img/logos/ff9.png",  timeStart: "19:00", timeEnd: "22:00" },
-  { name: { en: "Tuesday",   es: "Martes" },    category: "main-a",    game: "Persona 5 Royal",  subtitle: { en: "Persona 5 Royal",   es: "Persona 5 Royal" }, logo: "/img/logos/p5r.png",  timeStart: "19:00", timeEnd: "22:00" },
-  { name: { en: "Wednesday", es: "Mi\u00e9rcoles" }, category: "main-a", game: "Persona 5 Royal", subtitle: { en: "Persona 5 Royal", es: "Persona 5 Royal" }, logo: "/img/logos/p5r.png",  timeStart: "19:00", timeEnd: "22:00" },
-  { name: { en: "Thursday",  es: "Jueves" },    category: "main-b",    game: "Baldur's Gate 3",  subtitle: { en: "Baldur's Gate 3",   es: "Baldur's Gate 3" }, logo: "/img/logos/bg3.png",  timeStart: "19:00", timeEnd: "22:00" },
-  { name: { en: "Friday",    es: "Viernes" },   category: "main-b",    game: "Baldur's Gate 3",  subtitle: { en: "Baldur's Gate 3",   es: "Baldur's Gate 3" }, logo: "/img/logos/bg3.png",  timeStart: "19:00", timeEnd: "22:00" },
-  { name: { en: "Saturday",  es: "S\u00e1bado" }, category: "retro",   game: "Lumentale",             subtitle: { en: "Lumentale: Memories of Trey", es: "Lumentale: Memories of Trey" }, logo: "/img/logos/lumen.png", timeStart: "19:00", timeEnd: "22:00" },
-  { name: { en: "Sunday",    es: "Domingo" },   category: "retro",     game: "Lumentale",             subtitle: { en: "Lumentale: Memories of Trey", es: "Lumentale: Memories of Trey" }, logo: "/img/logos/lumen.png", timeStart: "19:00", timeEnd: "22:00" },
+
+  {
+    name: { en: "Monday", es: "Lunes" },
+    category: "challenge",
+    game: "Final Fantasy V",
+    subtitle: { en: "Crystal Roulette Fiesta", es: "Crystal Roulette Fiesta" },
+    logo: "/img/logos/ff5.png",
+    timeStart: "19:00",
+    timeEnd: "22:00"
+  },
+
+  {
+    name: { en: "Tuesday", es: "Martes" },
+    category: "main-a",
+    game: "The Legend of Zelda: Tears of the Kingdom",
+    subtitle: {
+      en: "The Legend of Zelda: Tears of the Kingdom",
+      es: "The Legend of Zelda: Tears of the Kingdom"
+    },
+    logo: "/img/logos/zelda.png",
+    timeStart: "19:00",
+    timeEnd: "22:00"
+  },
+
+  {
+    name: { en: "Wednesday", es: "Miércoles" },
+    category: "main-a",
+    game: "Baldur's Gate 3",
+    subtitle: {
+      en: "Baldur's Gate 3 - Collab",
+      es: "Baldur's Gate 3 - Collab"
+    },
+    logo: "/img/logos/bg3.png",
+    timeStart: "18:00",
+    timeEnd: "22:00"
+  },
+
+  {
+    name: { en: "Thursday", es: "Jueves" },
+    category: "main-b",
+    game: "The Adventures of Elliot: The Millennium Tales",
+    subtitle: {
+      en: "The Adventures of Elliot: The Millennium Tales",
+      es: "The Adventures of Elliot: The Millennium Tales"
+    },
+    logo: "/img/logos/elliot.png",
+    timeStart: "19:00",
+    timeEnd: "22:00"
+  },
+
+  {
+    name: { en: "Friday", es: "Viernes" },
+    category: "main-b",
+    game: "The Adventures of Elliot: The Millennium Tales",
+    subtitle: {
+      en: "The Adventures of Elliot: The Millennium Tales",
+      es: "The Adventures of Elliot: The Millennium Tales"
+    },
+    logo: "/img/logos/elliot.png",
+    timeStart: "19:00",
+    timeEnd: "22:00"
+  },
+
+  {
+    name: { en: "Saturday", es: "Sábado" },
+    category: "retro",
+    game: "Final Fantasy VI",
+    subtitle: {
+      en: "Final Fantasy VI",
+      es: "Final Fantasy VI"
+    },
+    logo: "/img/logos/ff6.png",
+    timeStart: "19:00",
+    timeEnd: "22:00"
+  },
+
+  {
+    name: { en: "Sunday", es: "Domingo" },
+    category: "retro",
+    game: "Final Fantasy VI",
+    subtitle: {
+      en: "Final Fantasy VI",
+      es: "Final Fantasy VI"
+    },
+    logo: "/img/logos/ff6.png",
+    timeStart: "19:00",
+    timeEnd: "22:00"
+  }
+
 ];
 
 /* ---------- JUEGOS / PROYECTOS ----------
@@ -112,21 +194,21 @@ export const SCHEDULE: ScheduleDay[] = [
 export const GAMES: GameProject[] = [
   /* ---------- NOW PLAYING ---------- */
   {
-    title: "Final Fantasy IX",
+    title: "Final Fantasy V — Crystal Roulette Fiesta",
     status: "playing",
-    cover: "/img/logos/ff9.png",
+    cover: "/img/logos/ff5.png",
     description: {
-      en: "Level 1 challenge run with Moguri Mod and Beatrix in the team.",
-      es: "Challenge run a nivel 1 con Moguri Mod y Beatrix en el equipo."
+      en: "A Crystal Roulette Fiesta challenge where every crystal reshapes the party.",
+      es: "Un reto Crystal Roulette Fiesta donde cada cristal transforma el equipo."
     }
   },
   {
-    title: "Persona 5 Royal",
+    title: "The Legend of Zelda: Tears of the Kingdom",
     status: "playing",
-    cover: "/img/logos/p5r.png",
+    cover: "/img/logos/zelda.png",
     description: {
-      en: "Stealing hearts in the Metaverse.",
-      es: "Robando corazones en el Metaverso."
+      en: "Exploring Hyrule and its skies one discovery at a time.",
+      es: "Explorando Hyrule y sus cielos, un descubrimiento tras otro."
     }
   },
   {
@@ -134,21 +216,57 @@ export const GAMES: GameProject[] = [
     status: "playing",
     cover: "/img/logos/bg3.png",
     description: {
-      en: "Campaign decided by chat.",
-      es: "Campaña decidida por el chat."
+      en: "A collaborative campaign full of choices, chaos and dice rolls.",
+      es: "Una campaña colaborativa llena de decisiones, caos y tiradas de dados."
     }
   },
   {
-    title: "Lumentale",
+    title: "The Adventures of Elliot: The Millennium Tales",
     status: "playing",
-    cover: "/img/logos/lumen.png",
+    cover: "/img/logos/elliot.png",
     description: {
-      en: "Monster collector with pokemon inspiration",
-      es: "Colector de monstruos con inspiración pokemon."
+      en: "Journeying through a new HD-2D action RPG adventure.",
+      es: "Recorriendo una nueva aventura de acción RPG en HD-2D."
+    }
+  },
+  {
+    title: "Final Fantasy VI",
+    status: "playing",
+    cover: "/img/logos/ff6.png",
+    description: {
+      en: "Revisiting a timeless rebellion against the Gestahlian Empire.",
+      es: "Reviviendo una rebelión inolvidable contra el Imperio Gestahliano."
     }
   },
 
   /* ---------- COMPLETED GAMES ---------- */
+  {
+    title: "Final Fantasy IX — Lv.1 Challenge Run",
+    status: "completed",
+    cover: "/img/logos/ff9.png",
+    description: {
+      en: "Completed Level 1 challenge run with Moguri Mod and Beatrix in the team.",
+      es: "Challenge run a nivel 1 terminada con Moguri Mod y Beatrix en el equipo."
+    }
+  },
+  {
+    title: "Persona 5 Royal",
+    status: "completed",
+    cover: "/img/logos/p5r.png",
+    description: {
+      en: "Completed journey with the Phantom Thieves through the Metaverse.",
+      es: "Aventura terminada con los Ladrones Fantasma por el Metaverso."
+    }
+  },
+  {
+    title: "Lumentale: Memories of Trey",
+    status: "completed",
+    cover: "/img/logos/lumen.png",
+    description: {
+      en: "Completed monster-collecting adventure through Trey's memories.",
+      es: "Aventura de colección de monstruos terminada a través de los recuerdos de Trey."
+    }
+  },
   {
     title: "Romancing SaGa: Minstrel Song Remastered",
     status: "completed",
@@ -336,15 +454,6 @@ export const GAMES: GameProject[] = [
     description: {
       en: "Completed Final Fantasy action RPG playthrough.",
       es: "Final Fantasy de acción terminado en directo."
-    }
-  },
-  {
-    title: "Final Fantasy IX",
-    status: "completed",
-    cover: "/img/logos/ff9.png",
-    description: {
-      en: "Completed classic Final Fantasy playthrough.",
-      es: "Final Fantasy clásico terminado en directo."
     }
   },
   {
