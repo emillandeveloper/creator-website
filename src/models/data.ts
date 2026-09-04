@@ -29,6 +29,8 @@ export interface GameProject {
   title: string;
   status: "playing" | "completed" | "upcoming";
   cover: string;
+  coverScale?: number;
+  coverOutline?: boolean;
   description: I18nText;
 }
 
@@ -210,6 +212,7 @@ export const GAMES: GameProject[] = [
     title: "Final Fantasy V — Crystal Roulette Fiesta",
     status: "playing",
     cover: "/img/logos/ff5.png",
+    coverScale: 0.78,
     description: {
       en: "A Crystal Roulette Fiesta challenge where every crystal reshapes the party.",
       es: "Un reto Crystal Roulette Fiesta donde cada cristal transforma el equipo."
@@ -219,6 +222,7 @@ export const GAMES: GameProject[] = [
     title: "The Legend of Zelda: Tears of the Kingdom",
     status: "playing",
     cover: "/img/logos/zelda.png",
+    coverScale: 1,
     description: {
       en: "Exploring Hyrule and its skies one discovery at a time.",
       es: "Explorando Hyrule y sus cielos, un descubrimiento tras otro."
@@ -228,6 +232,7 @@ export const GAMES: GameProject[] = [
     title: "Baldur's Gate 3",
     status: "playing",
     cover: "/img/logos/bg3.png",
+    coverScale: 1,
     description: {
       en: "A collaborative campaign full of choices, chaos and dice rolls.",
       es: "Una campaña colaborativa llena de decisiones, caos y tiradas de dados."
@@ -237,6 +242,8 @@ export const GAMES: GameProject[] = [
     title: "The Adventures of Elliot: The Millennium Tales",
     status: "playing",
     cover: "/img/logos/elliot.png",
+    coverScale: 1,
+    coverOutline: true,
     description: {
       en: "Journeying through a new HD-2D action RPG adventure.",
       es: "Recorriendo una nueva aventura de acción RPG en HD-2D."
@@ -246,6 +253,8 @@ export const GAMES: GameProject[] = [
     title: "Final Fantasy VI",
     status: "playing",
     cover: "/img/logos/ff6.png",
+    coverScale: 1.8,
+    coverOutline: true,
     description: {
       en: "Revisiting a timeless rebellion against the Gestahlian Empire.",
       es: "Reviviendo una rebelión inolvidable contra el Imperio Gestahliano."
@@ -275,6 +284,7 @@ export const GAMES: GameProject[] = [
     title: "Lumentale: Memories of Trey",
     status: "completed",
     cover: "/img/logos/lumen.png",
+    coverOutline: true,
     description: {
       en: "Completed monster-collecting adventure through Trey's memories.",
       es: "Aventura de colección de monstruos terminada a través de los recuerdos de Trey."

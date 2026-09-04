@@ -292,7 +292,12 @@ body {
   background: var(--bg-elevated);
   padding: 1rem;
 }
-.game-cover img { max-width: 90%; max-height: 90px; object-fit: contain; }
+.game-cover img {
+  max-width: 90%;
+  max-height: 90px;
+  object-fit: contain;
+  transform-origin: center center;
+}
 .game-body { padding: 1.2rem; }
 .game-title {
   font-family: 'Press Start 2P', monospace;

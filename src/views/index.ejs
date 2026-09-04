@@ -98,7 +98,13 @@
             <% nowPlayingGames.forEach(function(game) { %>
               <div class="game-card">
                 <div class="game-cover">
-                  <img src="<%= game.cover %>" alt="<%= game.title %>" onerror="this.style.display='none'">
+                  <img
+                    src="<%= game.cover %>"
+                    alt="<%= game.title %>"
+                    class="<%= game.coverOutline === true ? 'logo-outline' : '' %>"
+                    style="transform: scale(<%= game.coverScale ?? 1 %>);"
+                    onerror="this.style.display='none'"
+                  >
                 </div>
                 <div class="game-body">
                   <h3 class="game-title"><%= game.title %></h3>
@@ -122,7 +128,13 @@
               <% completedGames.forEach(function(game) { %>
                 <div class="game-card">
                   <div class="game-cover">
-                    <img src="<%= game.cover %>" alt="<%= game.title %>" onerror="this.style.display='none'">
+                    <img
+                      src="<%= game.cover %>"
+                      alt="<%= game.title %>"
+                      class="<%= game.coverOutline === true ? 'logo-outline' : '' %>"
+                      style="transform: scale(<%= game.coverScale ?? 1 %>);"
+                      onerror="this.style.display='none'"
+                    >
                   </div>
                   <div class="game-body">
                     <h3 class="game-title"><%= game.title %></h3>
