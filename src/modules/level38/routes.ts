@@ -3,11 +3,12 @@ import { rateLimit } from "express-rate-limit";
 import { Level38Config } from "./config";
 import { Level38Controller } from "./controller";
 import { Level38Error } from "./errors";
+import { TwitchIntegration } from "./twitch/integration";
 
 type AsyncHandler = (req: Request, res: Response) => Promise<void>;
 const wrap = (handler: AsyncHandler): express.RequestHandler => (req, res, next) => { handler(req, res).catch(next); };
 
-export function createLevel38Routes(controller: Level38Controller, config: Level38Config): Router {
+export function createLevel38Routes(controller: Level38Controller, config: Level38Config, twitch?: TwitchIntegration): Router {
   const router = Router();
   router.use((_req, res, next) => {
     res.set({
@@ -16,6 +17,8 @@ export function createLevel38Routes(controller: Level38Controller, config: Level
     });
     next();
   });
+  // Mount before JSON parsing and browser Origin checks: HMAC authenticates this one endpoint.
+  if (twitch) router.post("/twitch/eventsub", express.raw({ type: "application/json", limit: "64kb", inflate: false }), wrap(twitch.webhook));
   router.use((req, _res, next) => {
     if (req.method === "POST" && (req.get("origin") !== config.origin || req.get("X-Level38-Request") !== "1" || !req.is("application/json"))) {
       next(new Level38Error(403, "Use the LEVEL 38 page on the configured site to make changes."));
@@ -45,14 +48,16 @@ export function createLevel38Routes(controller: Level38Controller, config: Level
   router.post("/api/control/undo", limited(60, 60 * 1000), wrap(controller.undo));
   router.post("/api/polls/:id/vote", limited(120, 60 * 1000), wrap(controller.vote));
   router.post("/api/owner/games/:id", limited(30, 60 * 1000), wrap(controller.configureGame));
+  router.post("/api/control/twitch/:action", limited(10, 60 * 1000), wrap(controller.twitchAction));
+  router.post("/api/owner/games/:id/twitch", limited(30, 60 * 1000), wrap(controller.mapTwitchGame));
   router.use((_req, _res, next) => next(new Level38Error(404, "LEVEL 38 route not found.")));
   const errors: ErrorRequestHandler = (error: unknown, req, res, _next) => {
     const bodyError = error as { type?: string } | null;
-    const status = error instanceof Level38Error ? error.status : bodyError?.type === "entity.too.large" ? 413 : bodyError?.type === "entity.parse.failed" ? 400 : 503;
-    const message = error instanceof Level38Error ? error.message : status === 400 ? "Invalid JSON body." : status === 413 ? "Request body is too large." : "LEVEL 38 is temporarily unavailable. Please try again shortly.";
+    const status = error instanceof Level38Error ? error.status : bodyError?.type === "entity.too.large" ? 413 : bodyError?.type === "entity.parse.failed" ? 400 : bodyError?.type === "encoding.unsupported" ? 415 : 503;
+    const message = error instanceof Level38Error ? error.message : status === 400 ? "Invalid JSON body." : status === 413 ? "Request body is too large." : status === 415 ? "Compressed request bodies are not supported." : "LEVEL 38 is temporarily unavailable. Please try again shortly.";
     // Database errors can contain connection details; keep responses and routine logs credential-free.
     if (status === 503) console.error("LEVEL 38 request unavailable.");
-    if (req.path.startsWith("/api/")) res.status(status).json({ error: message });
+    if (req.path.startsWith("/api/") || req.path === "/twitch/eventsub") res.status(status).json({ error: message });
     else res.status(status).render("level38/unavailable", { message });
   };
   router.use(errors);

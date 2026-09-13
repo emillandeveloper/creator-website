@@ -35,6 +35,11 @@ enum PollStatus {
   CLOSED
 }
 
+enum GameSource {
+  AUTO_TWITCH
+  MANUAL_OVERRIDE
+}
+
 model Event {
   id              String     @id @default(cuid())
   slug            String     @unique
@@ -42,7 +47,11 @@ model Event {
   target          Int        @default(38)
   revision        Int        @default(0)
   controlRevision Int        @default(0)
+  unlockSequence  Int        @default(0)
+  lastUnlockedAt  DateTime?
   currentGameId   String?
+  gameSource      GameSource @default(AUTO_TWITCH)
+  manualOverrideBy String?
   currentGame     Game?      @relation("CurrentGame", fields: [currentGameId], references: [id], onDelete: Restrict)
   createdAt       DateTime   @default(now())
   updatedAt       DateTime   @updatedAt
@@ -50,6 +59,7 @@ model Event {
   quests          Quest[]
   polls           Poll[]
   auditLogs       AuditLog[]
+  twitch          TwitchState?
 }
 
 model Game {
@@ -60,6 +70,8 @@ model Game {
   title       String
   enabled     Boolean      @default(true)
   imagePath   String?
+  twitchCategoryId String?
+  twitchCategoryName String?
   sortOrder   Int          @default(0)
   quests      Quest[]
   pollOptions PollOption[]
@@ -67,6 +79,7 @@ model Game {
 
   @@unique([id, eventId])
   @@unique([eventId, slug])
+  @@unique([eventId, twitchCategoryId])
 }
 
 model Quest {
@@ -95,6 +108,7 @@ model Participant {
   id        String   @id @default(cuid())
   tokenHash String   @unique
   nickname  String?
+  classId   String?
   createdAt DateTime @default(now())
   expiresAt DateTime
   votes     Vote[]
@@ -193,8 +207,8 @@ model AuditLog {
   id            String    @id @default(cuid())
   eventId       String
   event         Event     @relation(fields: [eventId], references: [id], onDelete: Restrict)
-  operatorId    String
-  operator      Operator  @relation(fields: [operatorId], references: [id], onDelete: Restrict)
+  operatorId    String?
+  operator      Operator? @relation(fields: [operatorId], references: [id], onDelete: Restrict)
   operatorName  String
   action        String
   entityId      String
@@ -209,4 +223,27 @@ model AuditLog {
 
   @@unique([eventId, eventRevision])
   @@index([eventId, createdAt])
+}
+
+// Integration diagnostics are returned only to authenticated operators.
+model TwitchState {
+  eventId String @id
+  event Event @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  broadcasterId String
+  categoryId String?
+  categoryName String?
+  channelTitle String?
+  observedAt DateTime?
+  lastEventAt DateTime?
+  subscriptionId String?
+  subscriptionStatus String @default("unknown")
+  subscriptionSecretHash String?
+}
+
+// No raw webhook payload or credentials. Retain IDs for 24 hours, beyond replay window.
+model TwitchMessage {
+  id String @id
+  receivedAt DateTime @default(now())
+
+  @@index([receivedAt])
 }

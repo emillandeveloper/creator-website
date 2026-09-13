@@ -1,6 +1,20 @@
 # LEVEL 38 — first Render production deployment
 
-Prepared locally for Phase 2. No Render resources were created or changed, and nothing was pushed or deployed. The repository configuration was inspected; live Dashboard settings, credentials, domain ownership, billing, and database contents were not inspected. Follow this checklist yourself when ready.
+Originally prepared for Phase 2 and extended locally for Phase 4. No Render resources were created or changed during Phase 4, and nothing was pushed or deployed in this phase. The repository configuration was inspected; live Dashboard settings, credentials, domain ownership, billing, and database contents were not inspected. Follow the appropriate checklist yourself when ready.
+
+## Phase 4 release on the existing production service
+
+Phases 1?3 are already complete. For the next reviewed release, keep the existing Render build, pre-deploy (`npm run db:migrate` / `prisma migrate deploy`), start, health, plan and instance settings. **No production Render configuration was changed during Phase 4.** Do not repeat first-event seeding or recreate operator keys.
+
+- [ ] Review the Phase 3 and Phase 4 release together if Phase 3 is still uncommitted locally; include all five migration directories.
+- [ ] Back up the existing event database before applying the reviewed release.
+- [ ] Keep `TWITCH_ENABLED=false` for the first release of this code. Check the migration log applies any pending Phase 3 migration followed by `202609130005_level38_twitch`.
+- [ ] Verify existing routes, health, progress, classes, quests, polls, votes and manual controls with Twitch disabled.
+- [ ] Register/configure the Twitch application and seven variables below using the [exact Twitch setup checklist](level38-twitch.md#production-setup-checklist).
+- [ ] Configure real category mappings as OWNER. No example category IDs are seeded.
+- [ ] Enable Twitch only when ready to create the application subscription and perform initial synchronization. Verify subscription status, a real category update, manual override and return-to-auto.
+
+The rest of this document preserves the original first-deployment procedure for a new service. For the existing live event, use this upgrade checklist. Commit, push, migration and production deployment remain actions for a separately authorized release; none were performed for Phase 4.
 
 ## What changed in the deployment setup
 
@@ -45,7 +59,21 @@ These are all application variables read by this repository, plus the relevant R
 | `NODE_VERSION` | Optional Render build/runtime override; not secret | **Unset** | `.node-version` selects Node 24. Remove an old Dashboard override; if one is necessary, keep it on a tested Node 24 release. It takes precedence over the file. |
 | `LEVEL38_TEST_DATABASE_URL` | Test-only; secret if it has credentials | **Do not set in production** | Integration tests require a disposable database whose name contains `test`; never point this at production or run integration tests from the production service. |
 
-There is no `SESSION_SECRET`, owner password environment variable, Twitch token, OBS variable, separate `DIRECT_URL`, or shadow database URL in this implementation. Anonymous/operator cookies contain random tokens; PostgreSQL stores their hashes and expiry. Operator access keys are provisioned explicitly, not placed in the repository, Blueprint, or build logs.
+Optional Twitch variables, added manually to the existing service's environment when enabling Phase 4 (not to `render.yaml`):
+
+| Variable | Required / secret | Value or behavior |
+| --- | --- | --- |
+| `TWITCH_ENABLED` | Optional switch; not secret | `false` initially; exactly `true` enables background initialization and the signed callback. |
+| `TWITCH_CLIENT_ID` | Required when enabled; identifier | Client ID of the dedicated Twitch developer app. |
+| `TWITCH_CLIENT_SECRET` | Required when enabled; **secret** | App Client Secret, stored only in Render environment settings. |
+| `TWITCH_BROADCASTER_LOGIN` | Default `leonifelheim`; not secret | Used to resolve the ID when no explicit ID is supplied. |
+| `TWITCH_BROADCASTER_ID` | Optional numeric identifier | Takes precedence over login; leave empty to resolve with Get Users. |
+| `TWITCH_EVENTSUB_SECRET` | Required when enabled; **secret** | Separate random 64-character hex string. Rotation replaces the matching subscription. |
+| `TWITCH_EVENTSUB_CALLBACK_URL` | Required when enabled; not secret | `https://leonifelheim.tv/level38/twitch/eventsub` if that is the canonical production domain. Must exactly match `LEVEL38_ORIGIN` plus this path, HTTPS port 443. |
+
+See [Twitch setup, verification and fallback](level38-twitch.md) for secret generation, app registration, callback details and owner/moderator instructions. App tokens are obtained by the server and are never configured as an environment variable. Invalid Twitch configuration affects only Twitch status, not LEVEL 38 readiness or manual operation.
+
+There is no `SESSION_SECRET`, owner password environment variable, manually supplied Twitch access token, OBS variable, separate `DIRECT_URL`, or shadow database URL in this implementation. Anonymous/operator cookies contain random tokens; PostgreSQL stores their hashes and expiry. Operator access keys are provisioned explicitly, not placed in the repository, Blueprint, or build logs.
 
 The Node file prevents an unexpected major-version change; it does not freeze patch releases. Review the resolved version in each build log. [Render Node version selection](https://render.com/docs/node-version)
 
@@ -63,7 +91,7 @@ Internal access requires the same Render account and region. Current Render Post
 
 - [ ] Confirm the paid web/database plans, the existing service's region, and the canonical HTTPS origin. The Blueprint does not provision a database automatically.
 - [ ] In the existing Render service, turn Auto-Deploy **Off before you push**. A local YAML edit cannot change the live service's current auto-deploy setting. For a Blueprint-managed service, also review/disable automatic Blueprint sync during preparation; applying a sync may deploy.
-- [ ] Review all Phase 1 + Phase 2 + deployment-preparation files. Earlier phase work was already uncommitted; do not release only the latest deployment-file edits. Include the lockfile, `.node-version`, Prisma schema, all three migration directories, and `migration_lock.toml`. Exclude `.env`, credentials, `node_modules`, `dist`, and local test artifacts.
+- [ ] Review all Phase 1 + Phase 2 + deployment-preparation files. Earlier phase work was already uncommitted; do not release only the latest deployment-file edits. Include the lockfile, `.node-version`, Prisma schema, all five migration directories, and `migration_lock.toml`. Exclude `.env`, credentials, `node_modules`, `dist`, and local test artifacts.
 - [ ] Run the local release checks below. Then **you** commit/push the reviewed release and record its commit SHA. No push has been performed here.
 - [ ] Create or select paid Render PostgreSQL **16** in the same account/region as the web service (16 is the tested version). Use a fresh empty production database for the first event. If importing existing Phase 1/2 data, follow the preservation notes below before continuing.
 - [ ] Confirm backup/recovery availability and external access restrictions. Take a backup before migrations on any database containing records you need to keep. Render provides recovery and logical exports on paid plans. [PostgreSQL backups](https://render.com/docs/postgresql-backups)
@@ -79,6 +107,8 @@ Internal access requires the same Render account and region. Current Render Post
 202609130001_level38_foundation
 202609130002_level38_live_control
 202609130003_level38_state_backfill
+202609130004_level38_party_and_unlock
+202609130005_level38_twitch
 ```
 
 - [ ] Confirm `npm start` starts successfully. `/healthz` must return HTTP 200 with `{"status":"ok"}`. `/` and `/portfolio` must work; `/level38` should return its preparation page with HTTP 503 while disabled.

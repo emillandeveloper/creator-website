@@ -1,8 +1,12 @@
 # LEVEL 38 — development and operation
 
-LEVEL 38 is an isolated Express/EJS module for the birthday livestream. Phase 2 adds a complete moderator workflow to the Phase 1 foundation. The creator site's existing routes, content, views, styles, and navigation are unchanged. The module remains disabled by default.
+LEVEL 38 is an isolated Express/EJS module for the birthday livestream. Phase 2 adds the moderator workflow; Phase 3 adds the pixel RPG public experience, persistent cosmetic classes, and synchronized level-up celebration. Phase 4 adds optional Twitch category synchronization with a persistent manual override. The creator site's existing routes, content, views, styles, and navigation are unchanged. The module remains disabled by default in local configuration.
 
-See [the Phase 2 implementation report](level38-phase2.md) for changes, verification, and the exact file inventory.
+See [the Phase 2 implementation report](level38-phase2.md) and [the Phase 3 implementation report](level38-phase3.md) for changes, verification, and exact file inventories. Phase 3 does not change Render settings, production configuration, or deployment commands.
+
+Phase 4: [Twitch setup and operations](level38-twitch.md), [implementation and validation report](level38-phase4.md). Twitch failures never enter the readiness check. Migrate locally with `npm run db:migrate` after building; migration `202609130005_level38_twitch` expands the schema without resetting gameplay or identity. No reseeding or key rotation is needed. Existing migration files and `render.yaml` are unchanged.
+
+Manual current-game selection now enters `MANUAL_OVERRIDE`, including selecting the same game when currently in auto mode. Undo restores the previous game while retaining manual control. **Return to Twitch Auto** applies the latest known mapped category immediately; if unmapped, it preserves the current game. This source choice persists across restarts even while Twitch is disabled. OWNER manages category mappings and sync/subscription actions; MODERATOR can read status and choose the game source. Full details and fallback steps are in the Twitch guide.
 
 ## Local setup
 
@@ -51,6 +55,26 @@ A new database constraint allows only one open poll per event. Phase 1 had no po
 `dotenv` loads `.env` locally; existing environment variables take precedence. Local environment files are ignored. No session-signing secret is needed: opaque random cookie tokens are checked against hashes and expiry in PostgreSQL.
 
 Disabled LEVEL 38 returns a preparation page/503 and does not need PostgreSQL. An enabled but unseeded or unavailable database produces a friendly module-level 503; the existing `/` and `/portfolio` pages remain available. Invalid enabled configuration fails startup with a configuration error.
+
+## Phase 3: party classes and presentation
+
+For a local Phase 2 upgrade, stop the local server, run `npm run build`, then run `npm run db:migrate` against your development database. The new `202609130004_level38_party_and_unlock` migration adds nullable `Participant.classId`, `Event.unlockSequence` (default zero), and nullable `Event.lastUnlockedAt`. No existing migration was edited, no records are removed, and no seed rerun is required. Production application of this migration remains a separate authorized release; nothing has been deployed in this phase.
+
+Visitors can browse anonymously and join explicitly or when voting. The server chooses one equally likely cosmetic class from the centralized 16-class catalog in `src/modules/level38/classes.ts`. New anonymous sessions have no class until a valid nickname is saved. Existing named Phase 2 participants get a class lazily on their next authenticated session read or join request. A database compare-and-set inside a transaction prevents concurrent requests from rerolling it. Nickname changes, reloads, and the same valid cookie preserve the assignment. Clearing/expiring the cookie creates a new anonymous identity as before.
+
+The private session/join response includes safe class metadata and a `classAssigned` flag only when that request actually persisted a first assignment. This triggers the brief welcome presentation; normal refreshes do not. Classes have no effect on votes, permissions, keys, cookies, rate limits, or operator capabilities. No class/participant identity is broadcast publicly. Online presence is intentionally deferred; the party panel shows only the current viewer's membership.
+
+The public journal filters by game, current game, status, and text. Secret placeholders use only the already-public total; they do not have quest identifiers, titles, descriptions, or hidden per-game counts. Poll totals update existing rows and retain keyboard focus. Old rounds remain persisted and appear under expandable history.
+
+The [sprite replacement guide](../public/img/level38/README.md) covers the original demo sheets, metadata overrides, missing-image fallback, and locally served font license. Final supplied assets need no participant data rewrite. No commercial game sprites were downloaded.
+
+## Level-up contract
+
+A committed transition from fewer than the target (38) completed quests to at least the target increments the event's durable `unlockSequence` and records `lastUnlockedAt` in the same transaction as the quest/audit update. After commit, the existing public Socket.IO namespace emits `level38:unlocked` with `version`, `id`, `sequence`, `revision`, `occurredAt`, `completed`, `target`, `startsAt`, and `durationMs`. The ID is `level38:unlock:<sequence>` for this single event. The scheduled start is 400ms after emission preparation; the presentation lasts 6.5 seconds. The snapshot includes `unlockSequence` and `serverTime` for reconnect baselines and device-clock calibration.
+
+Initial connections and reconnects receive state only; they never replay historical fireworks. The browser baselines its sequence on the first socket snapshot, deduplicates subsequent event IDs/sequences, and remembers the last seen sequence in session storage when available. A normal snapshot or page opened at 38 never starts the celebration. Hidden tabs and old delayed events are skipped. Reduced motion shows a static level-up panel with no fireworks. Escape or the dismiss button ends it without blocking the underlying controls.
+
+Undoing back below 38 keeps the sequence monotonic. Reaching 38 again emits a **new** sequence and celebrates again. Going from 38 to 39, duplicate/stale completion, page refresh, or server restart does not emit another unlock. The protocol is reusable by a future OBS client, but no overlay route is included. Delivery is best effort: a process crash after commit but before emit can miss a celebration. State recovers correctly; no durable outbox, replay queue, or guaranteed exactly-once network delivery is claimed.
 
 ## Isma's live workflow
 
@@ -162,7 +186,7 @@ The prepared `render.yaml` uses a single paid Starter instance, Node 24, `npm ci
 
 `/healthz` returns 200 while the module is deliberately disabled. Once enabled, it requires a reachable database with the Phase 2 event column and a seeded event; failure returns a generic 503. Render may withhold traffic to the entire service during a database outage, so the deployment guide includes a maintenance path for keeping the creator site available.
 
-Phase 2 still targets one Node process / one Render instance. Database concurrency is safe across connections, but live fan-out and rate limits are process-local. Multi-instance deployment needs a shared Socket.IO adapter, shared throttling, and suitable load balancing. There is no durable outbox yet; crashes between commit and emit recover through snapshots. Load-test for the expected audience before the real event, including the cost of full snapshots and history. Sleeping hosting is unsuitable for uninterrupted livestream operation.
+Phase 4 still targets one Node process / one Render instance. Database concurrency is safe across connections, but live fan-out and rate limits are process-local. Multi-instance deployment needs a shared Socket.IO adapter, shared throttling, and suitable load balancing. There is no durable outbox yet; crashes between commit and emit recover through snapshots. Load-test for the expected audience before the real event, including the cost of full snapshots and history. Sleeping hosting is unsuitable for uninterrupted livestream operation.
 
 ## Tests and tooling
 
@@ -191,4 +215,4 @@ The Prisma advisory is resolved through a scoped `@prisma/config → deepmerge-t
 
 ## Later work
 
-Phase 3 may add Twitch/EventSub, OBS overlays, pixel-art presentation and synchronized celebrations. Owner-management UI, richer event/quest configuration, verified-person/abuse controls, retention/cleanup, durable event delivery, multi-instance scaling, and audience load testing also remain. No Twitch, OBS, final styling, global reset, or special level-38 unlock celebration is implemented here.
+Twitch stream.online/offline subscriptions, embedded category search, user OAuth, OBS browser-source routes, general owner-management UI, online presence, richer event/quest configuration, verified-person/abuse controls, general retention/cleanup beyond Twitch message IDs, durable event delivery, multi-instance scaling and audience load testing remain deferred. No inventory, currency, achievements, class rarity, stats, or abilities were added.

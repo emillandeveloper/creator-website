@@ -6,13 +6,15 @@ import { isHidden, questSnapshot, questTransition } from "./quest-domain";
 import { eventOrThrow, Level38State, readState } from "./state";
 import { applyUndo } from "./undo";
 import { PollInput, QuestAction } from "./validation";
+import { UnlockEvent, unlockEvent } from "./celebration";
+import { mappedGame } from "./twitch/store";
 
 export { EVENT_SLUG, Level38State } from "./state";
 export interface Change {
   action: string; entityId: string; before: Prisma.InputJsonObject; after: Prisma.InputJsonObject;
   metadata?: Prisma.InputJsonObject; undoOfId?: string;
 }
-export type PublicChange = { type: string; revision: number };
+export type PublicChange = { type: string; revision: number; unlock?: UnlockEvent };
 
 export class Level38Service {
   constructor(private readonly db: PrismaClient, private readonly publish?: (state: Level38State, change: PublicChange) => void) {}
@@ -36,13 +38,19 @@ export class Level38Service {
       const completedBefore = await tx.quest.count({ where: { eventId: event.id, status: "COMPLETED" } });
       const action = await change(tx, event.id);
       const completedAfter = await tx.quest.count({ where: { eventId: event.id, status: "COMPLETED" } });
+      const crossedTarget = completedBefore < event.target && completedAfter >= event.target;
+      if (crossedTarget) await tx.event.update({ where: { id: event.id },
+        data: { unlockSequence: { increment: 1 }, lastUnlockedAt: new Date() } });
       const current = await tx.event.findUniqueOrThrow({ where: { id: event.id } });
       await tx.auditLog.create({ data: { eventId: event.id, operatorId, operatorName: operator.name, action: action.action,
         entityId: action.entityId, before: { ...action.before, completed: completedBefore }, after: { ...action.after, completed: completedAfter },
         metadata: { version: 2, ...action.metadata }, undoOfId: action.undoOfId, eventRevision: current.revision } });
-      return { state: await readState(tx, false), type: action.action };
+      return { state: await readState(tx, false), type: action.action,
+        milestone: crossedTarget ? { sequence: current.unlockSequence, occurredAt: current.lastUnlockedAt!, completed: completedAfter } : null };
     }, { maxWait: 10000, timeout: 15000 });
-    this.publish?.(result.state, { type: result.type, revision: result.state.event.revision });
+    this.publish?.(result.state, { type: result.type, revision: result.state.event.revision,
+      ...(result.milestone ? { unlock: unlockEvent(result.milestone.sequence, result.state.event.revision, result.milestone.occurredAt,
+        result.milestone.completed, result.state.event.target) } : {}) });
     return result.state;
   }
 
@@ -66,10 +74,34 @@ export class Level38Service {
       const game = gameId ? await tx.game.findFirst({ where: { id: gameId, eventId, enabled: true } }) : null;
       if (gameId && !game) throw new Level38Error(404, "Enabled game not found in this event.");
       const event = await tx.event.findUniqueOrThrow({ where: { id: eventId }, include: { currentGame: true } });
-      if (event.currentGameId === gameId) throw new Level38Error(409, "That game is already selected.");
-      await tx.event.update({ where: { id: eventId }, data: { currentGameId: gameId } });
-      return { action: "game:changed", entityId: eventId, before: { gameId: event.currentGameId, gameTitle: event.currentGame?.title ?? null }, after: { gameId, gameTitle: game?.title ?? null } };
+      if (event.currentGameId === gameId && event.gameSource === "MANUAL_OVERRIDE") throw new Level38Error(409, "That game is already selected.");
+      const operator = await tx.operator.findUniqueOrThrow({ where: { id: operatorId } });
+      await tx.event.update({ where: { id: eventId }, data: { currentGameId: gameId, gameSource: "MANUAL_OVERRIDE", manualOverrideBy: operator.name } });
+      return { action: "game:changed", entityId: eventId, before: { gameId: event.currentGameId, gameTitle: event.currentGame?.title ?? null, source: event.gameSource }, after: { gameId, gameTitle: game?.title ?? null, source: "MANUAL_OVERRIDE" }, metadata: { source: "MANUAL" } };
     });
+  }
+
+  returnToTwitch(operatorId: string, expectedRevision: number, broadcasterId: string): Promise<Level38State> {
+    return this.mutate(operatorId, expectedRevision, async (tx, eventId) => {
+      const event = await tx.event.findUniqueOrThrow({ where: { id: eventId }, include: { currentGame: true } });
+      const game = await mappedGame(tx, eventId, broadcasterId);
+      await tx.event.update({ where: { id: eventId }, data: { gameSource: "AUTO_TWITCH", manualOverrideBy: null, ...(game ? { currentGameId: game.id } : {}) } });
+      return { action: game && game.id !== event.currentGameId ? "game:changed" : "game:source", entityId: eventId,
+        before: { gameId: event.currentGameId, gameTitle: event.currentGame?.title ?? null, source: event.gameSource },
+        after: { gameId: game?.id ?? event.currentGameId, gameTitle: game?.title ?? event.currentGame?.title ?? null, source: "AUTO_TWITCH" }, metadata: { source: "TWITCH_AUTO" } };
+    });
+  }
+
+  mapTwitchGame(operatorId: string, gameId: string, categoryId: string | null, categoryName: string | null, expectedRevision: number): Promise<Level38State> {
+    return this.mutate(operatorId, expectedRevision, async (tx, eventId) => {
+      const game = await tx.game.findFirst({ where: { id: gameId, eventId } });
+      if (!game) throw new Level38Error(404, "Game not found.");
+      if (categoryId && await tx.game.count({ where: { eventId, twitchCategoryId: categoryId, id: { not: gameId } } })) throw new Level38Error(409, "That Twitch category is already mapped to another game.");
+      const data = { twitchCategoryId: categoryId, twitchCategoryName: categoryId ? categoryName : null };
+      await tx.game.update({ where: { id: gameId }, data });
+      return { action: "game:mapped", entityId: gameId,
+        before: { twitchCategoryId: game.twitchCategoryId, twitchCategoryName: game.twitchCategoryName }, after: { ...data, title: game.title } };
+    }, true);
   }
 
   savePoll(operatorId: string, pollId: string | null, input: PollInput, expectedRevision: number): Promise<Level38State> {

@@ -8,9 +8,10 @@
   <link rel="stylesheet" href="/css/level38.css">
   <script defer src="/level38/socket.io/socket.io.js"></script>
   <script defer src="/js/level38/common.js"></script>
+  <script defer src="/js/level38/twitch-control.js"></script>
   <script defer src="/js/level38/control.js"></script>
 </head>
-<body class="level38" data-authenticated="<%= operator ? 'true' : 'false' %>">
+<body class="level38 l38-control" data-authenticated="<%= operator ? 'true' : 'false' %>">
   <main class="l38-shell">
     <nav class="l38-nav" aria-label="Site"><a href="/">← Creator hub</a><a href="/level38">Public event page</a></nav>
     <header><p class="l38-eyebrow">Live event desk</p><h1>LEVEL 38 control</h1><p id="connection" role="status">Connecting to live updates…</p></header>
@@ -40,6 +41,31 @@
         <button type="submit" disabled>Change game</button>
       </form>
       <p>Activate a quest before completing it. Check the quest number before confirming completion.</p>
+    </section>
+    <section class="l38-panel" aria-labelledby="twitch-heading">
+      <h2 id="twitch-heading">Twitch <span id="twitch-connection">Loading…</span></h2>
+      <p id="twitch-source" role="status"></p>
+      <p id="twitch-error" role="status"></p>
+      <dl class="l38-twitch-status">
+        <dt>Channel</dt><dd id="twitch-channel">—</dd>
+        <dt>Latest category</dt><dd id="twitch-category">—</dd>
+        <dt>Mapped game</dt><dd id="twitch-mapped">—</dd>
+        <dt>Last EventSub update</dt><dd id="twitch-updated">—</dd>
+        <dt>Subscription</dt><dd id="twitch-subscription">—</dd>
+      </dl>
+      <button id="twitch-auto" type="button">Return to Twitch Auto</button>
+      <p>Changing the current game above activates a manual override. Twitch cannot replace it until you return to auto.</p>
+      <% if (operator.role === 'OWNER') { %>
+      <div class="l38-actions">
+        <button id="twitch-sync" type="button">Sync now</button>
+        <button id="twitch-ensure" type="button">Ensure subscription</button>
+        <button id="twitch-recreate" type="button">Recreate subscription</button>
+      </div>
+      <details id="twitch-mapping"><summary>Configure Twitch category mappings</summary>
+        <p>Enter the numeric Twitch category ID for each existing game. Names are labels; the ID determines the match. Save, then use Sync now to apply the latest category in auto mode.</p>
+        <div id="twitch-mapping-forms"></div>
+      </details>
+      <% } %>
     </section>
     <section class="l38-panel" aria-label="Recent operator actions">
       <h2>Undo latest action</h2>

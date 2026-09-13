@@ -16,7 +16,7 @@ async function startSite(env = {}, port) {
   port ??= await unusedPort();
   const origin = `http://127.0.0.1:${port}`;
   const child = spawn(process.execPath, ["dist/server.js"], {
-    env: { ...process.env, NODE_ENV: "test", LEVEL38_ENABLED: "false", LEVEL38_TRUST_PROXY_HOPS: "0", ...env, PORT: String(port), LEVEL38_ORIGIN: origin },
+    env: { ...process.env, NODE_ENV: "test", LEVEL38_ENABLED: "false", TWITCH_ENABLED: "false", LEVEL38_TRUST_PROXY_HOPS: "0", ...env, PORT: String(port), LEVEL38_ORIGIN: origin },
     stdio: "ignore", windowsHide: true,
   });
   const stop = async () => {

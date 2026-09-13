@@ -18,6 +18,7 @@ export async function undoCandidate(tx: Prisma.TransactionClient, eventId: strin
   const after = jsonObject(audit.after);
   if (audit.undoOfId) reason = "The latest action was already undone. Earlier history cannot be rewound.";
   else if (!reversible.has(audit.action)) reason = "The latest operator action is not reversible. Earlier actions cannot be undone past it.";
+  else if (["TWITCH", "TWITCH_AUTO"].includes(String(jsonObject(audit.metadata).source))) reason = "Use a manual game override to replace Twitch auto. Automatic game changes cannot be undone.";
   else if (jsonObject(audit.metadata).version !== 2) reason = "This older action does not contain a complete undo snapshot.";
   else if (audit.action.startsWith("quest:")) {
     const quest = await tx.quest.findFirst({ where: { id: audit.entityId, eventId } });
@@ -52,7 +53,8 @@ export async function applyUndo(tx: Prisma.TransactionClient, eventId: string, a
       revealedAt: typeof before.revealedAt === "string" ? new Date(before.revealedAt) : null,
     } });
   } else if (audit.action === "game:changed") {
-    await tx.event.update({ where: { id: eventId }, data: { currentGameId: typeof before.gameId === "string" ? before.gameId : null } });
+    // Undo restores the game while retaining explicit human control of its source.
+    await tx.event.update({ where: { id: eventId }, data: { currentGameId: typeof before.gameId === "string" ? before.gameId : null, gameSource: "MANUAL_OVERRIDE" } });
   } else if (audit.action === "poll:opened") {
     await tx.poll.update({ where: { id: audit.entityId }, data: { status: "DRAFT", openedAt: null, closedAt: null } });
   } else if (audit.action === "poll:closed") {

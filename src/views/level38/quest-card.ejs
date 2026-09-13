@@ -1,0 +1,5 @@
+<article class="l38-card" data-status="<%= quest.status %>">
+  <div class="l38-card-top"><span class="l38-quest-number">QUEST <%= String(quest.number).padStart(2, '0') %></span><span class="l38-status"><%= quest.status %></span></div>
+  <h3><%= quest.title %></h3><p><%= quest.description %></p>
+  <p class="l38-meta"><span aria-hidden="true">◇</span> <%= state.games.find(game => game.id === quest.gameId)?.title %></p>
+</article>

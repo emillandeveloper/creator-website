@@ -22,10 +22,14 @@ export async function readState(tx: Prisma.TransactionClient, control: boolean) 
   const audit = control ? await tx.auditLog.findMany({ where: { eventId: event.id }, orderBy: { eventRevision: "desc" }, take: 40 }) : [];
   const undo = control ? await undoCandidate(tx, event.id) : null;
   return {
+    serverTime: Date.now(),
     event: { title: event.title, target: event.target, revision: event.revision, controlRevision: event.controlRevision,
+      unlockSequence: event.unlockSequence,
+      ...(control ? { gameSource: event.gameSource, manualOverrideBy: event.manualOverrideBy } : {}),
       completed: quests.filter((quest) => quest.status === "COMPLETED").length, currentGameId: event.currentGameId },
     games: games.filter((game) => control || game.enabled || game.id === event.currentGameId || visible.some((quest) => quest.gameId === game.id))
-      .map((game) => ({ id: game.id, title: game.title, displayName: game.title, slug: game.slug, enabled: game.enabled, imagePath: game.imagePath, sortOrder: game.sortOrder })),
+      .map((game) => ({ id: game.id, title: game.title, displayName: game.title, slug: game.slug, enabled: game.enabled, imagePath: game.imagePath, sortOrder: game.sortOrder,
+        ...(control ? { twitchCategoryId: game.twitchCategoryId, twitchCategoryName: game.twitchCategoryName } : {}) })),
     quests: visible.map((quest) => ({ id: quest.id, number: quest.number, gameId: quest.gameId, title: quest.title,
       description: quest.description, status: isHidden(quest) ? "SECRET" as const : quest.status, hidden: isHidden(quest),
       ...(control ? { actions: allowedQuestActions(quest) } : {}) })),
@@ -52,6 +56,8 @@ function describeAction(action: string, before: Prisma.JsonObject, after: Prisma
   if (verbs[action]) return `${verbs[action]} quest #${after.number} “${after.title ?? ""}”`;
   if (action === "game:changed") return `changed game from ${before.gameTitle ?? "Between adventures"} to ${after.gameTitle ?? "Between adventures"}`;
   if (action === "game:configured") return `configured game “${after.title}”`;
+  if (action === "game:mapped") return `mapped Twitch category for “${after.title}”`;
+  if (action === "game:source") return "returned game source to Twitch Auto";
   if (action === "poll:winner") return `${metadata.override === true ? "overrode" : "accepted"} poll #${after.number} winner from ${before.winnerLabel ?? "unselected"} to ${after.winnerLabel}`;
   if (action === "action:undone") return `undid ${String(metadata.originalAction).replace(":", " ")} (#${after.number ?? ""} ${after.title ?? after.gameTitle ?? "game"})`;
   if (action.startsWith("poll:")) return `${action.slice(5)} poll #${after.number} “${after.title}”`;

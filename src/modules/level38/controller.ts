@@ -3,6 +3,9 @@ import { PrismaClient } from "@prisma/client";
 import { Level38Auth } from "./auth";
 import { Level38Error } from "./errors";
 import { Level38Service } from "./service";
+import { publicClass } from "./classes";
+import { joinParticipant } from "./participants";
+import { TwitchIntegration } from "./twitch/integration";
 import { bodyObject, identifier, nickname, pollAction, pollInput, questAction, revision, textInput } from "./validation";
 
 export class Level38Controller {
@@ -10,6 +13,7 @@ export class Level38Controller {
     private readonly db: PrismaClient,
     private readonly auth: Level38Auth,
     private readonly service: Level38Service,
+    private readonly twitch?: TwitchIntegration,
   ) {}
 
   publicPage = async (_req: Request, res: Response): Promise<void> => {
@@ -27,20 +31,23 @@ export class Level38Controller {
 
   controlState = async (req: Request, res: Response): Promise<void> => {
     const operator = await this.auth.requireOperator(req);
-    res.json({ ...await this.service.state(true), operator: { name: operator.name, role: operator.role } });
+    res.json({ ...await this.service.state(true), operator: { name: operator.name, role: operator.role }, twitch: this.twitch ? await this.twitch.status() : null });
   };
 
   session = async (req: Request, res: Response): Promise<void> => {
-    const participant = await this.auth.viewer(req) ?? await this.auth.createViewer(res);
-    res.json({ nickname: participant.nickname, role: "VIEWER", votes: await this.service.viewerVotes(participant.id) });
+    let participant = await this.auth.viewer(req) ?? await this.auth.createViewer(res);
+    let classAssigned = false;
+    if (participant.nickname && !participant.classId) ({ participant, classAssigned } = await joinParticipant(this.db, participant.id));
+    res.json({ nickname: participant.nickname, role: "VIEWER", class: publicClass(participant.classId), classAssigned,
+      votes: await this.service.viewerVotes(participant.id) });
   };
 
   join = async (req: Request, res: Response): Promise<void> => {
     const name = nickname(bodyObject(req.body).nickname);
     const participant = await this.auth.viewer(req);
     if (!participant) throw new Level38Error(401, "Your viewer session expired. Reload the page to join again.");
-    await this.db.participant.update({ where: { id: participant.id }, data: { nickname: name } });
-    res.json({ nickname: name, role: "VIEWER" });
+    const joined = await joinParticipant(this.db, participant.id, name);
+    res.json({ nickname: joined.participant.nickname, role: "VIEWER", class: publicClass(joined.participant.classId), classAssigned: joined.classAssigned });
   };
 
   login = async (req: Request, res: Response): Promise<void> => {
@@ -104,5 +111,22 @@ export class Level38Controller {
     if (typeof body.enabled !== "boolean" || !Number.isInteger(body.sortOrder) || Number(body.sortOrder) < 0 || Number(body.sortOrder) > 10000) throw new Level38Error(400, "Provide enabled and a sort order from 0 to 10000.");
     if (body.imagePath !== null && (typeof body.imagePath !== "string" || !/^\/img\/[a-zA-Z0-9/_-]+\.(png|jpe?g|webp|gif|svg)$/.test(body.imagePath))) throw new Level38Error(400, "Use a local /img/ image path or null.");
     res.json(await this.service.configureGame(operator.id, identifier(req.params.id), { title: textInput(body.displayName, "Game name"), enabled: body.enabled, sortOrder: Number(body.sortOrder), imagePath: body.imagePath }, revision(body.controlRevision ?? body.revision)));
+  };
+
+  twitchAction = async (req: Request, res: Response): Promise<void> => {
+    const operator = req.params.action === "auto" ? await this.auth.requireOperator(req) : await this.auth.requireOwner(req);
+    if (!this.twitch) throw new Level38Error(503, "Twitch integration is disabled.");
+    const body = bodyObject(req.body);
+    if (req.params.action === "auto") res.json(await this.service.returnToTwitch(operator.id, revision(body.controlRevision), await this.twitch.autoBroadcaster()));
+    else if (["sync", "ensure", "recreate"].includes(req.params.action)) { await this.twitch.run(req.params.action as "sync" | "ensure" | "recreate"); res.json({ ok: true }); }
+    else throw new Level38Error(404, "Twitch action not found.");
+  };
+
+  mapTwitchGame = async (req: Request, res: Response): Promise<void> => {
+    const operator = await this.auth.requireOwner(req); const body = bodyObject(req.body);
+    const id = body.twitchCategoryId;
+    if (id !== null && (typeof id !== "string" || !/^\d{1,30}$/.test(id))) throw new Level38Error(400, "Enter a numeric Twitch category ID, or clear the mapping.");
+    const name = body.twitchCategoryName === null ? null : textInput(body.twitchCategoryName, "Twitch category name", 200);
+    res.json(await this.service.mapTwitchGame(operator.id, identifier(req.params.id), id, name, revision(body.controlRevision)));
   };
 }
