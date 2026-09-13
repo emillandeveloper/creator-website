@@ -1,7 +1,26 @@
 services:
   - type: web
     name: leo-nifelheim-site
-    env: node
-    buildCommand: npm install && npm run build
+    runtime: node
+    # Paid compute is required for pre-deploy migrations and an always-on event.
+    # This file is a local deployment proposal; see docs/render-deployment.md.
+    plan: starter
+    numInstances: 1
+    autoDeployTrigger: "off"
+    buildCommand: npm ci --include=dev && npm run build
+    preDeployCommand: npm run db:migrate
     startCommand: npm start
-    plan: free
+    healthCheckPath: /healthz
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: LEVEL38_TRUST_PROXY_HOPS
+        value: "1"
+      # Supply false for the first deploy; enable after seed/operator provisioning.
+      # Dashboard-managed so a later Blueprint sync does not disable a live event.
+      - key: LEVEL38_ENABLED
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: LEVEL38_ORIGIN
+        sync: false

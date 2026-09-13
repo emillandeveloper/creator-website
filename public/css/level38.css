@@ -1,0 +1,54 @@
+.level38 {
+  --l38-bg: #11151d;
+  --l38-panel: #1b2230;
+  --l38-text: #edf1f7;
+  --l38-muted: #b6c1d4;
+  --l38-accent: #f0c875;
+  --l38-border: #44516b;
+  margin: 0;
+  background: var(--l38-bg);
+  color: var(--l38-text);
+  font: 16px/1.6 system-ui, sans-serif;
+}
+.level38 * { box-sizing: border-box; }
+.level38 [hidden] { display: none !important; }
+.level38 a { color: var(--l38-accent); }
+.level38 h1 { font-size: clamp(2rem, 6vw, 3.5rem); line-height: 1.15; margin: .4em 0; }
+.level38 h2 { font-size: 1.35rem; }
+.level38 h3 { font-size: 1.1rem; line-height: 1.4; }
+.level38 p, .level38 h3 { overflow-wrap: anywhere; }
+.l38-shell { max-width: 1120px; margin: auto; padding: 1.5rem; }
+.l38-nav { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1rem; margin-bottom: 2rem; }
+.l38-eyebrow { color: var(--l38-accent); text-transform: uppercase; letter-spacing: .14em; }
+.l38-panel, .l38-card { background: var(--l38-panel); border: 1px solid var(--l38-border); padding: 1.25rem; border-radius: 8px; }
+.l38-panel { margin: 1.5rem 0; }
+.l38-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 290px), 1fr)); gap: 1rem; }
+.l38-quest-section { margin: 2rem 0; }
+.l38-meta { color: var(--l38-muted); font-size: .85rem; margin: 0; }
+.l38-card[data-status="ACTIVE"] { border-color: var(--l38-accent); }
+.l38-card[data-status="COMPLETED"] { border-color: #79c8a0; }
+.level38 progress { width: 100%; height: 1.5rem; accent-color: var(--l38-accent); }
+.level38 form { display: flex; flex-wrap: wrap; align-items: end; gap: .75rem; margin: 1rem 0; }
+.level38 label { flex-basis: 100%; }
+.level38 button, .level38 input, .level38 select { font: inherit; border-radius: 4px; border: 1px solid var(--l38-border); padding: .65rem .9rem; max-width: 100%; min-height: 44px; }
+.level38 input, .level38 select { background: var(--l38-bg); color: var(--l38-text); }
+.level38 button { background: var(--l38-accent); color: #141414; cursor: pointer; font-weight: 650; }
+.level38 button:disabled { opacity: .55; cursor: wait; }
+.level38 :focus-visible { outline: 3px solid #9ec7ff; outline-offset: 3px; }
+.level38 #message { color: var(--l38-accent); min-height: 1.6em; }
+.level38 #connection { color: var(--l38-muted); }
+.level38 #audit-list { padding-left: 1.5rem; max-height: 20rem; overflow: auto; }
+.level38 #audit-list li { margin: .5rem 0; }
+.l38-controls { border: 0; padding: 0; margin: 0; min-width: 0; }
+.l38-actions, .l38-option, .l38-option-editor { display: flex; gap: .7rem; flex-wrap: wrap; align-items: center; margin: .8rem 0; }
+.l38-option span { flex: 1; min-width: 150px; overflow-wrap: anywhere; }
+.l38-options-editor { flex-basis: 100%; min-width: 0; border: 1px solid var(--l38-border); }
+.l38-option-editor select, .l38-option-editor input { flex: 1; min-width: 150px; }
+.l38-card button, .l38-poll > button, .l38-poll > input, .l38-poll > select { margin: .3rem; }
+.l38-poll[data-status="OPEN"] { border: 2px solid var(--l38-accent); }
+.l38-result { color: #9de3b9; font-weight: 700; }
+.level38 button[aria-pressed="true"] { background: #9de3b9; }
+@media (max-width: 600px) {
+  .l38-shell { padding: 1rem; }
+  .level38 input, .level38 select { width: 100%; }
+}

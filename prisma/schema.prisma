@@ -1,0 +1,212 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum OperatorRole {
+  MODERATOR
+  OWNER
+}
+
+enum QuestStatus {
+  LOCKED
+  AVAILABLE
+  ACTIVE
+  COMPLETED
+  FAILED
+  SKIPPED
+  SECRET
+}
+
+enum PollType {
+  NEXT_QUEST
+  NEXT_GAME
+  YES_NO
+  CUSTOM
+}
+
+enum PollStatus {
+  DRAFT
+  OPEN
+  CLOSED
+}
+
+model Event {
+  id              String     @id @default(cuid())
+  slug            String     @unique
+  title           String
+  target          Int        @default(38)
+  revision        Int        @default(0)
+  controlRevision Int        @default(0)
+  currentGameId   String?
+  currentGame     Game?      @relation("CurrentGame", fields: [currentGameId], references: [id], onDelete: Restrict)
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  games           Game[]     @relation("EventGames")
+  quests          Quest[]
+  polls           Poll[]
+  auditLogs       AuditLog[]
+}
+
+model Game {
+  id          String       @id @default(cuid())
+  eventId     String
+  event       Event        @relation("EventGames", fields: [eventId], references: [id], onDelete: Restrict)
+  slug        String
+  title       String
+  enabled     Boolean      @default(true)
+  imagePath   String?
+  sortOrder   Int          @default(0)
+  quests      Quest[]
+  pollOptions PollOption[]
+  currentIn   Event[]      @relation("CurrentGame")
+
+  @@unique([id, eventId])
+  @@unique([eventId, slug])
+}
+
+model Quest {
+  id          String       @id @default(cuid())
+  eventId     String
+  event       Event        @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  gameId      String
+  game        Game         @relation(fields: [gameId, eventId], references: [id, eventId], onDelete: Restrict)
+  number      Int
+  title       String
+  description String
+  status      QuestStatus  @default(AVAILABLE)
+  isSecret    Boolean      @default(false)
+  revealedAt  DateTime?
+  completedAt DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  pollOptions PollOption[]
+
+  @@unique([id, eventId])
+  @@unique([eventId, number])
+  @@index([eventId, status])
+}
+
+model Participant {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  nickname  String?
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+  votes     Vote[]
+}
+
+model Operator {
+  id          String            @id @default(cuid())
+  name        String            @unique
+  role        OperatorRole
+  keyHash     String            @unique
+  disabled    Boolean           @default(false)
+  createdAt   DateTime          @default(now())
+  sessions    OperatorSession[]
+  auditLogs   AuditLog[]
+  openedPolls Poll[]            @relation("PollCreator")
+}
+
+model OperatorSession {
+  id         String   @id @default(cuid())
+  tokenHash  String   @unique
+  operatorId String
+  operator   Operator @relation(fields: [operatorId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+  expiresAt  DateTime
+
+  @@index([operatorId])
+  @@index([expiresAt])
+}
+
+// Polls are separate historical rounds. Closing a round never deletes its votes.
+model Poll {
+  id               String       @id @default(cuid())
+  eventId          String
+  event            Event        @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  title            String
+  number           Int          @unique @default(autoincrement())
+  type             PollType     @default(NEXT_QUEST)
+  status           PollStatus   @default(DRAFT)
+  createdById      String
+  createdBy        Operator     @relation("PollCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  createdAt        DateTime     @default(now())
+  openedAt         DateTime?
+  closedAt         DateTime?
+  voteRevision     Int          @default(0)
+  winningOptionId  String?
+  winningPollId    String?
+  winningOption    PollOption?  @relation("PollWinner", fields: [winningOptionId, winningPollId], references: [id, pollId], onDelete: Restrict, onUpdate: NoAction)
+  overrideOptionId String?
+  overridePollId   String?
+  overrideOption   PollOption?  @relation("PollOverride", fields: [overrideOptionId, overridePollId], references: [id, pollId], onDelete: Restrict, onUpdate: NoAction)
+  overrideReason   String?
+  winnerAcceptedAt DateTime?
+  options          PollOption[] @relation("PollOptions")
+  votes            Vote[]
+
+  @@unique([id, eventId])
+  @@index([eventId, status])
+}
+
+model PollOption {
+  id              String  @id @default(cuid())
+  pollId          String
+  eventId         String
+  poll            Poll    @relation("PollOptions", fields: [pollId, eventId], references: [id, eventId], onDelete: Restrict)
+  questId         String?
+  quest           Quest?  @relation(fields: [questId, eventId], references: [id, eventId], onDelete: Restrict)
+  gameId          String?
+  game            Game?   @relation(fields: [gameId, eventId], references: [id, eventId], onDelete: Restrict)
+  label           String // Snapshot of the quest title when the round is created.
+  position        Int
+  votes           Vote[]
+  wonPolls        Poll[]  @relation("PollWinner")
+  overriddenPolls Poll[]  @relation("PollOverride")
+
+  @@unique([id, pollId])
+  @@unique([pollId, questId])
+  @@unique([pollId, gameId])
+  @@unique([pollId, position])
+}
+
+model Vote {
+  id            String      @id @default(cuid())
+  pollId        String
+  poll          Poll        @relation(fields: [pollId], references: [id], onDelete: Restrict)
+  optionId      String
+  option        PollOption  @relation(fields: [optionId, pollId], references: [id, pollId], onDelete: Restrict)
+  participantId String
+  participant   Participant @relation(fields: [participantId], references: [id], onDelete: Restrict)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@unique([pollId, participantId])
+}
+
+model AuditLog {
+  id            String    @id @default(cuid())
+  eventId       String
+  event         Event     @relation(fields: [eventId], references: [id], onDelete: Restrict)
+  operatorId    String
+  operator      Operator  @relation(fields: [operatorId], references: [id], onDelete: Restrict)
+  operatorName  String
+  action        String
+  entityId      String
+  before        Json
+  after         Json
+  metadata      Json?
+  undoOfId      String?   @unique
+  undoOf        AuditLog? @relation("AuditUndo", fields: [undoOfId], references: [id], onDelete: Restrict)
+  undoneBy      AuditLog? @relation("AuditUndo")
+  eventRevision Int
+  createdAt     DateTime  @default(now())
+
+  @@unique([eventId, eventRevision])
+  @@index([eventId, createdAt])
+}

@@ -2,6 +2,10 @@
 
 Página web de creador con arquitectura **MVC** en **Node.js + Express + TypeScript** y vistas **EJS**. Estilo dark fantasy a juego con el calendario de stream.
 
+## LEVEL 38
+
+La base del evento de cumpleaños vive en `/level38`, con panel de control en `/level38/control`. Está desactivada por defecto y necesita PostgreSQL para activarse. Consulta [la guía de arquitectura, configuración y desarrollo de LEVEL 38](docs/level38.md).
+
 ## 📁 Estructura (MVC)
 
 ```
@@ -56,16 +60,15 @@ Reemplaza los placeholders en `public/img/`:
 - `banner.png` — fondo del hero (~1200x500)
 - `logos/*.png` — logos de juegos (fondo transparente)
 
-## 🌐 Hosting gratuito
+## 🌐 Hosting
 
-### Render (recomendado para Node)
-1. Sube este repo a GitHub
-2. En render.com → New → Web Service → conecta el repo
-3. Build command: `npm install && npm run build`
-4. Start command: `npm start`
-5. Plan: Free
+### Render
+
+Para desplegar LEVEL 38 por primera vez, sigue la [lista de despliegue en producción](docs/render-deployment.md), con todas las variables de entorno, inicialización y comprobaciones.
+
+La configuración propuesta usa una instancia Starter de pago y PostgreSQL de pago para el evento. Build: `npm ci --include=dev && npm run build`; pre-deploy: `npm run db:migrate` (`prisma migrate deploy`); start: `npm start`. Mantén LEVEL 38 desactivado hasta inicializar la base de datos y crear las claves de los operadores. Los despliegues automáticos quedan desactivados en la propuesta; debes revisar también el ajuste del servicio existente en Render.
 
 ### Railway
 Similar a Render, también tiene plan gratuito.
 
-> Nota: el plan gratuito de Render "duerme" el servicio tras inactividad y tarda ~30s en revivir en la primera visita. Para una web de creador es suficiente.
+> El plan gratuito de Render puede servir para probar la web de creador, pero no para un evento que necesita funcionamiento continuo y datos persistentes.

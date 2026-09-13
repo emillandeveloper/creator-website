@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LEVEL 38 — Operator control</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="stylesheet" href="/css/level38.css">
+  <script defer src="/level38/socket.io/socket.io.js"></script>
+  <script defer src="/js/level38/common.js"></script>
+  <script defer src="/js/level38/control.js"></script>
+</head>
+<body class="level38" data-authenticated="<%= operator ? 'true' : 'false' %>">
+  <main class="l38-shell">
+    <nav class="l38-nav" aria-label="Site"><a href="/">← Creator hub</a><a href="/level38">Public event page</a></nav>
+    <header><p class="l38-eyebrow">Live event desk</p><h1>LEVEL 38 control</h1><p id="connection" role="status">Connecting to live updates…</p></header>
+    <p id="message" role="status" aria-live="polite"></p>
+    <% if (!operator) { %>
+    <section class="l38-panel">
+      <h2>Operator sign in</h2>
+      <p>Use your personal operator access key.</p>
+      <form id="login-form">
+        <label for="access-key">Access key</label>
+        <input id="access-key" name="key" type="password" autocomplete="current-password" required maxlength="43">
+        <button type="submit">Sign in</button>
+      </form>
+    </section>
+    <% } else { %>
+    <fieldset id="operator-controls" class="l38-controls">
+    <section class="l38-panel">
+      <p>Signed in as <strong><%= operator.name %></strong> · <%= operator.role %></p>
+      <button id="logout" type="button">Sign out</button>
+      <h2 id="progress-text">Loading progress…</h2>
+      <progress id="progress" value="0" max="38" aria-labelledby="progress-text"></progress>
+      <p>Current game: <strong id="current-game">Loading…</strong></p>
+      <p id="secret-count"></p>
+      <form id="game-form">
+        <label for="game">Current game</label>
+        <select id="game" name="gameId" disabled><option value="">Between adventures</option></select>
+        <button type="submit" disabled>Change game</button>
+      </form>
+      <p>Activate a quest before completing it. Check the quest number before confirming completion.</p>
+    </section>
+    <section class="l38-panel" aria-label="Recent operator actions">
+      <h2>Undo latest action</h2>
+      <p id="undo-description">Loading…</p>
+      <button id="undo" type="button" disabled>Undo latest action</button>
+      <p id="undo-reason"></p>
+      <h2>Recent activity</h2>
+      <ol id="audit-list"><li>Loading history…</li></ol>
+    </section>
+    <section aria-label="Poll controls"><h2>Voting rounds</h2><div id="poll-board"></div></section>
+    <section class="l38-panel" id="poll-editor">
+      <h2 id="poll-editor-title">Create voting round</h2>
+      <form id="poll-form">
+        <label for="poll-title">Question</label><input id="poll-title" maxlength="160" required>
+        <label for="poll-type">Poll type</label>
+        <select id="poll-type"><option value="NEXT_QUEST">Next quest</option><option value="NEXT_GAME">Next game</option><option value="YES_NO">Yes / No</option><option value="CUSTOM">Custom choices</option></select>
+        <fieldset class="l38-options-editor"><legend>Options (2–8 before opening)</legend><div id="poll-options"></div><button id="add-option" type="button">Add option</button></fieldset>
+        <button id="save-poll" type="submit">Save draft</button><button id="cancel-poll-edit" type="button">Start fresh</button>
+      </form>
+      <p id="poll-editor-note">A new round keeps previous votes and results in history.</p>
+    </section>
+    <div id="quest-board"></div>
+    </fieldset>
+    <% } %>
+    <noscript><p>Enable JavaScript to use operator control.</p></noscript>
+  </main>
+</body>
+</html>

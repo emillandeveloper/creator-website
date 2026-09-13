@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LEVEL 38 — Leo Nifelheim</title>
+  <link rel="stylesheet" href="/css/level38.css">
+  <script defer src="/level38/socket.io/socket.io.js"></script>
+  <script defer src="/js/level38/common.js"></script>
+  <script defer src="/js/level38/public.js"></script>
+</head>
+<body class="level38">
+  <main class="l38-shell">
+    <nav class="l38-nav" aria-label="Site"><a href="/">← Creator hub</a><a href="/level38/control">Operator control</a></nav>
+    <header>
+      <p class="l38-eyebrow">Leo's birthday quest</p>
+      <h1>LEVEL 38</h1>
+      <p>One night. Many adventures. Complete 38 quests together.</p>
+      <p id="connection" role="status">Connecting to live updates…</p>
+    </header>
+    <section class="l38-panel" aria-label="Event progress">
+      <h2 id="progress-text"><%= state.event.completed %> / <%= state.event.target %> quests completed</h2>
+      <progress id="progress" value="<%= state.event.completed %>" max="<%= state.event.target %>" aria-labelledby="progress-text"></progress>
+      <p>Current game: <strong id="current-game"><%= state.games.find(game => game.id === state.event.currentGameId)?.title || 'Between adventures' %></strong></p>
+      <p id="secret-count"><%= state.secretCount %> secret quests waiting to be revealed.</p>
+    </section>
+    <section class="l38-panel" aria-label="Join the event">
+      <p id="viewer-status">Enjoy the event without signing in.</p>
+      <button id="join-open" type="button" disabled>Join with a nickname</button>
+      <form id="join-form" hidden>
+        <label for="nickname">Your display nickname</label>
+        <input id="nickname" name="nickname" minlength="2" maxlength="48" autocomplete="nickname" required>
+        <button type="submit">Save nickname</button>
+        <button id="join-cancel" type="button">Cancel</button>
+      </form>
+      <p>Choose a nickname when you vote. You can change your vote while the poll is open.</p>
+    </section>
+    <p id="message" role="status" aria-live="polite"></p>
+    <section aria-label="Voting rounds">
+      <h2>Voting</h2>
+      <div id="poll-board">
+        <% for (const poll of state.polls) { %>
+        <section class="l38-panel">
+          <h3>Poll #<%= poll.number %> · <%= poll.title %></h3>
+          <p><%= poll.status %> · <%= poll.totalVotes %> votes</p>
+          <% for (const option of poll.options) { %><p><%= option.label %> — <%= option.votes %></p><% } %>
+          <% if (poll.effectiveWinnerId) { %><p>Winner: <%= poll.options.find(option => option.id === poll.effectiveWinnerId)?.label %></p><% } %>
+        </section>
+        <% } %>
+        <% if (!state.polls.length) { %><p>No poll is open yet.</p><% } %>
+      </div>
+    </section>
+    <div id="quest-board">
+      <% for (const status of ['ACTIVE', 'AVAILABLE', 'LOCKED', 'COMPLETED', 'FAILED', 'SKIPPED']) { const quests = state.quests.filter(quest => quest.status === status); %>
+      <section class="l38-quest-section">
+        <h2><%= status.charAt(0) + status.slice(1).toLowerCase() %> (<%= quests.length %>)</h2>
+        <div class="l38-grid">
+          <% for (const quest of quests) { %>
+          <article class="l38-card" data-status="<%= quest.status %>">
+            <p class="l38-meta"><%= state.games.find(game => game.id === quest.gameId)?.title %></p>
+            <h3>#<%= quest.number %> · <%= quest.title %></h3>
+            <p><%= quest.description %></p>
+          </article>
+          <% } %>
+          <% if (!quests.length) { %><p>No quests here yet.</p><% } %>
+        </div>
+      </section>
+      <% } %>
+    </div>
+    <noscript><p>Quest progress is visible above. Enable JavaScript for live updates and joining.</p></noscript>
+  </main>
+</body>
+</html>

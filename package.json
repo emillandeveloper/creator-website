@@ -4,22 +4,51 @@
   "description": "Web de creador de Leo Nifelheim — dark fantasy stream hub",
   "main": "dist/server.js",
   "scripts": {
+    "prebuild": "prisma generate",
     "build": "tsc",
     "start": "node dist/server.js",
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
-    "watch": "tsc --watch"
+    "watch": "tsc --watch",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate deploy",
+    "db:status": "prisma migrate status",
+    "db:migrate:dev": "prisma migrate dev",
+    "db:seed": "node dist/modules/level38/commands.js seed",
+    "level38:operator": "node dist/modules/level38/commands.js operator",
+    "test": "npm run build && node --test tests/*.test.cjs",
+    "test:integration": "npm run build && node --test tests/integration/*.test.cjs"
   },
-  "keywords": ["twitch", "streamer", "schedule", "mvc"],
+  "keywords": [
+    "twitch",
+    "streamer",
+    "schedule",
+    "mvc"
+  ],
   "author": "Leo Nifelheim",
   "license": "MIT",
   "dependencies": {
+    "@prisma/client": "6.19.3",
+    "dotenv": "17.4.2",
     "ejs": "^3.1.10",
-    "express": "^4.19.2"
+    "express": "^4.19.2",
+    "express-rate-limit": "8.7.0",
+    "socket.io": "4.8.3"
+  },
+  "overrides": {
+    "@prisma/config": {
+      "deepmerge-ts": "8.0.2"
+    },
+    "express": {
+      "qs": "6.16.0"
+    }
   },
   "devDependencies": {
     "@types/ejs": "^3.1.5",
     "@types/express": "^4.17.21",
     "@types/node": "^20.14.0",
+    "jsdom": "26.1.0",
+    "prisma": "6.19.3",
+    "socket.io-client": "4.8.3",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.4.5"
   }
