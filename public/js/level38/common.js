@@ -144,7 +144,8 @@
         const card = element("section", undefined, "l38-panel l38-poll");
         card.dataset.pollId = poll.id;
         card.dataset.status = poll.status;
-        card.append(element("p", `Poll #${poll.number} · ${poll.type.replaceAll("_", " ")} · ${poll.status}`, "l38-meta"), element("h3", poll.title));
+        const roundLabel = handlers.control ? `Poll #${poll.number} · ${poll.type.replaceAll("_", " ")} · ${poll.status}` : `ROUND ${String(poll.number).padStart(2, "0")} · ${poll.status}`;
+        card.append(element("p", roundLabel, "l38-meta"), element("h3", poll.title));
         const total = element("p", ""); total.dataset.total = "true"; card.append(total);
         for (const option of poll.options) {
           const row = element("div", undefined, "l38-option");

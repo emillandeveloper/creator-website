@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" shape-rendering="crispEdges">
+  <!-- Original LEVEL 38 menu icon, drawn on a 20-pixel grid. -->
+  <path fill="#536f86" d="M13 2h5v5h-2v2h-2v2h-2v2H8V9h2V7h2V5h1z"/>
+  <path fill="#e9e9dd" d="M14 2h4v2h-2v2h-2v2h-2v2h-2V8h2V6h2z"/>
+  <path fill="#90bee0" d="M16 4h2v3h-2v2h-2v2h-2v2h-2v-3h2V8h2V6h2z"/>
+  <path fill="#e4be73" d="M5 8h2v2h2v2h2v2h2v2H9v-2H7v-2H5zM2 16h2v2H2z"/>
+  <path fill="#ad8250" d="M5 13h2v2H5v2H3v-2h2z"/>
+</svg>

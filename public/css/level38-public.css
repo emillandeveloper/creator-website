@@ -1,0 +1,213 @@
+/* Public RPG windows. The operator's shared, functional layout stays in level38.css. */
+.l38-public {
+  --l38-frame: #70849b;
+  --l38-window-shadow: inset 0 0 0 2px #090f1b, inset 0 0 0 4px #30445c, 4px 4px 0 #060c15;
+  background-color: #0c1523;
+  background-image: repeating-linear-gradient(0deg, transparent 0 7px, #0e1a2a 7px 8px);
+}
+.l38-public .l38-shell { padding-top: 20px; }
+.l38-public :is(.l38-panel, .l38-landscape, .l38-journal, .l38-secret-note, .l38-party-welcome) {
+  border: 2px solid var(--l38-frame);
+  box-shadow: var(--l38-window-shadow);
+  background-color: var(--l38-panel);
+}
+.l38-public .l38-panel { padding: 24px; margin-bottom: 24px; }
+.l38-public .l38-nav {
+  padding: 12px 16px;
+  background: #131f30;
+  border: 2px solid var(--l38-frame);
+  box-shadow: var(--l38-window-shadow);
+  gap: 12px;
+}
+.l38-public .l38-nav > div { gap: 8px; flex-wrap: wrap; }
+.l38-public .l38-nav > div a {
+  display: inline-flex; align-items: center; min-height: 44px;
+  padding: 8px 12px; border: 2px solid #3c5066; background: #0e1928;
+  color: #c5d2df; font: 10px/1.6 "Silkscreen", monospace;
+}
+.l38-public .l38-nav > div a.is-open { border-color: #8fcca5; color: #b6dfbd; }
+.l38-public .l38-nav > div a:hover { background: #263c51; text-decoration: none; }
+.l38-public .l38-hero { padding: 32px 0; gap: 32px; }
+.l38-public .l38-landscape { padding: 4px; }
+.l38-public .l38-landscape > span { border-top: 2px solid #526a61; line-height: 1.7; }
+.l38-public .l38-title-star { font-family: "Silkscreen", monospace; }
+.l38-public .l38-section-heading { padding-bottom: 12px; border-bottom: 2px solid #40536a; gap: 12px; }
+.l38-public .l38-section-heading h2 { font-size: 16px; }
+.l38-public .l38-section-heading > .l38-small { font: 9px/1.7 "Silkscreen", monospace; }
+.l38-public .l38-tag { font-size: 9px; white-space: normal; border: 2px solid #5c8069; background: #102722; padding: 4px 8px; }
+.l38-public .l38-progress-panel { --l38-frame: #a6a575; background: #192d30; }
+.l38-public .l38-progress-heading { flex-wrap: wrap; gap: 12px; margin-bottom: 16px; }
+.l38-public .l38-progress-heading h2 { font: 18px/1.7 "Silkscreen", monospace; letter-spacing: 0; margin-bottom: 0; }
+.l38-public .l38-progress-heading .l38-eyebrow { margin-bottom: 8px; }
+.l38-public .l38-segments { height: 32px; padding: 5px; gap: 4px; border: 2px solid #637b6a; box-shadow: inset 2px 2px #050f18; }
+.l38-public .l38-progress-foot { padding-top: 12px; font-size: 12px; }
+.l38-public .l38-adventure-grid { grid-template-columns: minmax(0, 1fr) 352px; gap: 24px; margin-top: 24px; }
+.l38-public .l38-current-game { --l38-frame: #799ebc; background: #192b42; gap: 16px; }
+.l38-public .l38-current-game > div:nth-child(2) { min-width: 0; }
+.l38-public .l38-current-game h2 { font: 18px/1.6 "Silkscreen", monospace; margin: 4px 0 8px; }
+.l38-public .l38-game-emblem { width: 64px; height: 64px; flex-basis: 64px; border: 2px solid #8da6b9; box-shadow: inset 0 0 0 3px #080f1b, inset 0 0 0 5px #30445c; }
+.l38-public .l38-game-emblem img { image-rendering: pixelated; }
+.l38-public .l38-game-arrow { font-family: "Silkscreen", monospace; font-size: 20px; }
+.l38-public .l38-active-panel { --l38-frame: #bba16a; background: #1c2b30; }
+.l38-public .l38-voting-section > .l38-section-heading { padding: 12px 0; margin-bottom: 16px; flex-wrap: wrap; }
+
+/* An inset quest ledger: status tab, readable title/body, then game attribution. */
+.l38-public .l38-card {
+  --quest-edge: #68819b;
+  border: 2px solid var(--quest-edge); border-left-width: 2px;
+  padding: 18px; background: #142235;
+  box-shadow: inset 0 0 0 2px #0a1421, 3px 3px 0 #080e18;
+  min-width: 0;
+}
+.l38-public .l38-card-top { gap: 8px; flex-wrap: wrap; border-bottom: 2px solid #354b60; padding-bottom: 12px; }
+.l38-public .l38-quest-number { font-size: 10px; }
+.l38-public .l38-status { font: 9px/1.6 "Silkscreen", monospace; letter-spacing: 0; border: 0; background: #0b1725; padding: 5px 7px; box-shadow: inset 3px 0 var(--quest-edge); }
+.l38-public .l38-card h3 { font-size: 17px; line-height: 1.5; color: #f0eddf; }
+.l38-public .l38-card > p:not(.l38-meta) { font-size: 14px; line-height: 1.8; color: #c4d0db; white-space: pre-line; }
+.l38-public .l38-card .l38-meta { font-size: 12px; border-top: 2px solid #354b60; padding-top: 12px; }
+.l38-public .l38-card[data-status="ACTIVE"] { --quest-edge: #d9bb71; background: #223330; }
+.l38-public .l38-card[data-status="COMPLETED"] { --quest-edge: #79a985; background: #192d30; }
+.l38-public .l38-card[data-status="FAILED"] { --quest-edge: #bf8189; }
+.l38-public .l38-card[data-status="SKIPPED"] { --quest-edge: #8f91aa; background: #192332; }
+.l38-public .l38-card[data-status="LOCKED"] { --quest-edge: #727e94; background: #101d2c; }
+.l38-public .l38-card[data-status="SECRET"] { --quest-edge: #aa92c3; background: #24263b; }
+.l38-public .l38-journal { padding: 24px; margin: 8px 0 24px; }
+.l38-public .l38-journal h2 { font-size: 22px; }
+.l38-public .l38-grid { gap: 16px; align-items: start; }
+.l38-public .l38-log-toolbar { grid-template-columns: minmax(0, 1fr) minmax(0, .8fr) minmax(0, 1fr); margin: 20px 0 24px; padding: 16px; gap: 16px; border: 2px solid #52677f; background: #0c1827; box-shadow: inset 2px 2px #060f19; }
+.l38-public .l38-log-toolbar label { min-width: 0; color: #bdcad8; font: 10px/1.6 "Silkscreen", monospace; }
+.l38-public .l38-log-toolbar :is(input, select) { margin-top: 8px; font: 14px/1.5 system-ui, sans-serif; }
+.l38-public .l38-secret-placeholder { border: 2px solid #86749d; box-shadow: inset 0 0 0 3px #0d1625; background: #20243a; }
+.l38-public .l38-secret-placeholder h3 { font: 12px/1.7 "Silkscreen", monospace; margin-bottom: 8px; }
+.l38-public #quest-board .l38-empty { grid-column: 1 / -1; border: 2px dashed #52677f; margin: 0; }
+
+/* Command buttons and recessed fields use the same bevel at every entry point. */
+.l38-public button, .l38-public .l38-button {
+  font: 11px/1.6 "Silkscreen", monospace;
+  border-width: 2px; padding: 10px 12px;
+  box-shadow: inset 2px 2px 0 #f6da9d, inset -2px -3px 0 #a77d44, 3px 3px 0 #070e19;
+}
+.l38-public .l38-secondary { border-color: #8098b2; box-shadow: inset 2px 2px #38516b, inset -2px -3px #101e30, 3px 3px #070e19; }
+.l38-public button:active, .l38-public .l38-button:active { transform: translate(2px, 2px); box-shadow: inset 2px 2px #152234; }
+.l38-public :is(input, select) { border: 2px solid #71879e; box-shadow: inset 2px 2px #050d17; }
+.l38-public input::placeholder { color: #9dacc0; opacity: 1; }
+.l38-public .l38-poll { --l38-frame: #67839e; }
+.l38-public .l38-poll[data-status="OPEN"] { --l38-frame: #90bee0; }
+.l38-public .l38-poll .l38-meta { padding-bottom: 12px; border-bottom: 2px solid #405770; }
+.l38-public .l38-poll h3 { font-size: 20px; line-height: 1.55; }
+.l38-public .l38-option {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 12px;
+  margin: 12px 0; padding: 12px 12px 22px;
+  border: 2px solid #526d89; background: #101d2e; box-shadow: inset 2px 2px #08111e;
+}
+.l38-public .l38-option::after {
+  content: ""; position: absolute; left: 10px; right: 10px; bottom: 6px; height: 6px;
+  background: repeating-linear-gradient(to right, transparent 0 6px, #101d2e 6px 8px), linear-gradient(to right, #779db9 var(--vote-percent, 0%), #263c50 var(--vote-percent, 0%));
+  pointer-events: none;
+}
+.l38-public .l38-option > span:first-child { min-width: 0; font-size: 14px; }
+.l38-public .l38-option button { min-width: 76px; font: 10px/1.6 "Silkscreen", monospace; border-width: 2px; box-shadow: inset 2px 2px #385b78, inset -2px -2px #0f2032; }
+.l38-public .l38-option:is(.is-selected, .is-winner) { border-color: #b4d0a0; background: #182f30; }
+.l38-public .l38-option:is(.is-selected, .is-winner)::after { background: repeating-linear-gradient(to right, transparent 0 6px, #182f30 6px 8px), linear-gradient(to right, #b4d0a0 var(--vote-percent, 0%), #304a47 var(--vote-percent, 0%)); }
+.l38-public .l38-static-option { padding-bottom: 12px; }
+.l38-public .l38-static-option::after { display: none; }
+.l38-public .l38-static-meter { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(20, minmax(0, 1fr)); gap: 2px; height: 6px; }
+.l38-public .l38-static-meter > span { background: #263c50; }
+.l38-public .l38-static-meter > .is-filled { background: #779db9; }
+.l38-public .is-winner .l38-static-meter > .is-filled { background: #b4d0a0; }
+.l38-public .l38-result { border: 2px solid #8cb395; box-shadow: inset 0 0 0 2px #10211f; margin-bottom: 0; }
+.l38-public .l38-poll-history summary { padding: 12px 16px; margin-bottom: 16px; border: 2px solid #637b95; background: #192b40; font: 10px/1.8 "Silkscreen", monospace; }
+.l38-public .l38-empty h3 { font: 13px/1.8 "Silkscreen", monospace; }
+
+/* Character sheet and the inline registration / class reveal windows. */
+.l38-public .l38-party-panel { --l38-frame: #a296b7; }
+.l38-public .l38-party-panel h2 { padding-bottom: 16px; border-bottom: 2px solid #4d4c66; }
+.l38-public .l38-identity { margin: 20px 0 16px; padding: 12px; gap: 12px; border: 2px solid #5c607c; background: #0d1929; }
+.l38-public .l38-avatar-slot { width: 80px; height: 96px; flex-basis: 80px; border: 2px solid #7c829e; background: #192c3c; box-shadow: inset 0 0 0 3px #0a1321, inset 0 -20px #2b4344; }
+.l38-public .l38-avatar-slot::after { content: ""; position: absolute; bottom: 12px; width: 48px; height: 4px; background: #688379; }
+.l38-public .l38-sprite { z-index: 1; }
+.l38-public .l38-character-label { display: block; font: 8px/1.6 "Silkscreen", monospace; color: #a5b3c7; }
+.l38-public #viewer-name { margin-bottom: 8px; font-size: 14px; }
+.l38-public #viewer-class { margin-top: 2px; font-size: 10px; }
+.l38-public .l38-party-note { border-top: 2px solid #354459; margin-top: 20px; line-height: 1.7; }
+.l38-public #join-form { margin: 20px 0 0; padding: 16px; border: 2px solid #c8b277; background: #1c2c3e; box-shadow: inset 0 0 0 3px #0b1727, 3px 3px #080e18; gap: 12px; }
+.l38-public #join-form .l38-eyebrow { font-size: 9px; color: #b7c9da; }
+.l38-public #join-form h3 { padding-bottom: 12px; border-bottom: 2px solid #526177; }
+.l38-public #join-form label { margin: 0; font: 10px/1.6 "Silkscreen", monospace; }
+.l38-public #join-form input { font-size: 16px; }
+.l38-public #join-form button { font-size: 10px; flex: 1 1 auto; }
+.l38-public .l38-party-welcome { --l38-frame: #afd19e; padding: 16px; background: #203733; }
+.l38-public .l38-party-welcome > .l38-eyebrow { color: #c7e5b6; padding-bottom: 12px; border-bottom: 2px solid #608574; }
+.l38-public .l38-welcome-character { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+.l38-public .l38-welcome-character > div:last-child { min-width: 0; overflow-wrap: anywhere; }
+.l38-public #welcome-name { display: block; font-size: 15px; }
+.l38-public #welcome-class { display: block; color: var(--l38-accent); font: 11px/1.7 "Silkscreen", monospace; margin-top: 8px; }
+.l38-public #welcome-dismiss { width: 100%; }
+.l38-public .l38-guide-panel li { gap: 12px; }
+.l38-public .l38-guide-panel li > span { align-self: start; padding: 6px; font-size: 10px; border: 2px solid #586c7b; background: #0c1927; color: #b1cbb7; }
+.l38-public .l38-secret-note { --l38-frame: #86749d; padding: 16px; margin-bottom: 24px; background: #20243a; }
+.l38-public .l38-footer { padding: 0 0 28px; border: 0; }
+.l38-public .l38-footer > span:first-child { font: 10px/1.7 "Silkscreen", monospace; }
+.l38-public .l38-footer .l38-small { font-family: system-ui, sans-serif; font-size: 12px; }
+.l38-public .l38-footer a { padding: 12px 0; }
+.l38-public :is(.l38-message:not(:empty), .l38-toast, .l38-level-up-copy) { border: 2px solid #c8b277; box-shadow: var(--l38-window-shadow); }
+.l38-public .l38-level-up-copy { background: #112332; }
+
+@media (max-width: 1100px) {
+  .l38-public .l38-adventure-grid { grid-template-columns: minmax(0, 1fr) 304px; }
+  .l38-public .l38-panel { padding: 20px; }
+  .l38-public .l38-section-heading { flex-wrap: wrap; }
+  .l38-public .l38-identity { padding: 10px; gap: 10px; flex-wrap: wrap; }
+  .l38-public .l38-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .l38-public .l38-hero h1 { font-size: 48px; }
+}
+@media (max-width: 850px) {
+  .l38-public .l38-adventure-grid { grid-template-columns: minmax(0, 1fr); }
+  .l38-public .l38-party-column { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; align-items: start; }
+  .l38-public .l38-party-panel { grid-row: span 2; margin-bottom: 0; }
+  .l38-public .l38-guide-panel { margin-bottom: 0; }
+  .l38-public .l38-secret-note { margin-bottom: 0; }
+  .l38-public .l38-journal { margin-top: 24px; }
+  .l38-public .l38-nav { align-items: start; }
+  .l38-public .l38-nav > div { width: 100%; }
+  .l38-public .l38-nav > div a { flex: 1; justify-content: center; }
+  .l38-public .l38-hero { gap: 20px; }
+  .l38-public .l38-hero h1 { font-size: 38px; }
+  .l38-public .l38-title-star { margin-left: 8px; font-size: 18px; }
+}
+@media (max-width: 650px) {
+  .l38-public .l38-shell { padding: 12px 16px 0; }
+  .l38-public .l38-nav { padding: 12px; }
+  .l38-public .l38-nav > div { gap: 6px; }
+  .l38-public .l38-nav > div a { padding: 7px 5px; font-size: 9px; }
+  .l38-public .l38-hero { padding: 24px 0; }
+  .l38-public .l38-hero h1 { font-size: clamp(36px, 11vw, 54px); }
+  .l38-public .l38-panel, .l38-public .l38-journal { padding: 18px; }
+  .l38-public .l38-progress-heading { gap: 12px; }
+  .l38-public .l38-progress-heading h2 { font-size: 16px; }
+  .l38-public .l38-progress-heading .l38-tag { margin-bottom: 0; }
+  .l38-public .l38-segments { gap: 2px; padding: 3px; height: 28px; }
+  .l38-public .l38-progress-foot { font-size: 11px; }
+  .l38-public .l38-current-game { gap: 12px; }
+  .l38-public .l38-current-game h2 { font-size: 15px; }
+  .l38-public .l38-adventure-grid { gap: 0; }
+  .l38-public .l38-party-column { display: block; }
+  .l38-public .l38-party-panel, .l38-public .l38-guide-panel { margin-bottom: 24px; }
+  .l38-public .l38-guide-panel { display: block; }
+  .l38-public .l38-identity { flex-wrap: nowrap; }
+  .l38-public .l38-grid { grid-template-columns: minmax(0, 1fr); }
+  .l38-public .l38-journal h2 { font-size: 19px; }
+  .l38-public .l38-log-toolbar { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; padding: 12px; }
+  .l38-public .l38-log-toolbar :is(input, select) { font-size: 16px; padding: 8px; }
+  .l38-public .l38-card { padding: 16px; }
+  .l38-public .l38-option { gap: 8px; padding: 10px 10px 22px; }
+  .l38-public .l38-option button { min-width: 72px; padding: 8px 6px; }
+  .l38-public .l38-secret-placeholder { padding: 16px; }
+  .l38-public .l38-secret-placeholder > div { min-width: 0; flex-basis: 150px; }
+  .l38-public .l38-secret-placeholder > strong { margin-left: 0; }
+}
+@media (max-height: 500px) and (orientation: landscape) {
+  .l38-public .l38-hero { padding: 20px 0; }
+  .l38-public .l38-landscape img { min-height: 0; height: 160px; object-fit: cover; }
+  .l38-public .l38-level-up-copy { max-height: calc(100dvh - 24px); overflow-y: auto; }
+}
