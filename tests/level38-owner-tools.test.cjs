@@ -20,7 +20,7 @@ test('shared control finale keeps preview dedupe separate, prioritizes genuine e
   dismiss();socket.emit('level38:celebration-preview',preview);await delay(20);assert.ok(!visible());
   const real={version:1,id:'level38:unlock:1',sequence:1,revision:2,completed:38,target:38,startsAt:Date.now(),durationMs:6500};
   observe(2,38,1);socket.emit('level38:unlocked',real);socket.emit('level38:celebration-preview',{...preview,id:'preview-2'});await delay(20);
-  assert.ok(visible());assert.equal(w.document.getElementById('celebration-preview-label').hidden,true);assert.equal(w.sessionStorage.getItem('level38:last-unlock'),'1');
+  assert.ok(visible());assert.equal(w.document.getElementById('celebration-preview-label').hidden,true);assert.equal(w.sessionStorage.getItem('level38:acknowledged-unlock'),null);
   observe(3,0,1,1);assert.ok(!visible());socket.emit('level38:unlocked',real);await delay(20);assert.ok(!visible());
   observe(4,38,2,1);socket.emit('level38:unlocked',{...real,id:'level38:unlock:2',sequence:2,revision:4,startsAt:Date.now()});await delay(20);assert.ok(visible());
   dismiss();socket.emit('disconnect');socket.emit('connect');observe(4,38,2,1);socket.emit('level38:unlocked',{...real,id:'level38:unlock:2',sequence:2,revision:4});await delay(20);assert.ok(!visible());

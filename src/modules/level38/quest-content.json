@@ -1,0 +1,758 @@
+[
+  {
+    "key": "ff5-opening-encounter",
+    "number": 1,
+    "gameSlug": "ff5",
+    "isSecret": false,
+    "title": {
+      "en": "Win the opening encounter",
+      "es": "Gana el primer combate"
+    },
+    "description": {
+      "en": "Win the first battle agreed on for this save.",
+      "es": "Gana el primer combate que acordéis para esta partida."
+    }
+  },
+  {
+    "key": "ff5-no-items",
+    "number": 2,
+    "gameSlug": "ff5",
+    "isSecret": false,
+    "title": {
+      "en": "Win without using items",
+      "es": "Gana sin usar objetos"
+    },
+    "description": {
+      "en": "Win a battle without using any items.",
+      "es": "Gana un combate sin usar ningún objeto."
+    }
+  },
+  {
+    "key": "ff5-hidden-chest",
+    "number": 3,
+    "gameSlug": "ff5",
+    "isSecret": false,
+    "title": {
+      "en": "Find a hidden chest",
+      "es": "Encuentra un cofre oculto"
+    },
+    "description": {
+      "en": "Find and open a chest off the main route.",
+      "es": "Encuentra y abre un cofre apartado del camino principal."
+    }
+  },
+  {
+    "key": "ff5-new-town",
+    "number": 4,
+    "gameSlug": "ff5",
+    "isSecret": false,
+    "title": {
+      "en": "Visit a new town",
+      "es": "Visita una nueva ciudad"
+    },
+    "description": {
+      "en": "Reach a town you have not visited in this run.",
+      "es": "Llega a una ciudad que aún no hayas visitado en esta partida."
+    }
+  },
+  {
+    "key": "ff5-optional-enemy",
+    "number": 5,
+    "gameSlug": "ff5",
+    "isSecret": false,
+    "title": {
+      "en": "Defeat an optional enemy",
+      "es": "Derrota a un enemigo opcional"
+    },
+    "description": {
+      "en": "Defeat an enemy that is not required to advance the story.",
+      "es": "Derrota a un enemigo al que no haga falta vencer para avanzar en la historia."
+    }
+  },
+  {
+    "key": "ff5-starting-equipment",
+    "number": 6,
+    "gameSlug": "ff5",
+    "isSecret": false,
+    "title": {
+      "en": "Win with the starting equipment",
+      "es": "Gana con el equipo inicial"
+    },
+    "description": {
+      "en": "Win the agreed battle using your starting equipment.",
+      "es": "Gana el combate acordado con el equipo inicial."
+    }
+  },
+  {
+    "key": "ff5-difficult-encounter",
+    "number": 7,
+    "gameSlug": "ff5",
+    "isSecret": false,
+    "title": {
+      "en": "Survive a difficult encounter",
+      "es": "Sobrevive a un combate difícil"
+    },
+    "description": {
+      "en": "Overcome a challenging battle and keep the adventure going.",
+      "es": "Supera un combate difícil y sigue adelante con la aventura."
+    }
+  },
+  {
+    "key": "ff5-new-ability",
+    "number": 8,
+    "gameSlug": "ff5",
+    "isSecret": false,
+    "title": {
+      "en": "Discover a new ability",
+      "es": "Descubre una nueva habilidad"
+    },
+    "description": {
+      "en": "Learn or unlock an ability you have not used in this run.",
+      "es": "Aprende o desbloquea una habilidad que aún no hayas usado en esta partida."
+    }
+  },
+  {
+    "key": "ff5-dungeon",
+    "number": 9,
+    "gameSlug": "ff5",
+    "isSecret": false,
+    "title": {
+      "en": "Finish a dungeon",
+      "es": "Completa una mazmorra"
+    },
+    "description": {
+      "en": "Make your way through the agreed dungeon and reach its end.",
+      "es": "Recorre la mazmorra acordada y llega hasta el final."
+    }
+  },
+  {
+    "key": "ff5-no-fleeing",
+    "number": 10,
+    "gameSlug": "ff5",
+    "isSecret": false,
+    "title": {
+      "en": "Win without fleeing",
+      "es": "Gana sin huir"
+    },
+    "description": {
+      "en": "Clear the agreed stretch without running from any battles.",
+      "es": "Supera el tramo acordado sin huir de ningún combate."
+    }
+  },
+  {
+    "key": "ff5-rare-item",
+    "number": 11,
+    "gameSlug": "ff5",
+    "isSecret": false,
+    "title": {
+      "en": "Find a rare item",
+      "es": "Encuentra un objeto raro"
+    },
+    "description": {
+      "en": "Obtain a rare item and show the party your find.",
+      "es": "Consigue un objeto raro y enséñale el hallazgo al grupo."
+    }
+  },
+  {
+    "key": "ff5-side-objective",
+    "number": 12,
+    "gameSlug": "ff5",
+    "isSecret": false,
+    "title": {
+      "en": "Complete a side objective",
+      "es": "Completa un objetivo secundario"
+    },
+    "description": {
+      "en": "Finish a side objective chosen for the current save.",
+      "es": "Completa un objetivo secundario elegido para la partida actual."
+    }
+  },
+  {
+    "key": "ff5-boss",
+    "number": 13,
+    "gameSlug": "ff5",
+    "isSecret": false,
+    "title": {
+      "en": "Win a boss encounter",
+      "es": "Derrota a un jefe"
+    },
+    "description": {
+      "en": "Defeat the boss chosen for this challenge.",
+      "es": "Derrota al jefe elegido para esta misión."
+    }
+  },
+  {
+    "key": "ff5-optional-area",
+    "number": 14,
+    "gameSlug": "ff5",
+    "isSecret": false,
+    "title": {
+      "en": "Explore an optional area",
+      "es": "Explora una zona opcional"
+    },
+    "description": {
+      "en": "Take a detour and explore an area outside the main story route.",
+      "es": "Desvíate del camino principal y explora una zona opcional."
+    }
+  },
+  {
+    "key": "ff5-save-point",
+    "number": 15,
+    "gameSlug": "ff5",
+    "isSecret": false,
+    "title": {
+      "en": "Reach the next save point",
+      "es": "Llega al siguiente punto de guardado"
+    },
+    "description": {
+      "en": "Reach the next save point and save your progress.",
+      "es": "Llega al siguiente punto de guardado y guarda la partida."
+    }
+  },
+  {
+    "key": "ff5-chat-party",
+    "number": 16,
+    "gameSlug": "ff5",
+    "isSecret": false,
+    "title": {
+      "en": "Let chat choose the party",
+      "es": "Deja que el chat elija el grupo"
+    },
+    "description": {
+      "en": "Let chat pick the party for the next agreed stretch.",
+      "es": "Deja que el chat elija a los miembros del grupo para el siguiente tramo."
+    }
+  },
+  {
+    "key": "ff5-secret-treasure",
+    "number": 17,
+    "gameSlug": "ff5",
+    "isSecret": true,
+    "title": {
+      "en": "Secret treasure hunt",
+      "es": "Búsqueda secreta del tesoro"
+    },
+    "description": {
+      "en": "Follow the revealed clue and find the secret treasure.",
+      "es": "Sigue la pista revelada y encuentra el tesoro secreto."
+    }
+  },
+  {
+    "key": "ff5-secret-finale",
+    "number": 18,
+    "gameSlug": "ff5",
+    "isSecret": true,
+    "title": {
+      "en": "Secret final encounter",
+      "es": "Combate final secreto"
+    },
+    "description": {
+      "en": "Face the secret encounter when the challenge is revealed.",
+      "es": "Afronta el combate secreto cuando se revele la misión."
+    }
+  },
+  {
+    "key": "ff6-opening-encounter",
+    "number": 19,
+    "gameSlug": "ff6",
+    "isSecret": false,
+    "title": {
+      "en": "Win the opening encounter",
+      "es": "Gana el primer combate"
+    },
+    "description": {
+      "en": "Win the first battle agreed on for this save.",
+      "es": "Gana el primer combate que acordéis para esta partida."
+    }
+  },
+  {
+    "key": "ff6-no-items",
+    "number": 20,
+    "gameSlug": "ff6",
+    "isSecret": false,
+    "title": {
+      "en": "Win without using items",
+      "es": "Gana sin usar objetos"
+    },
+    "description": {
+      "en": "Win a battle without using any items.",
+      "es": "Gana un combate sin usar ningún objeto."
+    }
+  },
+  {
+    "key": "ff6-hidden-chest",
+    "number": 21,
+    "gameSlug": "ff6",
+    "isSecret": false,
+    "title": {
+      "en": "Find a hidden chest",
+      "es": "Encuentra un cofre oculto"
+    },
+    "description": {
+      "en": "Find and open a chest off the main route.",
+      "es": "Encuentra y abre un cofre apartado del camino principal."
+    }
+  },
+  {
+    "key": "ff6-new-town",
+    "number": 22,
+    "gameSlug": "ff6",
+    "isSecret": false,
+    "title": {
+      "en": "Visit a new town",
+      "es": "Visita una nueva ciudad"
+    },
+    "description": {
+      "en": "Reach a town you have not visited in this run.",
+      "es": "Llega a una ciudad que aún no hayas visitado en esta partida."
+    }
+  },
+  {
+    "key": "ff6-optional-enemy",
+    "number": 23,
+    "gameSlug": "ff6",
+    "isSecret": false,
+    "title": {
+      "en": "Defeat an optional enemy",
+      "es": "Derrota a un enemigo opcional"
+    },
+    "description": {
+      "en": "Defeat an enemy that is not required to advance the story.",
+      "es": "Derrota a un enemigo al que no haga falta vencer para avanzar en la historia."
+    }
+  },
+  {
+    "key": "ff6-starting-equipment",
+    "number": 24,
+    "gameSlug": "ff6",
+    "isSecret": false,
+    "title": {
+      "en": "Win with the starting equipment",
+      "es": "Gana con el equipo inicial"
+    },
+    "description": {
+      "en": "Win the agreed battle using your starting equipment.",
+      "es": "Gana el combate acordado con el equipo inicial."
+    }
+  },
+  {
+    "key": "ff6-difficult-encounter",
+    "number": 25,
+    "gameSlug": "ff6",
+    "isSecret": false,
+    "title": {
+      "en": "Survive a difficult encounter",
+      "es": "Sobrevive a un combate difícil"
+    },
+    "description": {
+      "en": "Overcome a challenging battle and keep the adventure going.",
+      "es": "Supera un combate difícil y sigue adelante con la aventura."
+    }
+  },
+  {
+    "key": "ff6-new-ability",
+    "number": 26,
+    "gameSlug": "ff6",
+    "isSecret": false,
+    "title": {
+      "en": "Discover a new ability",
+      "es": "Descubre una nueva habilidad"
+    },
+    "description": {
+      "en": "Learn or unlock an ability you have not used in this run.",
+      "es": "Aprende o desbloquea una habilidad que aún no hayas usado en esta partida."
+    }
+  },
+  {
+    "key": "ff6-dungeon",
+    "number": 27,
+    "gameSlug": "ff6",
+    "isSecret": false,
+    "title": {
+      "en": "Finish a dungeon",
+      "es": "Completa una mazmorra"
+    },
+    "description": {
+      "en": "Make your way through the agreed dungeon and reach its end.",
+      "es": "Recorre la mazmorra acordada y llega hasta el final."
+    }
+  },
+  {
+    "key": "ff6-no-fleeing",
+    "number": 28,
+    "gameSlug": "ff6",
+    "isSecret": false,
+    "title": {
+      "en": "Win without fleeing",
+      "es": "Gana sin huir"
+    },
+    "description": {
+      "en": "Clear the agreed stretch without running from any battles.",
+      "es": "Supera el tramo acordado sin huir de ningún combate."
+    }
+  },
+  {
+    "key": "ff6-rare-item",
+    "number": 29,
+    "gameSlug": "ff6",
+    "isSecret": false,
+    "title": {
+      "en": "Find a rare item",
+      "es": "Encuentra un objeto raro"
+    },
+    "description": {
+      "en": "Obtain a rare item and show the party your find.",
+      "es": "Consigue un objeto raro y enséñale el hallazgo al grupo."
+    }
+  },
+  {
+    "key": "ff6-side-objective",
+    "number": 30,
+    "gameSlug": "ff6",
+    "isSecret": false,
+    "title": {
+      "en": "Complete a side objective",
+      "es": "Completa un objetivo secundario"
+    },
+    "description": {
+      "en": "Finish a side objective chosen for the current save.",
+      "es": "Completa un objetivo secundario elegido para la partida actual."
+    }
+  },
+  {
+    "key": "ff6-boss",
+    "number": 31,
+    "gameSlug": "ff6",
+    "isSecret": false,
+    "title": {
+      "en": "Win a boss encounter",
+      "es": "Derrota a un jefe"
+    },
+    "description": {
+      "en": "Defeat the boss chosen for this challenge.",
+      "es": "Derrota al jefe elegido para esta misión."
+    }
+  },
+  {
+    "key": "ff6-optional-area",
+    "number": 32,
+    "gameSlug": "ff6",
+    "isSecret": false,
+    "title": {
+      "en": "Explore an optional area",
+      "es": "Explora una zona opcional"
+    },
+    "description": {
+      "en": "Take a detour and explore an area outside the main story route.",
+      "es": "Desvíate del camino principal y explora una zona opcional."
+    }
+  },
+  {
+    "key": "ff6-save-point",
+    "number": 33,
+    "gameSlug": "ff6",
+    "isSecret": false,
+    "title": {
+      "en": "Reach the next save point",
+      "es": "Llega al siguiente punto de guardado"
+    },
+    "description": {
+      "en": "Reach the next save point and save your progress.",
+      "es": "Llega al siguiente punto de guardado y guarda la partida."
+    }
+  },
+  {
+    "key": "ff6-chat-party",
+    "number": 34,
+    "gameSlug": "ff6",
+    "isSecret": false,
+    "title": {
+      "en": "Let chat choose the party",
+      "es": "Deja que el chat elija el grupo"
+    },
+    "description": {
+      "en": "Let chat pick the party for the next agreed stretch.",
+      "es": "Deja que el chat elija a los miembros del grupo para el siguiente tramo."
+    }
+  },
+  {
+    "key": "ff6-secret-treasure",
+    "number": 35,
+    "gameSlug": "ff6",
+    "isSecret": true,
+    "title": {
+      "en": "Secret treasure hunt",
+      "es": "Búsqueda secreta del tesoro"
+    },
+    "description": {
+      "en": "Follow the revealed clue and find the secret treasure.",
+      "es": "Sigue la pista revelada y encuentra el tesoro secreto."
+    }
+  },
+  {
+    "key": "ff6-secret-finale",
+    "number": 36,
+    "gameSlug": "ff6",
+    "isSecret": true,
+    "title": {
+      "en": "Secret final encounter",
+      "es": "Combate final secreto"
+    },
+    "description": {
+      "en": "Face the secret encounter when the challenge is revealed.",
+      "es": "Afronta el combate secreto cuando se revele la misión."
+    }
+  },
+  {
+    "key": "ff9-opening-encounter",
+    "number": 37,
+    "gameSlug": "ff9",
+    "isSecret": false,
+    "title": {
+      "en": "Win the opening encounter",
+      "es": "Gana el primer combate"
+    },
+    "description": {
+      "en": "Win the first battle agreed on for this save.",
+      "es": "Gana el primer combate que acordéis para esta partida."
+    }
+  },
+  {
+    "key": "ff9-no-items",
+    "number": 38,
+    "gameSlug": "ff9",
+    "isSecret": false,
+    "title": {
+      "en": "Win without using items",
+      "es": "Gana sin usar objetos"
+    },
+    "description": {
+      "en": "Win a battle without using any items.",
+      "es": "Gana un combate sin usar ningún objeto."
+    }
+  },
+  {
+    "key": "ff9-hidden-chest",
+    "number": 39,
+    "gameSlug": "ff9",
+    "isSecret": false,
+    "title": {
+      "en": "Find a hidden chest",
+      "es": "Encuentra un cofre oculto"
+    },
+    "description": {
+      "en": "Find and open a chest off the main route.",
+      "es": "Encuentra y abre un cofre apartado del camino principal."
+    }
+  },
+  {
+    "key": "ff9-new-town",
+    "number": 40,
+    "gameSlug": "ff9",
+    "isSecret": false,
+    "title": {
+      "en": "Visit a new town",
+      "es": "Visita una nueva ciudad"
+    },
+    "description": {
+      "en": "Reach a town you have not visited in this run.",
+      "es": "Llega a una ciudad que aún no hayas visitado en esta partida."
+    }
+  },
+  {
+    "key": "ff9-optional-enemy",
+    "number": 41,
+    "gameSlug": "ff9",
+    "isSecret": false,
+    "title": {
+      "en": "Defeat an optional enemy",
+      "es": "Derrota a un enemigo opcional"
+    },
+    "description": {
+      "en": "Defeat an enemy that is not required to advance the story.",
+      "es": "Derrota a un enemigo al que no haga falta vencer para avanzar en la historia."
+    }
+  },
+  {
+    "key": "ff9-starting-equipment",
+    "number": 42,
+    "gameSlug": "ff9",
+    "isSecret": false,
+    "title": {
+      "en": "Win with the starting equipment",
+      "es": "Gana con el equipo inicial"
+    },
+    "description": {
+      "en": "Win the agreed battle using your starting equipment.",
+      "es": "Gana el combate acordado con el equipo inicial."
+    }
+  },
+  {
+    "key": "ff9-difficult-encounter",
+    "number": 43,
+    "gameSlug": "ff9",
+    "isSecret": false,
+    "title": {
+      "en": "Survive a difficult encounter",
+      "es": "Sobrevive a un combate difícil"
+    },
+    "description": {
+      "en": "Overcome a challenging battle and keep the adventure going.",
+      "es": "Supera un combate difícil y sigue adelante con la aventura."
+    }
+  },
+  {
+    "key": "ff9-new-ability",
+    "number": 44,
+    "gameSlug": "ff9",
+    "isSecret": false,
+    "title": {
+      "en": "Discover a new ability",
+      "es": "Descubre una nueva habilidad"
+    },
+    "description": {
+      "en": "Learn or unlock an ability you have not used in this run.",
+      "es": "Aprende o desbloquea una habilidad que aún no hayas usado en esta partida."
+    }
+  },
+  {
+    "key": "ff9-dungeon",
+    "number": 45,
+    "gameSlug": "ff9",
+    "isSecret": false,
+    "title": {
+      "en": "Finish a dungeon",
+      "es": "Completa una mazmorra"
+    },
+    "description": {
+      "en": "Make your way through the agreed dungeon and reach its end.",
+      "es": "Recorre la mazmorra acordada y llega hasta el final."
+    }
+  },
+  {
+    "key": "ff9-no-fleeing",
+    "number": 46,
+    "gameSlug": "ff9",
+    "isSecret": false,
+    "title": {
+      "en": "Win without fleeing",
+      "es": "Gana sin huir"
+    },
+    "description": {
+      "en": "Clear the agreed stretch without running from any battles.",
+      "es": "Supera el tramo acordado sin huir de ningún combate."
+    }
+  },
+  {
+    "key": "ff9-rare-item",
+    "number": 47,
+    "gameSlug": "ff9",
+    "isSecret": false,
+    "title": {
+      "en": "Find a rare item",
+      "es": "Encuentra un objeto raro"
+    },
+    "description": {
+      "en": "Obtain a rare item and show the party your find.",
+      "es": "Consigue un objeto raro y enséñale el hallazgo al grupo."
+    }
+  },
+  {
+    "key": "ff9-side-objective",
+    "number": 48,
+    "gameSlug": "ff9",
+    "isSecret": false,
+    "title": {
+      "en": "Complete a side objective",
+      "es": "Completa un objetivo secundario"
+    },
+    "description": {
+      "en": "Finish a side objective chosen for the current save.",
+      "es": "Completa un objetivo secundario elegido para la partida actual."
+    }
+  },
+  {
+    "key": "ff9-boss",
+    "number": 49,
+    "gameSlug": "ff9",
+    "isSecret": false,
+    "title": {
+      "en": "Win a boss encounter",
+      "es": "Derrota a un jefe"
+    },
+    "description": {
+      "en": "Defeat the boss chosen for this challenge.",
+      "es": "Derrota al jefe elegido para esta misión."
+    }
+  },
+  {
+    "key": "ff9-optional-area",
+    "number": 50,
+    "gameSlug": "ff9",
+    "isSecret": false,
+    "title": {
+      "en": "Explore an optional area",
+      "es": "Explora una zona opcional"
+    },
+    "description": {
+      "en": "Take a detour and explore an area outside the main story route.",
+      "es": "Desvíate del camino principal y explora una zona opcional."
+    }
+  },
+  {
+    "key": "ff9-save-point",
+    "number": 51,
+    "gameSlug": "ff9",
+    "isSecret": false,
+    "title": {
+      "en": "Reach the next save point",
+      "es": "Llega al siguiente punto de guardado"
+    },
+    "description": {
+      "en": "Reach the next save point and save your progress.",
+      "es": "Llega al siguiente punto de guardado y guarda la partida."
+    }
+  },
+  {
+    "key": "ff9-chat-party",
+    "number": 52,
+    "gameSlug": "ff9",
+    "isSecret": false,
+    "title": {
+      "en": "Let chat choose the party",
+      "es": "Deja que el chat elija el grupo"
+    },
+    "description": {
+      "en": "Let chat pick the party for the next agreed stretch.",
+      "es": "Deja que el chat elija a los miembros del grupo para el siguiente tramo."
+    }
+  },
+  {
+    "key": "ff9-secret-treasure",
+    "number": 53,
+    "gameSlug": "ff9",
+    "isSecret": true,
+    "title": {
+      "en": "Secret treasure hunt",
+      "es": "Búsqueda secreta del tesoro"
+    },
+    "description": {
+      "en": "Follow the revealed clue and find the secret treasure.",
+      "es": "Sigue la pista revelada y encuentra el tesoro secreto."
+    }
+  },
+  {
+    "key": "ff9-secret-finale",
+    "number": 54,
+    "gameSlug": "ff9",
+    "isSecret": true,
+    "title": {
+      "en": "Secret final encounter",
+      "es": "Combate final secreto"
+    },
+    "description": {
+      "en": "Face the secret encounter when the challenge is revealed.",
+      "es": "Afronta el combate secreto cuando se revele la misión."
+    }
+  }
+]

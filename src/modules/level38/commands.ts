@@ -2,11 +2,17 @@ import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
 import { hashToken, newToken } from "./auth";
 import { seedLevel38 } from "./seed";
+import { updateStarterQuestContent } from "./quest-content-update";
 
 async function main(): Promise<void> {
   const db = new PrismaClient();
   try {
     const [command, operation, name, role] = process.argv.slice(2);
+    if (command === "quest-content") {
+      if (operation && operation !== "--apply") throw new Error("Usage: node dist/modules/level38/commands.js quest-content [--apply]");
+      console.log(JSON.stringify(await updateStarterQuestContent(db, operation === "--apply"), null, 2));
+      return;
+    }
     if (command === "seed") {
       console.log(await seedLevel38(db) ? "Created LEVEL 38 with 54 starter quests (6 secret)." : "LEVEL 38 already exists; no event data changed.");
       return;

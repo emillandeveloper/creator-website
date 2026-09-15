@@ -5,7 +5,7 @@
   "main": "dist/server.js",
   "scripts": {
     "prebuild": "prisma generate",
-    "build": "tsc",
+    "build": "tsc && node dist/modules/level38/quest-content.js",
     "start": "node dist/server.js",
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
     "watch": "tsc --watch",

@@ -20,7 +20,7 @@ const event = (sequence, revision) => ({ version: 1, id: `level38:unlock:${seque
 test("celebration client suppresses refresh/reconnect/duplicates and supports a new crossing with reduced motion", async (t) => {
   const p = page(t); p.observe(4, 37, 0); p.observe(5, 38, 1);
   const first = event(1, 5); p.socket.emit("level38:unlocked", first); await delay(20);
-  assert.equal(p.visible(), true); assert.equal(p.window.sessionStorage.getItem("level38:last-unlock"), "1");
+  assert.equal(p.visible(), true); assert.equal(p.window.sessionStorage.getItem("level38:acknowledged-unlock"), null);
   p.window.document.getElementById("celebration-dismiss").click();
   p.socket.emit("level38:unlocked", first); await delay(20); assert.equal(p.visible(), false);
   p.socket.emit("disconnect"); p.socket.emit("connect"); p.observe(5, 38, 1);
