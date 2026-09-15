@@ -36,10 +36,13 @@ export function createLevel38Routes(controller: Level38Controller, config: Level
   });
   router.get("/", wrap(controller.publicPage));
   router.get("/control", wrap(controller.controlPage));
+  router.get("/overlay/party", wrap(controller.partyOverlay));
   router.get("/api/state", wrap(controller.publicState));
   router.get("/api/classes", (_req, res) => { res.json(SPRITE_MANIFEST); });
   router.get("/api/session", limited(300, 60 * 60 * 1000), wrap(controller.session));
   router.post("/api/join", limited(20, 60 * 1000), wrap(controller.join));
+  router.post("/api/stream-visibility", limited(60, 60 * 1000), wrap(controller.streamVisibility));
+  router.post("/api/control/party", limited(30, 60 * 1000), wrap(controller.configureParty));
   router.post("/api/control/login", limited(10, 15 * 60 * 1000), wrap(controller.login));
   router.post("/api/control/logout", wrap(controller.logout));
   router.get("/api/control/state", wrap(controller.controlState));

@@ -17,6 +17,7 @@
   <script defer src="/js/level38/common.js"></script>
   <script defer src="/js/level38/fireworks.js"></script>
   <script defer src="/js/level38/experience.js"></script>
+  <script defer src="/js/level38/party-viewer.js"></script>
   <script defer src="/js/level38/public.js"></script>
 </head>
 <body class="level38 l38-public">
@@ -84,6 +85,10 @@
             <p class="l38-small" data-i18n="One random class. Yours for this adventure. All party members have an equal vote."><%= t("One random class. Yours for this adventure. All party members have an equal vote.") %></p>
             <button type="submit" data-i18n="Join party"><%= t("Join party") %></button><button class="l38-secondary" id="join-cancel" type="button" data-i18n="Cancel"><%= t("Cancel") %></button>
           </form>
+          <div id="stream-visibility" hidden>
+            <label class="l38-stream-toggle"><input id="stream-visible" type="checkbox" aria-describedby="stream-visibility-note"><span data-i18n="Appear on stream"><%= t('Appear on stream') %></span></label>
+            <p id="stream-visibility-note" class="l38-small" data-i18n="While this page is open, your nickname and character may appear in Leo's stream."><%= t("While this page is open, your nickname and character may appear in Leo's stream.") %></p>
+          </div>
           <p class="l38-small l38-party-note" data-i18n="No account needed. Your class stays with this browser."><%= t("No account needed. Your class stays with this browser.") %></p>
           <div id="party-welcome" class="l38-party-welcome" role="status" hidden><p class="l38-eyebrow" data-i18n="NEW PARTY MEMBER"><%= t("NEW PARTY MEMBER") %></p><div class="l38-welcome-character"><div id="welcome-sprite" class="l38-avatar-slot" aria-hidden="true"></div><div><strong id="welcome-name"></strong><span id="welcome-class"></span></div></div><button type="button" id="welcome-dismiss" class="l38-secondary" data-i18n="Onward!"><%= t("Onward!") %></button></div>
         </section>

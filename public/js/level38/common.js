@@ -245,6 +245,7 @@
   let messageTimer;
   function auditDescription(entry, state) {
     if (!entry) return t("No action yet.");
+    if (entry.action === "party:configured") return t("updated party overlay settings");
     const ownerActions = {"owner:progress":"reset event progress", "owner:participants":"cleared test participants", "owner:prepare":"prepared a clean event", "owner:preview":"previewed the finale for connected clients"};
     if (ownerActions[entry.action]) return t(ownerActions[entry.action]);
     const before = entry.before || {}, after = entry.after || {}, metadata = entry.metadata || {};

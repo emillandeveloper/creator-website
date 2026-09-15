@@ -1,0 +1,14 @@
+<section class="l38-panel" id="party-overlay-controls">
+  <h2 data-i18n="Party Overlay"><%= t('Party Overlay') %></h2>
+  <p id="party-counts" role="status"></p>
+  <form id="party-config-form">
+    <label class="l38-stream-toggle"><input type="checkbox" name="enabled"><span data-i18n="Enable party overlay"><%= t('Enable party overlay') %></span></label>
+    <label for="party-name-mode" data-i18n="Nickname display"><%= t('Nickname display') %></label>
+    <select id="party-name-mode" name="nameMode"><option value="OFF" data-i18n="Names off"><%= t('Names off') %></option><option value="ENTRY" data-i18n="Names on entry"><%= t('Names on entry') %></option><option value="ALWAYS" data-i18n="Names always"><%= t('Names always') %></option></select>
+    <label for="party-limit" data-i18n="Visible avatars (1–50)"><%= t('Visible avatars (1–50)') %></label>
+    <input id="party-limit" name="maxVisible" type="number" min="1" max="50" value="30" required>
+    <button type="submit" data-i18n="Save party settings"><%= t('Save party settings') %></button>
+  </form>
+  <p><a href="/level38/overlay/party" target="_blank" rel="noopener" data-i18n="Open party overlay"><%= t('Open party overlay') %></a></p>
+  <% if (operator.role === 'OWNER') { %><p data-i18n="Owner preview (separate from the live party)"><%= t('Owner preview (separate from the live party)') %></p><div class="l38-actions"><% for (const count of [1,5,15,30]) { %><a href="/level38/overlay/party?preview=<%= count %>" target="_blank" rel="noopener"><%= count %></a><% } %></div><% } %>
+</section>

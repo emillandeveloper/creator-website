@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="<%= lang %>">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LEVEL 38 Party</title>
+  <link rel="stylesheet" href="/css/level38-party.css">
+  <script defer src="/level38/socket.io/socket.io.js"></script>
+  <script defer src="/js/level38/sprites.js"></script>
+  <script defer src="/js/level38/party-overlay.js"></script>
+</head>
+<body data-preview="<%= preview %>">
+  <main id="party-stage" aria-label="LEVEL 38 party"></main>
+  <span id="party-overflow" hidden></span>
+  <% if (preview) { %>
+  <div id="party-preview-controls">
+    <span>OWNER PREVIEW · <%= preview %></span>
+    <button id="preview-vote" type="button">Vote hop</button>
+    <button id="preview-victory" type="button">Party victory</button>
+    <label>Names <select id="preview-names"><option>ENTRY</option><option>ALWAYS</option><option>OFF</option></select></label>
+  </div>
+  <% } %>
+</body>
+</html>

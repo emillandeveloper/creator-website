@@ -26,6 +26,7 @@ export async function readState(tx: Prisma.TransactionClient, control: boolean) 
   const undo = control ? await undoCandidate(tx, event.id) : null;
   return {
     serverTime: Date.now(),
+    party: { enabled: event.partyEnabled, nameMode: event.partyNameMode, maxVisible: event.partyMaxVisible },
     event: { title: event.title, target: event.target, revision: event.revision, controlRevision: event.controlRevision,
       unlockSequence: event.unlockSequence, resetSequence: event.resetSequence,
       ...(control ? { gameSource: event.gameSource, manualOverrideBy: event.manualOverrideBy } : {}),
@@ -61,6 +62,7 @@ export async function readState(tx: Prisma.TransactionClient, control: boolean) 
 }
 
 function describeAction(action: string, before: Prisma.JsonObject, after: Prisma.JsonObject, metadata: Prisma.JsonObject): string {
+  if (action === "party:configured") return "updated party overlay settings";
   const ownerActions: Record<string, string> = { "owner:progress": "reset event progress", "owner:participants": "cleared test participants", "owner:prepare": "prepared a clean event", "owner:preview": "previewed the finale for connected clients" };
   if (ownerActions[action]) return ownerActions[action];
   const verbs: Record<string, string> = { "quest:activated": "activated", "quest:completed": "completed", "quest:failed": "failed", "quest:skipped": "skipped", "quest:revealed": "revealed", "quest:available": "made available" };

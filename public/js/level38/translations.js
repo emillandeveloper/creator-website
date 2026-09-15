@@ -5,6 +5,24 @@
 })(typeof window === "undefined" ? globalThis : window, function () {
   "use strict";
   const es = {
+    "Appear on stream": "Aparecer en el stream",
+    "While this page is open, your nickname and character may appear in Leo's stream.": "Mientras esta página esté abierta, tu nombre y personaje pueden aparecer en el stream de Leo.",
+    "Party Overlay": "Grupo en el stream",
+    "Enable party overlay": "Mostrar el grupo en el stream",
+    "Nickname display": "Mostrar nombres",
+    "Names off": "No mostrar nombres",
+    "Names on entry": "Nombres al entrar",
+    "Names always": "Nombres siempre",
+    "Visible avatars (1–50)": "Personajes visibles (1–50)",
+    "Save party settings": "Guardar ajustes del grupo",
+    "Open party overlay": "Abrir el grupo del stream",
+    "Owner preview (separate from the live party)": "Vista previa del propietario (separada del grupo real)",
+    "{online} online · {rendered} visible · {overflow} overflow": "{online} en línea · {rendered} visibles · {overflow} adicionales",
+    "Choose a valid party configuration (1–50 avatars).": "Elige una configuración válida del grupo (1–50 personajes).",
+    "Choose whether to appear on stream.": "Elige si quieres aparecer en el stream.",
+    "Choose a preview crowd of 1, 5, 15 or 30.": "Elige una vista previa de 1, 5, 15 o 30 personajes.",
+    "updated party overlay settings": "actualizó los ajustes del grupo del stream",
+
     "Language": "Idioma", "Spanish": "Español", "English": "Inglés",
     "Site": "Sitio", "Skip to the adventure": "Ir a la aventura", "← Creator hub": "← Web de Leo",
     "LEVEL 38 — Join Leo's party": "LEVEL 38 — Únete al grupo de Leo",

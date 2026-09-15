@@ -1,0 +1,15 @@
+@font-face { font-family: Silkscreen; src: url('/fonts/level38/Silkscreen-Regular.ttf') format('truetype'); font-display: swap; }
+html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; background: transparent !important; }
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+#party-stage { position: fixed; inset: 0; overflow: hidden; pointer-events: none; }
+.party-avatar { position: absolute; left: 0; top: 0; width: 32px; height: 48px; will-change: transform; }
+.party-art, .party-art .l38-sprite { position: absolute; left: 0; top: 0; width: 32px; height: 48px; }
+.party-art img { display: block; width: 32px; height: 48px; max-width: none; image-rendering: pixelated; }
+.l38-sprite-fallback { color: #e1c178; font: 24px Silkscreen, monospace; }
+.party-name { position: absolute; bottom: 54px; left: 50%; transform: translateX(-50%); max-width: 110px; padding: 3px 5px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; color: #fff6da; background: #101927df; border: 1px solid #839bb0; font: 12px/1.25 Arial, sans-serif; opacity: 1; transition: opacity .3s linear; }
+.party-name.is-faded { opacity: 0; }
+#party-overflow { position: fixed; right: 12px; bottom: 8px; color: #ffe3a1; background: #101927df; padding: 4px 6px; font: 10px Silkscreen, monospace; }
+#party-preview-controls { position: fixed; top: 12px; left: 12px; max-width: calc(100% - 24px); display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding: 12px; border: 2px solid #8ba0b1; color: #ffe3a1; background: #101927; font: 12px Arial, sans-serif; }
+#party-preview-controls button, #party-preview-controls select { min-height: 36px; font: inherit; }
+@media (prefers-reduced-motion: reduce) { .party-name { transition: none; } }

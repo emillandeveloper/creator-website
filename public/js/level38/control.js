@@ -35,6 +35,7 @@
   function lock(value) { busy = value; byId("operator-controls").disabled = value; }
   function render(next, force = false) {
     window.Level38Twitch?.render(next, mutate);
+    window.Level38PartyControl?.render(next, mutate);
     if (!force && state && next.event.revision <= state.event.revision) return;
     const controlsChanged = force || !state || next.event.controlRevision !== state.event.controlRevision;
     state = next;

@@ -312,3 +312,6 @@ body.l38-finale-open { overflow: hidden; }
   .level38 .l38-level-up-copy > p { margin: 5px 0; }
   .level38 #celebration-dismiss { margin-top: 10px; }
 }
+
+.l38-stream-toggle { display: flex; align-items: center; gap: 10px; margin-top: 16px; font-size: 14px; }
+.l38-stream-toggle input[type="checkbox"] { flex: 0 0 22px; width: 22px; min-height: 22px; height: 22px; margin: 0; accent-color: #e1c178; }

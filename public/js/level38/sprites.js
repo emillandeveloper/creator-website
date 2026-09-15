@@ -24,8 +24,8 @@
   }
   function render(root, job, options = {}) {
     if (!root) return;
-    const signature = JSON.stringify([job, options.action || "idle"]);
-    if (renders.get(root)?.signature === signature) return;
+    const signature = JSON.stringify([job, options.action || "idle", !!options.externalClock]);
+    if (renders.get(root)?.signature === signature) return renders.get(root).instance;
     dispose(root);
     root.replaceChildren();
     const state = { signature, timer: null, failed: false };
@@ -47,16 +47,24 @@
     const sprite = job?.sprite;
     const action = root.ownerDocument.defaultView?.matchMedia?.("(prefers-reduced-motion: reduce)").matches ? "idle" : options.action || "idle";
     const start = Date.now();
-    function draw() {
+    function paint(nextAction, elapsed, mirrored = false) {
       if (state.failed || renders.get(root) !== state) return;
-      const selected = frameAt(sprite, action, Date.now() - start);
+      const selected = frameAt(sprite, nextAction, elapsed);
       const path = sprite?.animations[selected.action]?.frames[selected.index]?.path;
       const src = safePath(path) ? path : placeholder;
       root.dataset.spriteFallback = String(src === placeholder);
       if (img.getAttribute("src") !== src) img.src = src;
+      frame.style.transform = mirrored && sprite?.mirrorPolicy?.cosmeticFlip ? "scaleX(-1)" : "none";
+      return selected;
+    }
+    function draw() {
+      const selected = paint(action, Date.now() - start);
+      if (!selected) return;
       if (sprite && selected.action !== "idle") state.timer = setTimeout(draw, sprite.animations[selected.action].frameDurationMs);
     }
-    draw();
+    state.instance = { paint, dispose: () => dispose(root) };
+    if (options.externalClock) paint("idle", 0); else draw();
+    return state.instance;
   }
   function dispose(root) { clearTimeout(renders.get(root)?.timer); renders.delete(root); }
   const api = { resolve, frameAt, render, dispose, safePath, placeholder };

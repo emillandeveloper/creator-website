@@ -16,6 +16,7 @@
   <script defer src="/js/level38/twitch-control.js"></script>
   <script defer src="/js/level38/fireworks.js"></script>
   <script defer src="/js/level38/experience.js"></script>
+  <script defer src="/js/level38/party-control.js"></script>
   <script defer src="/js/level38/control.js"></script>
 </head>
 <body class="level38 l38-control" data-authenticated="<%= operator ? 'true' : 'false' %>">
@@ -80,6 +81,7 @@
     </section>
       </div>
     </div>
+    <%- include("party-controls") %>
     <section class="l38-panel" id="audit-panel">      <h2 data-i18n="Recent activity"><%= t("Recent activity") %></h2>
       <ol id="audit-list"><li data-i18n="Loading history…"><%= t('Loading history…') %></li></ol>
     </section>

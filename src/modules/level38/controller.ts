@@ -6,6 +6,7 @@ import { Level38Error } from "./errors";
 import { Level38Service } from "./service";
 import { publicClass } from "./classes";
 import { joinParticipant } from "./participants";
+import { PartyRuntime } from "./party-runtime";
 import { TwitchIntegration } from "./twitch/integration";
 import { bodyObject, identifier, nickname, pollAction, pollInput, questAction, revision, textInput } from "./validation";
 
@@ -15,6 +16,7 @@ export class Level38Controller {
     private readonly auth: Level38Auth,
     private readonly service: Level38Service,
     private readonly twitch?: TwitchIntegration,
+    private readonly party?: PartyRuntime,
   ) {}
 
   publicPage = async (_req: Request, res: Response): Promise<void> => {
@@ -30,16 +32,43 @@ export class Level38Controller {
     res.json(await this.service.state());
   };
 
+  partyOverlay = async (req: Request, res: Response): Promise<void> => {
+    let preview = 0;
+    if (req.query.preview !== undefined) {
+      await this.auth.requireOwner(req);
+      if (typeof req.query.preview !== "string" || !["1", "5", "15", "30"].includes(req.query.preview)) throw new Level38Error(400, "Choose a preview crowd of 1, 5, 15 or 30.");
+      preview = Number(req.query.preview);
+    }
+    res.render("level38/party-overlay", { preview });
+  };
+
+  streamVisibility = async (req: Request, res: Response): Promise<void> => {
+    const participant = await this.auth.viewer(req);
+    if (!participant) throw new Level38Error(401, "Your viewer session expired. Reload to join again.");
+    const visible = bodyObject(req.body).streamVisible;
+    if (typeof visible !== "boolean") throw new Level38Error(400, "Choose whether to appear on stream.");
+    const changed = await this.db.participant.updateMany({ where: { id: participant.id, expiresAt: { gt: new Date() } }, data: { streamVisible: visible } });
+    if (!changed.count) throw new Level38Error(401, "Your viewer session expired. Reload to join again.");
+    await this.party?.refreshParticipant(participant.id);
+    res.json({ streamVisible: visible });
+  };
+
+  configureParty = async (req: Request, res: Response): Promise<void> => {
+    const operator = await this.auth.requireOperator(req), body = bodyObject(req.body);
+    res.json(await this.service.configureParty(operator.id, { enabled: body.enabled as boolean, nameMode: body.nameMode as string, maxVisible: body.maxVisible as number }, revision(body.controlRevision)));
+  };
+
   controlState = async (req: Request, res: Response): Promise<void> => {
     const operator = await this.auth.requireOperator(req);
-    res.json({ ...await this.service.state(true), operator: { name: operator.name, role: operator.role }, twitch: this.twitch ? await this.twitch.status() : null });
+    res.json({ ...await this.service.state(true), partyCounts: this.party?.counts() ?? { online: 0, rendered: 0, overflow: 0 }, operator: { name: operator.name, role: operator.role }, twitch: this.twitch ? await this.twitch.status() : null });
   };
 
   session = async (req: Request, res: Response): Promise<void> => {
     let participant = await this.auth.viewer(req) ?? await this.auth.createViewer(res);
     let classAssigned = false;
     if ((participant.nickname && !participant.classId) || (participant.classId && !participant.variantId)) ({ participant, classAssigned } = await joinParticipant(this.db, participant.id));
-    res.json({ nickname: participant.nickname, role: "VIEWER", class: publicClass(participant.classId, participant.variantId), classAssigned,
+    await this.party?.refreshParticipant(participant.id);
+    res.json({ nickname: participant.nickname, streamVisible: participant.streamVisible, role: "VIEWER", class: publicClass(participant.classId, participant.variantId), classAssigned,
       votes: await this.service.viewerVotes(participant.id) });
   };
 
@@ -48,7 +77,8 @@ export class Level38Controller {
     const participant = await this.auth.viewer(req);
     if (!participant) throw new Level38Error(401, "Your viewer session expired. Reload the page to join again.");
     const joined = await joinParticipant(this.db, participant.id, name);
-    res.json({ nickname: joined.participant.nickname, role: "VIEWER", class: publicClass(joined.participant.classId, joined.participant.variantId), classAssigned: joined.classAssigned });
+    await this.party?.refreshParticipant(participant.id);
+    res.json({ nickname: joined.participant.nickname, streamVisible: joined.participant.streamVisible, role: "VIEWER", class: publicClass(joined.participant.classId, joined.participant.variantId), classAssigned: joined.classAssigned });
   };
 
   login = async (req: Request, res: Response): Promise<void> => {
@@ -97,7 +127,9 @@ export class Level38Controller {
   vote = async (req: Request, res: Response): Promise<void> => {
     const participant = await this.auth.viewer(req);
     if (!participant) throw new Level38Error(401, "Your viewer session expired. Reload to join again.");
-    res.json(await this.service.vote(participant.id, identifier(req.params.id), identifier(bodyObject(req.body).optionId)));
+    const state = await this.service.vote(participant.id, identifier(req.params.id), identifier(bodyObject(req.body).optionId));
+    this.party?.vote(participant.id);
+    res.json(state);
   };
 
   undo = async (req: Request, res: Response): Promise<void> => {

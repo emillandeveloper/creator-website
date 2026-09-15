@@ -51,7 +51,7 @@ test("party classes are assigned once, survive concurrent joins/name changes and
   for (let i = 0; i < 3; i++) {
     const session = await f.call("/api/session", undefined, cookie);
     assert.equal(session.data.nickname, "Garnet"); assert.deepEqual(session.data.class, job); assert.equal(session.data.classAssigned, false);
-    assert.deepEqual(Object.keys(session.data).sort(), ["class", "classAssigned", "nickname", "role", "votes"]);
+    assert.deepEqual(Object.keys(session.data).sort(), ["class", "classAssigned", "nickname", "role", "streamVisible", "votes"]);
   }
   assert.equal((await f.call("/api/control/state", undefined, cookie)).status, 401);
   const publicState = (await f.call("/api/state")).data;

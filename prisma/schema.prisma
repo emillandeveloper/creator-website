@@ -53,6 +53,9 @@ model Event {
   currentGameId   String?
   gameSource      GameSource @default(AUTO_TWITCH)
   manualOverrideBy String?
+  partyEnabled    Boolean @default(true)
+  partyNameMode   String  @default("ENTRY")
+  partyMaxVisible Int     @default(30)
   currentGame     Game?      @relation("CurrentGame", fields: [currentGameId], references: [id], onDelete: Restrict)
   createdAt       DateTime   @default(now())
   updatedAt       DateTime   @updatedAt
@@ -114,6 +117,7 @@ model Participant {
   nickname  String?
   classId   String?
   variantId String?
+  streamVisible Boolean @default(true)
   createdAt DateTime @default(now())
   expiresAt DateTime
   votes     Vote[]

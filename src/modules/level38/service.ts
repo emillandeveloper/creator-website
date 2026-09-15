@@ -62,6 +62,18 @@ export class Level38Service {
     return this.mutate(operatorId, expectedRevision, (tx, eventId) => applyOwnerTool(tx, eventId, action, confirmation), true);
   }
 
+  configureParty(operatorId: string, input: { enabled: boolean; nameMode: string; maxVisible: number }, expectedRevision: number) {
+    if (typeof input.enabled !== "boolean" || !["OFF", "ENTRY", "ALWAYS"].includes(input.nameMode) || !Number.isInteger(input.maxVisible) || input.maxVisible < 1 || input.maxVisible > 50) {
+      throw new Level38Error(400, "Choose a valid party configuration (1–50 avatars).");
+    }
+    return this.mutate(operatorId, expectedRevision, async (tx, eventId) => {
+      const event = await tx.event.findUniqueOrThrow({ where: { id: eventId } });
+      await tx.event.update({ where: { id: eventId }, data: { partyEnabled: input.enabled, partyNameMode: input.nameMode, partyMaxVisible: input.maxVisible } });
+      return { action: "party:configured", entityId: eventId,
+        before: { enabled: event.partyEnabled, nameMode: event.partyNameMode, maxVisible: event.partyMaxVisible }, after: { ...input } };
+    });
+  }
+
   changeQuest(operatorId: string, questId: string, action: QuestAction, expectedRevision: number): Promise<Level38State> {
     return this.mutate(operatorId, expectedRevision, async (tx, eventId) => {
       const quest = await tx.quest.findFirst({ where: { id: questId, eventId }, include: { game: true } });
