@@ -1,36 +1,24 @@
 import { randomInt } from "crypto";
+import { readFileSync } from "fs";
+import { resolve } from "path";
 
-// Stable IDs are persisted; names and asset metadata are resolved here, never on participants.
-// Retain retired entries with enabled: false so existing assignments still display correctly.
-interface Sprite { path: string; frameWidth: number; frameHeight: number; frames: number; fps: number; demo: boolean }
-interface ClassDefinition { id: string; displayName: string; displayNameEs: string; enabled?: boolean; sprite?: Sprite }
-// Optional enabled/sprite fields override the defaults on any individual entry.
-const roster: ClassDefinition[] = [
-  { id: "knight", displayName: "Knight", displayNameEs: "Caballero" }, { id: "dark-knight", displayName: "Dark Knight", displayNameEs: "Caballero oscuro" },
-  { id: "dragoon", displayName: "Dragoon", displayNameEs: "Dragoon" }, { id: "monk", displayName: "Monk", displayNameEs: "Monje" },
-  { id: "thief", displayName: "Thief", displayNameEs: "Ladrón" }, { id: "ninja", displayName: "Ninja", displayNameEs: "Ninja" },
-  { id: "samurai", displayName: "Samurai", displayNameEs: "Samurái" }, { id: "ranger", displayName: "Ranger", displayNameEs: "Explorador" },
-  { id: "black-mage", displayName: "Black Mage", displayNameEs: "Mago negro" }, { id: "white-mage", displayName: "White Mage", displayNameEs: "Mago blanco" },
-  { id: "red-mage", displayName: "Red Mage", displayNameEs: "Mago rojo" }, { id: "blue-mage", displayName: "Blue Mage", displayNameEs: "Mago azul" },
-  { id: "summoner", displayName: "Summoner", displayNameEs: "Invocador" }, { id: "bard", displayName: "Bard", displayNameEs: "Bardo" },
-  { id: "dancer", displayName: "Dancer", displayNameEs: "Bailarín" }, { id: "beastmaster", displayName: "Beastmaster", displayNameEs: "Domador" },
-];
-
-export const CLASS_CATALOG = roster.map(({ id, displayName, displayNameEs, enabled = true, sprite }) => ({
-  id, displayName, displayNames: { en: displayName, es: displayNameEs }, enabled, spriteKey: id,
-  sprite: sprite ?? { path: `/img/level38/classes/${id}/idle.svg`, frameWidth: 32, frameHeight: 32, frames: 4, fps: 4, demo: true },
-}));
-
-export function randomClassId(): string {
-  const pool = CLASS_CATALOG.filter((entry) => entry.enabled);
+interface Variant { variantId: string }
+interface ClassDefinition { classId: string; displayNames: { en: string; es: string }; enabled: boolean; variants: Variant[] }
+export const SPRITE_MANIFEST = JSON.parse(readFileSync(resolve(__dirname, "../../../public/level38/classes/manifest.json"), "utf8")) as {
+  version: string; classes: ClassDefinition[];
+};
+// Browser clients load this same resolver. Never construct paths from participant IDs.
+const sprites = require(resolve(__dirname, "../../../public/js/level38/sprites.js"));
+export const CLASS_CATALOG = SPRITE_MANIFEST.classes.map(entry => ({ ...entry, id: entry.classId, displayName: entry.displayNames.en }));
+export function randomClassId(pick: (maximum: number) => number = randomInt): string {
+  const pool = CLASS_CATALOG.filter(entry => entry.enabled);
   if (!pool.length) throw new Error("The cosmetic class roster is empty.");
-  return pool[randomInt(pool.length)].id;
+  return pool[pick(pool.length)].id;
 }
-
-export function publicClass(classId: string | null) {
-  if (!classId) return null;
-  const entry = CLASS_CATALOG.find((item) => item.id === classId);
-  // An accidentally removed catalog entry must never reroll a persistent assignment.
-  return entry ? { id: entry.id, displayName: entry.displayName, spriteKey: entry.spriteKey, sprite: entry.sprite }
-    : { id: "adventurer", displayName: "Adventurer", spriteKey: "placeholder", sprite: null };
+export function randomVariantId(classId: string, pick: (maximum: number) => number = randomInt): string | null {
+  const variants = CLASS_CATALOG.find(entry => entry.id === classId)?.variants;
+  return variants?.length ? variants[pick(variants.length)].variantId : null;
+}
+export function publicClass(classId: string | null, variantId: string | null = null) {
+  return classId ? sprites.resolve(SPRITE_MANIFEST, classId, variantId) : null;
 }

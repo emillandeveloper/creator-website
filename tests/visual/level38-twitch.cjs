@@ -12,8 +12,13 @@ test("Twitch owner/moderator controls work in Chrome at desktop and phone sizes"
   const f = await setup(t); await f.map(f.games[1], "100"); await f.twitch.run("ensure");
   const browser = await chromium.launch({ channel: "chrome", headless: true }); t.after(() => browser.close());
   const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
+  // This legacy suite asserts English labels; production control defaults to Spanish.
+  await context.addInitScript(() => localStorage.setItem("level38:language", "en"));
   const cookie = f.owner.cookie.split("="); await context.addCookies([{ name: cookie[0], value: cookie[1], url: f.url }]);
   const page = await context.newPage(); const errors = [];
+  const openConfiguration = async () => {
+    if (!await page.locator(".l38-config-panel").evaluate(el => el.open)) await page.locator(".l38-config-panel > summary").click();
+  };
   page.on("pageerror", (e) => errors.push(e.message));
   // Test HTTP origin differs from configured public HTTPS origin; only adapt the CSRF Origin header.
   await page.route("**/level38/api/**", async (route) => {
@@ -23,6 +28,7 @@ test("Twitch owner/moderator controls work in Chrome at desktop and phone sizes"
   const out = path.resolve("dist/phase4-visual-qa"); fs.mkdirSync(out, { recursive: true });
   await page.goto(f.url + "/control");
   await page.waitForFunction(() => !document.getElementById("operator-controls").disabled && document.getElementById("twitch-connection").textContent === "Connected");
+  await openConfiguration();
   await page.locator("#twitch-heading").evaluate((el) => el.scrollIntoView({ block: "start" })); await page.screenshot({ path: path.join(out, "1440-twitch-auto.png") });
   await page.locator("#twitch-mapping summary").click();
   const form = page.locator("#twitch-mapping-forms form").first();
@@ -48,8 +54,10 @@ test("Twitch owner/moderator controls work in Chrome at desktop and phone sizes"
   const update = payload(); update.event.category_id = "200"; update.event.category_name = "Category from webhook";
   assert.equal((await f.webhook(signed(update))).status, 204);
   await page.reload(); await page.waitForFunction(() => !document.getElementById("operator-controls").disabled);
+  await openConfiguration();
   await page.locator("#twitch-heading").evaluate((el) => el.scrollIntoView({ block: "start" })); await page.screenshot({ path: path.join(out, "390-manual-override.png") });
   assert.equal((await f.service.state()).event.currentGameId, f.games[2].id);
+  await openConfiguration();
   await page.locator("#twitch-auto").focus(); await page.keyboard.press("Enter");
   await page.waitForFunction(() => document.getElementById("twitch-source").textContent === "Game source: Twitch Auto");
   assert.equal((await f.service.state()).event.currentGameId, f.games[0].id);

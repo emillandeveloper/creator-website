@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
-import { randomClassId } from "./classes";
+import { randomClassId, randomVariantId } from "./classes";
+import { assignMissingVariant } from "./variants";
 import { Level38Error } from "./errors";
 
 export async function joinParticipant(db: PrismaClient, id: string, name?: string) {
@@ -10,12 +11,17 @@ export async function joinParticipant(db: PrismaClient, id: string, name?: strin
       if (changed.count !== 1) throw new Level38Error(401, "Your viewer session expired. Reload to join again.");
     }
     // Compare-and-set also protects two concurrent lazy backfills from rerolling.
+    const classId = randomClassId();
     const assigned = await tx.participant.updateMany({
       where: { id, classId: null, nickname: { not: null }, expiresAt: { gt: new Date() } },
-      data: { classId: randomClassId() },
+      data: { classId, variantId: randomVariantId(classId) },
     });
-    const participant = await tx.participant.findFirst({ where: { id, expiresAt: { gt: new Date() } } });
+    let participant = await tx.participant.findFirst({ where: { id, expiresAt: { gt: new Date() } } });
     if (!participant) throw new Level38Error(401, "Your viewer session expired. Reload to join again.");
+    if (participant.classId && participant.variantId === null) {
+      await assignMissingVariant(tx, id, participant.classId);
+      participant = await tx.participant.findUniqueOrThrow({ where: { id } });
+    }
     return { participant, classAssigned: assigned.count === 1 };
   });
 }

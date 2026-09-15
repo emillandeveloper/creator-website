@@ -35,7 +35,8 @@ test("Chrome visual and interaction QA at desktop, tablet, phone and landscape s
   }
   const out = path.resolve(process.env.LEVEL38_VISUAL_OUTPUT || "dist/phase3-visual-qa"); fs.mkdirSync(out, { recursive: true });
   const browser = await chromium.launch({ channel: "chrome", headless: true }); t.after(() => browser.close());
-  const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
+  const context = await browser.newContext({ locale: "en-US", viewport: { width: 1440, height: 1000 } });
+  await context.addInitScript(() => localStorage.setItem("level38:language", "en"));
   const page = await context.newPage(); const errors = []; const csp = [];
   page.on("pageerror", (error) => errors.push(error.message));
   page.on("console", (message) => { if (/Content Security Policy|Refused to/.test(message.text())) csp.push(message.text()); });
@@ -82,7 +83,7 @@ test("Chrome visual and interaction QA at desktop, tablet, phone and landscape s
   await page.locator("#party").scrollIntoViewIfNeeded(); await page.screenshot({ path: path.join(out, "390-class-assigned.png") });
   await checkOverflow("390 class reveal");
   await page.locator("#welcome-sprite img").waitFor();
-  assert.equal(await page.locator("#welcome-sprite img").getAttribute("src"), await page.locator("#viewer-sprite img").getAttribute("src"));
+  await page.waitForFunction(() => document.querySelector("#welcome-sprite img").src === document.querySelector("#viewer-sprite img").src);
   await page.locator("#join-open").click(); await page.locator("#nickname").fill("Garnet Moon"); await page.locator("#nickname").press("Enter");
   await page.waitForFunction(() => document.getElementById("viewer-name").textContent === "Garnet Moon");
   await page.locator("#join-open").click();
@@ -135,13 +136,14 @@ test("Chrome visual and interaction QA at desktop, tablet, phone and landscape s
   await page.setViewportSize({ width: 844, height: 390 }); await page.evaluate(() => window.scrollTo(0,0));
   assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth));
   await page.screenshot({ path: path.join(out, "844-landscape.png") });
-  await page.route("**/img/level38/classes/**", (route) => route.abort());
+  await page.route("**/level38/classes/**", (route) => route.abort());
   await page.reload(); await page.waitForFunction(() => document.getElementById("viewer-name").textContent === "Garnet Moon");
-  await page.waitForFunction(() => document.querySelector("#viewer-sprite .l38-sprite").hidden);
-  assert.equal(await page.locator("#viewer-sprite .l38-sprite-fallback").isVisible(), true);
+  await page.waitForFunction(() => document.getElementById("viewer-sprite").dataset.spriteFallback === "true");
+  assert.equal(await page.locator("#viewer-sprite img").getAttribute("src"), "/img/level38/placeholder.svg");
   await page.locator("#party").screenshot({ path: path.join(out, "844-sprite-fallback.png") });
-  const admin = await browser.newContext({ viewport: { width: 1440, height: 1000 } });
+  const admin = await browser.newContext({ locale: "en-US", viewport: { width: 1440, height: 1000 } });
   const [cookieName, cookieValue] = mod.cookie.split("="); await admin.addCookies([{ name: cookieName, value: cookieValue, url: f.origin }]);
+  await admin.addInitScript(() => localStorage.setItem("level38:language", "en"));
   const panel = await admin.newPage(); await panel.goto(`${f.origin}/level38/control`); await panel.locator("#quest-board button").first().waitFor();
   await panel.waitForFunction(() => !document.getElementById("operator-controls").disabled);
   await panel.screenshot({ path: path.join(out, "1440-control.png") });
@@ -149,7 +151,7 @@ test("Chrome visual and interaction QA at desktop, tablet, phone and landscape s
   await panel.setViewportSize({ width: 390, height: 844 });
   assert.ok(await panel.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
   await panel.screenshot({ path: path.join(out, "390-control.png") });
-  const noScript = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 390, height: 844 } });
+  const noScript = await browser.newContext({ locale: "en-US", javaScriptEnabled: false, viewport: { width: 390, height: 844 } });
   const staticPage = await noScript.newPage(); await staticPage.goto(`${f.origin}/level38`);
   await staticPage.locator("#voting").scrollIntoViewIfNeeded();
   assert.ok(await staticPage.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
@@ -158,7 +160,7 @@ test("Chrome visual and interaction QA at desktop, tablet, phone and landscape s
   // Empty public states still use the same windows and retain useful guidance.
   await f.db.poll.updateMany({ data: { status: "DRAFT" } });
   await f.db.event.updateMany({ data: { currentGameId: null } });
-  await page.unroute("**/img/level38/classes/**");
+  await page.unroute("**/level38/classes/**");
   await page.reload(); await page.waitForFunction(() => document.getElementById("current-game").textContent === "Between adventures");
   for (const [width,height] of [[1440,1000], [1024,1000], [768,1000], [390,844], [844,390]]) {
     await page.setViewportSize({ width, height });

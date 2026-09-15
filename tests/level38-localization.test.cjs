@@ -63,12 +63,15 @@ test('browser selector changes static text and persists preference without netwo
   window.fetch = () => { throw new Error('Language switching must not request state/session'); };
   for (const file of ['translations','locale']) window.eval(fs.readFileSync(`public/js/level38/${file}.js`, 'utf8'));
   assert.equal(window.document.documentElement.lang, 'es');
+  assert.equal(window.Level38I18n.className(publicClass('retired', 'old')), 'Aventurero');
+  assert.equal(window.Level38I18n.className(publicClass('black-mage', 'missing')), 'Mago negro');
   window.document.querySelector('[data-language="en"]').click();
   assert.equal(window.document.querySelector('h2').textContent, 'The quest journal');
   assert.equal(window.localStorage.getItem('level38:language'), 'en');
   assert.match(window.document.cookie, /viewer=unchanged/);
   window.eval(fs.readFileSync('public/js/level38/locale.js','utf8'));
   assert.equal(window.Level38I18n.language, 'en');
+  assert.equal(window.Level38I18n.className(publicClass('retired', 'old')), 'Adventurer');
 });
 
 test('class catalog centralizes both display names without changing stable IDs or public class contract', () => {

@@ -5,6 +5,7 @@ import { Level38Controller } from "./controller";
 import { Level38Error } from "./errors";
 import { TwitchIntegration } from "./twitch/integration";
 import { localization } from "./localization";
+import { SPRITE_MANIFEST } from "./classes";
 
 type AsyncHandler = (req: Request, res: Response) => Promise<void>;
 const wrap = (handler: AsyncHandler): express.RequestHandler => (req, res, next) => { handler(req, res).catch(next); };
@@ -36,6 +37,7 @@ export function createLevel38Routes(controller: Level38Controller, config: Level
   router.get("/", wrap(controller.publicPage));
   router.get("/control", wrap(controller.controlPage));
   router.get("/api/state", wrap(controller.publicState));
+  router.get("/api/classes", (_req, res) => { res.json(SPRITE_MANIFEST); });
   router.get("/api/session", limited(300, 60 * 60 * 1000), wrap(controller.session));
   router.post("/api/join", limited(20, 60 * 1000), wrap(controller.join));
   router.post("/api/control/login", limited(10, 15 * 60 * 1000), wrap(controller.login));

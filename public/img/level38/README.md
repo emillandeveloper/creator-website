@@ -1,16 +1,13 @@
-# LEVEL 38 original demo artwork
+# LEVEL 38 artwork
 
-`world.svg` and all 16 `classes/*/idle.svg` sheets are original geometric pixel artwork created for this repository. They are demo assets, not extracted or downloaded commercial game sprites. The generator is `scripts/level38-demo-assets.cjs`; it reads the compiled central class catalog. Run `npm run build` then `node scripts/level38-demo-assets.cjs` to regenerate the demos. Regeneration overwrites those demo paths, so do not run it over final supplied artwork.
+The public character UI now uses the approved Phase 3.9 assets at `public/level38/classes/`. The single `manifest.json` supplies 24 class IDs, 104 persistent class/variant pairs, ES/EN names, normalized dimensions, anchors and animation sequences. `public/js/level38/sprites.js` is the shared resolver, frame clock and DOM renderer; the server uses the same resolver. The manifest is also available at `/level38/api/classes`.
 
-The shipped sheets contain four horizontal 32 × 32 frames. Each class directory matches a stable class ID. The UI displays them at an integer scale with `image-rendering: pixelated` and animates one horizontal strip using CSS `steps()` at four frames per second. Only the viewer's own sprite is animated; reduced-motion users see the first frame.
+Runtime PNGs are 16 × 24, rendered at 2× using nearest-neighbor sampling. Audited shorter characters retain their 23-pixel visible height with transparent top padding. Idle is frame zero; walk uses 200 ms/frame; celebration uses 250 ms/frame for three cycles and returns to idle. The website only plays celebration on first class reveal. Reduced motion uses idle.
 
-To replace a class sprite:
+`placeholder.svg` is original geometric artwork for missing or failed variants. The older 16 `classes/*/idle.svg` demo strips remain original assets but are no longer used by the public character renderer. `world.svg` remains the original background illustration. The legacy generator `scripts/level38-demo-assets.cjs` writes demo paths only; it does not generate or replace the integrated PNGs.
 
-1. Put the permitted/licensed sheet in that class directory, preferably under a new versioned filename for cache refreshes. PNG, WebP, and SVG horizontal strips work; no GIF is required. Do not add copyrighted game sprites without appropriate permission.
-2. Add or update `sprite` on that roster entry in `src/modules/level38/classes.ts`: `path`, `frameWidth`, `frameHeight`, `frames`, `fps`, and `demo: false`. Each entry can override the shared defaults independently. Sheet width must equal `frameWidth × frames` and height must equal `frameHeight`.
-3. Keep the class `id` stable. Participant rows contain only this identifier, not an asset path; no database rewrite or class reroll is needed.
-4. Verify the image loads, its animation has no frame bleed, and its first frame looks good under reduced motion. Missing/failed sheets show the built-in geometric fallback and keep the class name visible.
+To update audited artwork, use `scripts/level38-import-sprites.py` with an approved local audit manifest. It copies only normalized idle/walk/victory PNGs after verifying pixel hashes, dimensions and binary transparency. It generates the public manifest and the internal `docs/level38-sprite-provenance.json`. No raw GIF, source HTML or audit screenshot is shipped. Internal provenance records source URLs, hashes, padding and permission status **UNKNOWN**; it is not a claim of permission.
 
-Class names, enabled selection pool, sprite keys, and metadata live in the catalog. All enabled entries have equal probability through `crypto.randomInt`. To retire an assignment from new rolls, retain its metadata and set `enabled: false`; never silently change existing participant IDs. Keep at least one class enabled. Unknown historical IDs fall back to “Adventurer” without rerolling.
+Keep class/variant IDs stable when replacing pixels. Update the asset version and validate all references and the public renderer; no participant database rewrite is needed. Retired classes can keep metadata with `enabled: false`. Unknown IDs keep their stored identity and use the owned fallback. Variants must never be derived from arbitrary URL or filesystem fragments.
 
-The heading font is the separately licensed **Silkscreen**, copyright The Silkscreen Project Authors, redistributed from the [Google Fonts repository](https://github.com/google/fonts/tree/main/ofl/silkscreen). The complete SIL Open Font License is included at `public/fonts/level38/OFL.txt`. The font is served locally; there is no third-party font request at runtime.
+Silkscreen remains separately licensed under the bundled `public/fonts/level38/OFL.txt`; all artwork and fonts are served locally.

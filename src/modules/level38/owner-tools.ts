@@ -19,7 +19,7 @@ export async function applyOwnerTool(tx: Prisma.TransactionClient, eventId: stri
   let participants = 0;
   if (action === "participants" || action === "prepare") {
     // Expired anonymous tombstones retain vote FKs and totals, but cannot authenticate.
-    const cleared = await tx.participant.updateMany({ data: { nickname: null, classId: null, expiresAt: new Date(0) } });
+    const cleared = await tx.participant.updateMany({ data: { nickname: null, classId: null, variantId: null, expiresAt: new Date(0) } });
     participants = cleared.count;
   }
   if (action === "progress" || action === "prepare") {

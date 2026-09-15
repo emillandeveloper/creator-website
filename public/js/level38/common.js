@@ -125,20 +125,8 @@
     }
     filterJournal();
   }
-  function renderSprite(root, job) {
-    const signature = JSON.stringify(job);
-    if (root.dataset.sprite === signature) return;
-    root.dataset.sprite = signature; root.replaceChildren();
-    const fallback = element("span", job ? "✦" : "?", "l38-sprite-fallback"); root.append(fallback);
-    if (!job?.sprite) return;
-    const sprite = job.sprite;
-    const frame = element("span", undefined, "l38-sprite");
-    frame.style.setProperty("--frame-width", `${sprite.frameWidth}px`); frame.style.setProperty("--frame-height", `${sprite.frameHeight}px`);
-    frame.style.setProperty("--frames", sprite.frames); frame.style.setProperty("--duration", `${sprite.frames / sprite.fps}s`);
-    const img = element("img"); img.alt = ""; img.src = sprite.path;
-    img.addEventListener("load", () => { fallback.hidden = true; });
-    img.addEventListener("error", () => { frame.hidden = true; fallback.hidden = false; });
-    frame.append(img); root.append(frame);
+  function renderSprite(root, job, options) {
+    window.Level38Sprites.render(root, job, options);
   }
   let pollSignature = "";
   let latestPolls = [];

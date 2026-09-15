@@ -37,7 +37,7 @@
     if (viewer.classAssigned) {
       byId("viewer-status").textContent = t("Welcome to the party, {name}!", { name: viewer.nickname });
       byId("welcome-name").textContent = viewer.nickname; byId("welcome-class").textContent = window.Level38I18n?.className(viewer.class) || viewer.class?.displayName || t("Adventurer");
-      renderSprite(byId("welcome-sprite"), viewer.class);
+      renderSprite(byId("welcome-sprite"), viewer.class, { action: "celebration" });
       byId("party-welcome").hidden = false;
       clearTimeout(welcomeTimer); welcomeTimer = setTimeout(() => { byId("party-welcome").hidden = true; }, 7000);
     }

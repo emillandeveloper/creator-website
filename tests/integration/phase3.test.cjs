@@ -61,7 +61,7 @@ test("party classes are assigned once, survive concurrent joins/name changes and
   const record = await f.db.participant.findFirstOrThrow();
   assert.equal(record.classId, job.id);
   // A named Phase 2 identity is backfilled lazily, once, without replacing its row/token.
-  await f.db.participant.update({ where: { id: record.id }, data: { classId: null } });
+  await f.db.participant.update({ where: { id: record.id }, data: { classId: null, variantId: null } });
   const backfill = await Promise.all([f.call("/api/session", undefined, cookie), f.call("/api/session", undefined, cookie)]);
   assert.equal(backfill.filter((r) => r.data.classAssigned).length, 1);
   assert.deepEqual(backfill[0].data.class, backfill[1].data.class);

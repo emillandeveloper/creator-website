@@ -32,6 +32,7 @@ async function page(f, control, cookie = "") {
     return response;
   };
   window.io = (namespace, options) => { const socket = io(`${f.origin}${namespace}`, { ...options, transports: ["websocket"] }); sockets.push(socket); return socket; };
+  window.eval(fs.readFileSync("public/js/level38/sprites.js", "utf8"));
   window.eval(fs.readFileSync("public/js/level38/common.js", "utf8"));
   window.eval(fs.readFileSync(`public/js/level38/${control ? "control" : "public"}.js`, "utf8"));
   return { window, document: window.document, failures, close() { sockets.forEach((socket) => socket.disconnect()); window.close(); } };

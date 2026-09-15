@@ -22,6 +22,6 @@
     document.dispatchEvent(new CustomEvent("level38:language", { detail: lang }));
   }
   for (const button of document.querySelectorAll("[data-language]")) button.addEventListener("click", () => setLanguage(button.dataset.language));
-  window.Level38I18n = { t, apply, setLanguage, get language() { return lang; }, questText: (quest, field) => catalog.questText(quest, field, lang), className: job => classes[job?.id]?.[lang] || job?.displayName || t("Adventurer") };
+  window.Level38I18n = { t, apply, setLanguage, get language() { return lang; }, questText: (quest, field) => catalog.questText(quest, field, lang), className: job => classes[job?.id]?.[lang] || job?.displayNames?.[lang] || job?.displayName || t("Adventurer") };
   apply();
 })();

@@ -38,8 +38,8 @@ export class Level38Controller {
   session = async (req: Request, res: Response): Promise<void> => {
     let participant = await this.auth.viewer(req) ?? await this.auth.createViewer(res);
     let classAssigned = false;
-    if (participant.nickname && !participant.classId) ({ participant, classAssigned } = await joinParticipant(this.db, participant.id));
-    res.json({ nickname: participant.nickname, role: "VIEWER", class: publicClass(participant.classId), classAssigned,
+    if ((participant.nickname && !participant.classId) || (participant.classId && !participant.variantId)) ({ participant, classAssigned } = await joinParticipant(this.db, participant.id));
+    res.json({ nickname: participant.nickname, role: "VIEWER", class: publicClass(participant.classId, participant.variantId), classAssigned,
       votes: await this.service.viewerVotes(participant.id) });
   };
 
@@ -48,7 +48,7 @@ export class Level38Controller {
     const participant = await this.auth.viewer(req);
     if (!participant) throw new Level38Error(401, "Your viewer session expired. Reload the page to join again.");
     const joined = await joinParticipant(this.db, participant.id, name);
-    res.json({ nickname: joined.participant.nickname, role: "VIEWER", class: publicClass(joined.participant.classId), classAssigned: joined.classAssigned });
+    res.json({ nickname: joined.participant.nickname, role: "VIEWER", class: publicClass(joined.participant.classId, joined.participant.variantId), classAssigned: joined.classAssigned });
   };
 
   login = async (req: Request, res: Response): Promise<void> => {
