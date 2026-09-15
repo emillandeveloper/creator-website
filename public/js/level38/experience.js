@@ -1,7 +1,12 @@
 (function () {
   "use strict";
   const { byId } = window.Level38;
+  if (!byId("level-up")) return;
+  const t = (key, params = {}) => window.Level38I18n?.t(key, params) ?? key.replace(/\{(\w+)\}/g, (match, name) => params[name] === undefined ? match : String(params[name]));
+  let currentNotice = null, currentCelebration = null;
   const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)");
+  let genuineActive = false;
+  const previews = new Set();
   let ready = false;
   let baselineRevision = -1;
   let sequence = 0;
@@ -25,6 +30,7 @@
     if (Number.isFinite(state.serverTime)) serverOffset = state.serverTime - Date.now();
     if (!ready) { baselineRevision = state.event.revision; sequence = Math.max(seen, state.event.unlockSequence || 0); ready = true; }
     if (previous && state.event.revision <= previous.revision) return;
+    if (previous && (state.event.resetSequence || 0) > (previous.resetSequence || 0)) { dismiss(); baselineRevision = state.event.revision; }
     if (previous && state.event.completed > previous.completed && !reduced?.matches) {
       byId("progress-segments").classList.add("is-progressing");
       clearTimeout(progressTimer); progressTimer = setTimeout(() => byId("progress-segments").classList.remove("is-progressing"), 750);
@@ -33,7 +39,7 @@
   }
   function dismiss() {
     clearTimeout(startTimer); clearTimeout(finishTimer); stopFireworks();
-    byId("level-up").hidden = true;
+    byId("level-up").hidden = true; genuineActive = false;
   }
   function celebrate(event) {
     // The baseline comes only from a connected socket's initial state. Snapshots never replay effects.
@@ -43,11 +49,27 @@
     try { sessionStorage.setItem("level38:last-unlock", String(seen)); } catch {}
     // Hidden tabs recover state without bringing a stale fireworks show back to the foreground.
     if (document.hidden || !Number.isFinite(event.startsAt) || Date.now() + serverOffset - event.startsAt > 8000) return;
-    dismiss(); clearTimeout(noticeTimer); clearTimeout(toastTimer); byId("event-toast").hidden = true;
+    showCelebration(event, false);
+  }
+  function preview(event) {
+    if (!ready || genuineActive || !event || event.version !== 1 || typeof event.id !== "string" || previews.has(event.id) || document.hidden ||
+        !Number.isFinite(event.startsAt) || Math.abs(Date.now() + serverOffset - event.startsAt) > 8000) return;
+    previews.add(event.id); if (previews.size > 32) previews.delete(previews.values().next().value);
+    showCelebration(event, true);
+  }
+  function renderCelebration() {
+    if (!currentCelebration) return;
+    const {event, preview} = currentCelebration;
+    const label = byId("celebration-preview-label"); if (label) label.hidden = !preview;
+    byId("celebration-progress").textContent = preview ? t("Visual preview — event progress is unchanged.") : t("{completed} / {target} QUESTS COMPLETED", event);
+  }
+  function showCelebration(event, preview) {
+    dismiss(); genuineActive = !preview; clearTimeout(noticeTimer); clearTimeout(toastTimer); byId("event-toast").hidden = true;
     const delay = Math.max(0, Math.min(1000, event.startsAt - Date.now() - serverOffset));
     startTimer = setTimeout(() => {
       if (document.hidden) return;
-      byId("celebration-progress").textContent = `${event.completed} / ${event.target} QUESTS COMPLETED`;
+      currentCelebration = {event, preview};
+      renderCelebration();
       byId("level-up").hidden = false;
       if (!reduced?.matches) stopFireworks = fireworks(byId("fireworks"));
       finishTimer = setTimeout(dismiss, Math.min(8000, Math.max(5000, event.durationMs || 6500)));
@@ -60,16 +82,21 @@
     clearTimeout(noticeTimer);
     noticeTimer = setTimeout(() => {
       if (!byId("level-up").hidden) return;
-      byId("event-toast").textContent = messages[type]; byId("event-toast").hidden = false;
+      currentNotice = type; byId("event-toast").textContent = t(messages[type]); byId("event-toast").hidden = false;
       clearTimeout(toastTimer); toastTimer = setTimeout(() => { byId("event-toast").hidden = true; }, 2600);
     }, 180);
   }
-  function attach(socket) {
+  document.addEventListener("level38:language", () => {
+    if (currentNotice) byId("event-toast").textContent = t(messages[currentNotice]);
+    renderCelebration();
+  });
+  function attach(socket, { notices = true } = {}) {
     if (!socket) return;
     socket.on("connect", () => { ready = false; previous = null; });
     socket.on("disconnect", () => { ready = false; previous = null; });
     socket.on("level38:unlocked", celebrate);
-    for (const type of Object.keys(messages)) socket.on(type, (event) => notify(type, event));
+    socket.on("level38:celebration-preview", preview);
+    if (notices) for (const type of Object.keys(messages)) socket.on(type, (event) => notify(type, event));
   }
   function fireworks(canvas) {
     const ctx = canvas.getContext("2d");

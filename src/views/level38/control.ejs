@@ -1,96 +1,117 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<%= lang %>">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>LEVEL 38 — Operator control</title>
+  <title data-i18n="LEVEL 38 — Operator control"><%= t("LEVEL 38 — Operator control") %></title>
   <meta name="robots" content="noindex, nofollow">
   <link rel="stylesheet" href="/css/level38.css">
+  <link rel="stylesheet" href="/css/level38-control.css">
+  <link rel="stylesheet" href="/css/level38-locale.css">
+  <script defer src="/js/level38/translations.js"></script>
+  <script defer src="/js/level38/locale.js"></script>
   <script defer src="/level38/socket.io/socket.io.js"></script>
   <script defer src="/js/level38/common.js"></script>
   <script defer src="/js/level38/twitch-control.js"></script>
+  <script defer src="/js/level38/experience.js"></script>
   <script defer src="/js/level38/control.js"></script>
 </head>
 <body class="level38 l38-control" data-authenticated="<%= operator ? 'true' : 'false' %>">
+  <div id="l38-class-names" hidden data-names="<%= JSON.stringify(classNames) %>"></div>
   <main class="l38-shell">
-    <nav class="l38-nav" aria-label="Site"><a href="/">← Creator hub</a><a href="/level38">Public event page</a></nav>
-    <header><p class="l38-eyebrow">Live event desk</p><h1>LEVEL 38 control</h1><p id="connection" role="status">Connecting to live updates…</p></header>
+    <nav class="l38-nav" data-i18n-aria-label="Site" aria-label="<%= t("Site") %>"><a href="/" data-i18n="← Creator hub"><%= t("← Creator hub") %></a><a href="/level38" data-i18n="Public event page"><%= t("Public event page") %></a><%- include("language") %></nav>
+    <header><p class="l38-eyebrow" data-i18n="Live event desk"><%= t("Live event desk") %></p><h1 data-i18n="LEVEL 38 control"><%= t("LEVEL 38 control") %></h1><p id="connection" role="status" data-i18n="Connecting to live updates…"><%= t("Connecting to live updates…") %></p></header>
     <p id="message" role="status" aria-live="polite"></p>
     <% if (!operator) { %>
     <section class="l38-panel">
-      <h2>Operator sign in</h2>
-      <p>Use your personal operator access key.</p>
+      <h2 data-i18n="Operator sign in"><%= t("Operator sign in") %></h2>
+      <p data-i18n="Use your personal operator access key."><%= t("Use your personal operator access key.") %></p>
       <form id="login-form">
-        <label for="access-key">Access key</label>
+        <label for="access-key" data-i18n="Access key"><%= t("Access key") %></label>
         <input id="access-key" name="key" type="password" autocomplete="current-password" required maxlength="43">
-        <button type="submit">Sign in</button>
+        <button type="submit" data-i18n="Sign in"><%= t("Sign in") %></button>
       </form>
     </section>
     <% } else { %>
+    <nav class="l38-command-nav" aria-label="<%= t('Live controls') %>" data-i18n-aria-label="Live controls">
+      <a href="#quest-board" data-i18n="Quest management"><%= t('Quest management') %></a>
+      <a href="#poll-workspace" data-i18n="Poll management"><%= t('Poll management') %></a>
+      <a href="#audit-panel" data-i18n="Recent activity"><%= t('Recent activity') %></a>
+    </nav>
     <fieldset id="operator-controls" class="l38-controls">
+    <div class="l38-live-desk">
     <section class="l38-panel">
-      <p>Signed in as <strong><%= operator.name %></strong> · <%= operator.role %></p>
-      <button id="logout" type="button">Sign out</button>
-      <h2 id="progress-text">Loading progress…</h2>
-      <progress id="progress" value="0" max="38" aria-labelledby="progress-text"></progress>
-      <p>Current game: <strong id="current-game">Loading…</strong></p>
-      <p id="secret-count"></p>
+      <p><span data-i18n="Signed in as"><%= t("Signed in as") %></span> <strong><%= operator.name %></strong> · <span class="l38-tag" data-i18n="<%= operator.role %>"><%= t(operator.role) %></span></p>
+      <button class="l38-secondary" id="logout" type="button" data-i18n="Sign out"><%= t("Sign out") %></button>
+      <h2 id="progress-text" data-i18n="Loading progress…"><%= t("Loading progress…") %></h2>
+      <progress class="l38-sr-only" id="progress" value="0" max="38" aria-labelledby="progress-text"></progress><div id="progress-segments" class="l38-segments" aria-hidden="true"></div>
+      <p><span data-i18n="Current game"><%= t("Current game") %></span>: <strong id="current-game" data-i18n="Loading…"><%= t('Loading…') %></strong></p>
+      <div class="l38-live-status"><span id="control-active-count" class="l38-tag"></span><span id="control-source" class="l38-tag"></span><span id="control-undo-status" class="l38-tag"></span></div>
+      <p id="secret-count" class="l38-small"></p>
       <form id="game-form">
-        <label for="game">Current game</label>
-        <select id="game" name="gameId" disabled><option value="">Between adventures</option></select>
-        <button type="submit" disabled>Change game</button>
+        <label for="game" data-i18n="Current game"><%= t("Current game") %></label>
+        <select id="game" name="gameId" disabled><option value="" data-i18n="Between adventures"><%= t("Between adventures") %></option></select>
+        <button type="submit" disabled data-i18n="Change game"><%= t("Change game") %></button>
       </form>
-      <p>Activate a quest before completing it. Check the quest number before confirming completion.</p>
+      <p data-i18n="Activate a quest before completing it. Check the quest number before confirming completion."><%= t("Activate a quest before completing it. Check the quest number before confirming completion.") %></p>
     </section>
-    <section class="l38-panel" aria-labelledby="twitch-heading">
-      <h2 id="twitch-heading">Twitch <span id="twitch-connection">Loading…</span></h2>
+    <section class="l38-panel" data-i18n-aria-label="Recent operator actions" aria-label="<%= t("Recent operator actions") %>">
+      <h2 data-i18n="Undo latest action"><%= t("Undo latest action") %></h2>
+      <p id="undo-description" data-i18n="Loading…"><%= t("Loading…") %></p>
+      <button id="undo" type="button" disabled data-i18n="Undo latest action"><%= t("Undo latest action") %></button>
+      <p id="undo-reason"></p>
+    </section>
+    </div>
+    <div class="l38-control-workspace">
+      <section class="l38-quest-workspace"><h2 data-i18n="Quest management"><%= t('Quest management') %></h2><div id="quest-board"></div></section>
+      <div id="poll-workspace">    <section data-i18n-aria-label="Poll controls" aria-label="<%= t("Poll controls") %>"><h2 data-i18n="Voting rounds"><%= t("Voting rounds") %></h2><div id="poll-board"></div></section>
+    <section class="l38-panel" id="poll-editor">
+      <h2 id="poll-editor-title" data-i18n="Create voting round"><%= t("Create voting round") %></h2>
+      <form id="poll-form">
+        <label for="poll-title" data-i18n="Question"><%= t("Question") %></label><input id="poll-title" maxlength="160" required>
+        <label for="poll-type" data-i18n="Poll type"><%= t("Poll type") %></label>
+        <select id="poll-type"><option value="NEXT_QUEST" data-i18n="Next quest"><%= t("Next quest") %></option><option value="NEXT_GAME" data-i18n="Next game"><%= t("Next game") %></option><option value="YES_NO" data-i18n="Yes / No"><%= t("Yes / No") %></option><option value="CUSTOM" data-i18n="Custom choices"><%= t("Custom choices") %></option></select>
+        <fieldset class="l38-options-editor"><legend data-i18n="Options (2–8 before opening)"><%= t("Options (2–8 before opening)") %></legend><div id="poll-options"></div><button id="add-option" type="button" data-i18n="Add option"><%= t("Add option") %></button></fieldset>
+        <button id="save-poll" type="submit" data-i18n="Save draft"><%= t("Save draft") %></button><button class="l38-secondary" id="cancel-poll-edit" type="button" data-i18n="Start fresh"><%= t("Start fresh") %></button>
+      </form>
+      <p id="poll-editor-note" data-i18n="A new round keeps previous votes and results in history."><%= t("A new round keeps previous votes and results in history.") %></p>
+    </section>
+      </div>
+    </div>
+    <section class="l38-panel" id="audit-panel">      <h2 data-i18n="Recent activity"><%= t("Recent activity") %></h2>
+      <ol id="audit-list"><li data-i18n="Loading history…"><%= t('Loading history…') %></li></ol>
+    </section>
+    <% if (operator.role === "OWNER") { %><%- include("owner-tools") %><% } %>
+    <details class="l38-config-panel"><summary data-i18n="Configuration / status"><%= t('Configuration / status') %></summary>    <section class="l38-panel" aria-labelledby="twitch-heading">
+      <h2 id="twitch-heading">Twitch <span id="twitch-connection" data-i18n="Loading…"><%= t("Loading…") %></span></h2>
       <p id="twitch-source" role="status"></p>
       <p id="twitch-error" role="status"></p>
       <dl class="l38-twitch-status">
-        <dt>Channel</dt><dd id="twitch-channel">—</dd>
-        <dt>Latest category</dt><dd id="twitch-category">—</dd>
-        <dt>Mapped game</dt><dd id="twitch-mapped">—</dd>
-        <dt>Last EventSub update</dt><dd id="twitch-updated">—</dd>
-        <dt>Subscription</dt><dd id="twitch-subscription">—</dd>
+        <dt data-i18n="Channel"><%= t("Channel") %></dt><dd id="twitch-channel">—</dd>
+        <dt data-i18n="Latest category"><%= t("Latest category") %></dt><dd id="twitch-category">—</dd>
+        <dt data-i18n="Mapped game"><%= t("Mapped game") %></dt><dd id="twitch-mapped">—</dd>
+        <dt data-i18n="Last EventSub update"><%= t("Last EventSub update") %></dt><dd id="twitch-updated">—</dd>
+        <dt data-i18n="Subscription"><%= t("Subscription") %></dt><dd id="twitch-subscription">—</dd>
       </dl>
-      <button id="twitch-auto" type="button">Return to Twitch Auto</button>
-      <p>Changing the current game above activates a manual override. Twitch cannot replace it until you return to auto.</p>
+      <button id="twitch-auto" type="button" data-i18n="Return to Twitch Auto"><%= t("Return to Twitch Auto") %></button>
+      <p data-i18n="Changing the current game above activates a manual override. Twitch cannot replace it until you return to auto."><%= t("Changing the current game above activates a manual override. Twitch cannot replace it until you return to auto.") %></p>
       <% if (operator.role === 'OWNER') { %>
       <div class="l38-actions">
-        <button id="twitch-sync" type="button">Sync now</button>
-        <button id="twitch-ensure" type="button">Ensure subscription</button>
-        <button id="twitch-recreate" type="button">Recreate subscription</button>
+        <button id="twitch-sync" type="button" data-i18n="Sync now"><%= t("Sync now") %></button>
+        <button id="twitch-ensure" type="button" data-i18n="Ensure subscription"><%= t("Ensure subscription") %></button>
+        <button id="twitch-recreate" type="button" data-i18n="Recreate subscription"><%= t("Recreate subscription") %></button>
       </div>
-      <details id="twitch-mapping"><summary>Configure Twitch category mappings</summary>
-        <p>Enter the numeric Twitch category ID for each existing game. Names are labels; the ID determines the match. Save, then use Sync now to apply the latest category in auto mode.</p>
+      <details id="twitch-mapping"><summary data-i18n="Configure Twitch category mappings"><%= t("Configure Twitch category mappings") %></summary>
+        <p data-i18n="Enter the numeric Twitch category ID for each existing game. Names are labels; the ID determines the match. Save, then use Sync now to apply the latest category in auto mode."><%= t("Enter the numeric Twitch category ID for each existing game. Names are labels; the ID determines the match. Save, then use Sync now to apply the latest category in auto mode.") %></p>
         <div id="twitch-mapping-forms"></div>
       </details>
       <% } %>
     </section>
-    <section class="l38-panel" aria-label="Recent operator actions">
-      <h2>Undo latest action</h2>
-      <p id="undo-description">Loading…</p>
-      <button id="undo" type="button" disabled>Undo latest action</button>
-      <p id="undo-reason"></p>
-      <h2>Recent activity</h2>
-      <ol id="audit-list"><li>Loading history…</li></ol>
-    </section>
-    <section aria-label="Poll controls"><h2>Voting rounds</h2><div id="poll-board"></div></section>
-    <section class="l38-panel" id="poll-editor">
-      <h2 id="poll-editor-title">Create voting round</h2>
-      <form id="poll-form">
-        <label for="poll-title">Question</label><input id="poll-title" maxlength="160" required>
-        <label for="poll-type">Poll type</label>
-        <select id="poll-type"><option value="NEXT_QUEST">Next quest</option><option value="NEXT_GAME">Next game</option><option value="YES_NO">Yes / No</option><option value="CUSTOM">Custom choices</option></select>
-        <fieldset class="l38-options-editor"><legend>Options (2–8 before opening)</legend><div id="poll-options"></div><button id="add-option" type="button">Add option</button></fieldset>
-        <button id="save-poll" type="submit">Save draft</button><button id="cancel-poll-edit" type="button">Start fresh</button>
-      </form>
-      <p id="poll-editor-note">A new round keeps previous votes and results in history.</p>
-    </section>
-    <div id="quest-board"></div>
+    </details>
     </fieldset>
     <% } %>
-    <noscript><p>Enable JavaScript to use operator control.</p></noscript>
+    <noscript><p data-i18n="Enable JavaScript to use operator control."><%= t("Enable JavaScript to use operator control.") %></p></noscript>
   </main>
+  <% if (operator) { %><%- include("celebration") %><% } %>
 </body>
 </html>

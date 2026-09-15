@@ -15,6 +15,15 @@ const challenges = [
   "Let chat choose the party", "Secret treasure hunt", "Secret final encounter",
 ];
 
+const challengesEs = [
+  "Gana el primer combate", "Gana sin usar objetos", "Encuentra un cofre oculto",
+  "Visita una nueva ciudad", "Derrota a un enemigo opcional", "Gana con el equipo inicial",
+  "Sobrevive a un combate difícil", "Descubre una nueva habilidad", "Completa una mazmorra",
+  "Gana sin huir", "Encuentra un objeto raro", "Completa un objetivo secundario",
+  "Gana un combate contra un jefe", "Explora una zona opcional", "Llega al siguiente punto de guardado",
+  "Deja que el chat elija el grupo", "Búsqueda del tesoro secreta", "Combate final secreto",
+];
+
 export async function seedLevel38(db: PrismaClient): Promise<boolean> {
   return db.$transaction(async (tx) => {
     // Seed only a new event. Rerunning this command must never reset a live event.
@@ -28,8 +37,11 @@ export async function seedLevel38(db: PrismaClient): Promise<boolean> {
       await tx.quest.createMany({ data: challenges.map((title, index) => ({
         eventId: event.id, gameId: game.id, number: ++number, title,
         description: "Starter challenge: agree on a suitable objective for the current save before activating.",
+        titleEs: challengesEs[index],
+        descriptionEs: "Misión de prueba: acordad un objetivo adecuado para la partida actual antes de activarla.",
         isSecret: index >= 16,
         status: index >= 16 ? "SECRET" : "AVAILABLE",
+        initialStatus: index >= 16 ? "SECRET" : "AVAILABLE",
       })) });
     }
     await tx.event.update({ where: { id: event.id }, data: { currentGameId: firstGameId } });

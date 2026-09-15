@@ -1,0 +1,279 @@
+/* Shared by EJS and the browser. English source keys follow a gettext-style catalog. */
+(function (root, factory) {
+  if (typeof module === "object" && module.exports) module.exports = factory();
+  else root.Level38Translations = factory();
+})(typeof window === "undefined" ? globalThis : window, function () {
+  "use strict";
+  const es = {
+    "Language": "Idioma", "Spanish": "Español", "English": "Inglés",
+    "Site": "Sitio", "Skip to the adventure": "Ir a la aventura", "← Creator hub": "← Web de Leo",
+    "LEVEL 38 — Join Leo's party": "LEVEL 38 — Únete al grupo de Leo",
+    "One birthday. A party of adventurers. Help Leo complete 38 quests across his favourite RPGs. Join the LEVEL 38 adventure.": "Un cumpleaños, un grupo de aventureros y 38 misiones por superar. Acompaña a Leo por sus RPG favoritos y únete a LEVEL 38.",
+    "Quest journal": "Misiones", "Vote now ·": "Vota ahora ·", "Vote": "Votar", "Your party": "Tu grupo",
+    "THE BIRTHDAY ADVENTURE": "LA AVENTURA DEL CUMPLEAÑOS", "One birthday. A whole party of adventurers.": "Un cumpleaños para vivirlo en grupo.",
+    "Help Leo complete 38 quests across his favourite RPGs.": "Ayuda a Leo a superar 38 misiones en sus RPG favoritos.",
+    "Follow the journey. Choose what happens next.": "Sigue la aventura y decide el siguiente paso.",
+    "EXPLORE QUESTS": "VER MISIONES", "Everyone has a place in the party.": "Aquí hay sitio para todo el mundo.",
+    "A little hilltop castle beneath a golden moon, with a winding path through the mountains.": "Un pequeño castillo bajo una luna dorada, al final de un sendero entre montañas.",
+    "YOUR NEXT ADVENTURE IS WAITING.": "TU PRÓXIMA AVENTURA TE ESPERA.", "Event progress": "Progreso del evento",
+    "THE ROAD TO LEVEL 38": "RUMBO AL NIVEL 38", "{completed} / {target} quests completed": "{completed} / {target} misiones completadas",
+    "TARGET REACHED": "OBJETIVO ALCANZADO", "ADVENTURE IN PROGRESS": "AVENTURA EN CURSO", "Every quest brings us closer.": "Cada misión nos acerca a la meta.",
+    "{count} TO GO ✦": "FALTAN {count} ✦", "NOW EXPLORING": "AVENTURA ACTUAL", "Between adventures": "Entre aventuras",
+    "Leo's current adventure · chosen live": "La aventura de Leo · en directo", "Go to active objectives": "Ir a las misiones activas",
+    "Current objectives": "Misiones activas", "{count} ACTIVE": "{count} ACTIVAS",
+    "A moment at the campfire. Leo's next objective will appear here.": "Un respiro junto a la hoguera. La próxima misión de Leo aparecerá aquí.",
+    "The party decides": "El grupo decide", "YOUR VOICE, OUR ADVENTURE": "TU VOZ, NUESTRA AVENTURA",
+    "ROUND {number} · {status}": "RONDA {number} · {status}", "Poll #{number} · {type} · {status}": "Ronda #{number} · {type} · {status}",
+    "The next choice is just ahead.": "Pronto habrá una nueva decisión.", "When a vote opens, choose Leo's next move right here.": "Cuando se abra una votación, decide aquí el siguiente paso de Leo.",
+    "Your party membership": "Tu lugar en el grupo", "THERE'S ROOM FOR ONE MORE": "SIEMPRE CABE UNO MÁS", "Your place in the party": "Tu lugar en el grupo",
+    "PLAYER": "JUGADOR", "CLASS": "CLASE", "Wandering adventurer": "Aventurero errante", "Your story starts here": "Tu historia empieza aquí",
+    "Watch the adventure, or pick a name and join the party.": "Sigue la aventura o elige un nombre y únete al grupo.",
+    "JOIN THE PARTY +": "UNIRME AL GRUPO +", "PARTY REGISTRATION": "REGISTRO DEL GRUPO", "Choose your player name": "Elige tu nombre de aventurero",
+    "Player name · 2–24 characters": "Nombre · de 2 a 24 caracteres", "e.g. Garnet": "p. ej., Garnet",
+    "One random class. Yours for this adventure. All party members have an equal vote.": "Te tocará una clase al azar para toda la aventura. Todos los votos valen lo mismo.",
+    "Join party": "Unirme al grupo", "Cancel": "Cancelar", "No account needed. Your class stays with this browser.": "Sin crear una cuenta. Tu clase se guarda en este navegador.",
+    "NEW PARTY MEMBER": "NUEVO MIEMBRO DEL GRUPO", "Onward!": "¡En marcha!", "How the adventure works": "Cómo funciona la aventura",
+    "A SMALL GUIDE TO A BIG NIGHT": "GUÍA PARA UNA GRAN NOCHE", "Follow the quest": "Sigue las misiones", "Leo plays. We share the journey.": "Leo juega. La aventura es de todos.",
+    "Choose the next move": "Decide el siguiente paso", "Vote whenever the party is called.": "Vota cuando llegue el momento de elegir.",
+    "Reach level 38 together": "Lleguemos juntos al nivel 38", "38 victories. One birthday to remember.": "38 victorias. Un cumpleaños para recordar.",
+    "Some paths are still hidden.": "Aún quedan caminos por descubrir.", "{count} secret quests waiting to be revealed.": "{count} misiones secretas por descubrir.",
+    "EVERY ADVENTURE HAS A STORY": "CADA AVENTURA TIENE SU HISTORIA", "The quest journal": "Diario de misiones", "{count} KNOWN QUESTS": "{count} MISIONES CONOCIDAS",
+    "Adventure": "Aventura", "All games": "Todos los juegos", "Current game": "Juego actual", "Quest status": "Estado", "All statuses": "Todos los estados",
+    "Find a quest": "Buscar misión", "Search the journal": "Buscar en el diario", "Undiscovered quests": "Misiones por descubrir",
+    "Some stories are best kept secret. New paths will appear when Leo reveals them.": "Hay historias que aún son un secreto. Leo irá revelando nuevos caminos.",
+    "{count} HIDDEN": "{count} OCULTAS", "A birthday adventure by Leo Nifelheim.": "Una aventura de cumpleaños de Leo Nifelheim.",
+    "Connecting to the party…": "Conectando con el grupo…", "Operator control ↗": "Panel de control ↗",
+    "Read the quest journal above. Enable JavaScript to join, vote, and follow live updates.": "Puedes leer las misiones de arriba. Activa JavaScript para unirte, votar y recibir las novedades en directo.",
+    "✦ THE PARTY DID IT ✦": "✦ LO HEMOS CONSEGUIDO ✦", "LEVEL UP!": "¡SUBIMOS DE NIVEL!", "LEO REACHED LV.38": "LEO HA LLEGADO AL NV.38",
+    "{completed} / {target} QUESTS COMPLETED": "{completed} / {target} MISIONES COMPLETADAS",
+    "One legendary birthday. Thanks for being part of it.": "Un cumpleaños legendario. Gracias por vivirlo con nosotros.", "Back to the adventure": "Volver a la aventura",
+    "QUEST {number}": "MISIÓN {number}", "Quest": "Misión", "No description available.": "Aún no hay descripción.",
+    "AVAILABLE": "Disponible", "ACTIVE": "Activa", "COMPLETED": "Completada", "FAILED": "Fallida", "SKIPPED": "Omitida", "LOCKED": "Bloqueada", "SECRET": "Secreta",
+    "OPEN": "Abierta", "CLOSED": "Cerrada", "DRAFT": "Borrador", "NEXT_QUEST": "Siguiente misión", "NEXT_GAME": "Siguiente juego", "YES_NO": "Sí / No", "CUSTOM": "Opciones libres",
+    "OWNER": "Propietario", "MODERATOR": "Moderador", "VIEWER": "Espectador", "MANUAL_OVERRIDE": "Selección manual", "AUTO_TWITCH": "Twitch automático",
+    "Yes": "Sí", "No": "No", "Adventurer": "Aventurero",
+    "Activate quest": "Activar misión", "Complete quest": "Completar misión", "Fail quest": "Marcar fallida", "Skip quest": "Omitir misión", "Reveal secret": "Revelar misión", "Make available": "Habilitar misión",
+    "No quests here yet.": "Aún no hay misiones aquí.", "Hidden quests have no public details yet.": "Los detalles de las misiones secretas aún no son públicos.",
+    "No quests on this path. Try another filter.": "No hay misiones con estos filtros. Prueba con otros.", "{count} matching quest": "{count} misión encontrada", "{count} matching quests": "{count} misiones encontradas",
+    "Earlier voting rounds ({count})": "Rondas anteriores ({count})", "{count} vote": "{count} voto", "{count} votes": "{count} votos", "Your vote": "Tu voto",
+    "Vote for {label}": "Votar por {label}", "Winner: {label}{override}": "Ganadora: {label}{override}", " (moderator override)": " (elección del moderador)", "Unselected": "Sin elegir",
+    "Edit draft": "Editar borrador", "Open poll": "Abrir votación", "Close poll": "Cerrar votación", "New round from this poll": "Crear ronda a partir de esta",
+    "Winner for poll #{number}": "Ganadora de la ronda #{number}", "Reason for override": "Motivo del cambio", "Override reason for poll #{number}": "Motivo del cambio en la ronda #{number}",
+    "Accept selected leader": "Aceptar opción más votada", "Override winner": "Cambiar ganadora", "No polls yet. Create a draft below.": "Aún no hay votaciones. Crea un borrador abajo.",
+    "Live connection unavailable. Checking for updates periodically.": "No hay conexión en directo. Buscaremos novedades periódicamente.", "Live updates connected": "Actualizaciones en directo conectadas",
+    "Connection lost. Reconnecting…": "Conexión perdida. Reconectando…", "Unable to connect. Retrying…": "No se ha podido conectar. Reintentando…", "Event temporarily unavailable. Retrying…": "Evento no disponible temporalmente. Reintentando…",
+    "Updates unavailable. Retrying…": "No se pueden cargar las novedades. Reintentando…", "Welcome back, {name}. Your party is waiting.": "¡Hola de nuevo, {name}! El grupo te espera.",
+    "Edit player name": "Editar nombre", "Save player name": "Guardar nombre", "Welcome to the party, {name}!": "¡Bienvenido al grupo, {name}!",
+    "Choose a nickname to submit your vote.": "Elige un nombre para enviar tu voto.", "Vote saved. You can change it while the poll is open.": "Voto guardado. Puedes cambiarlo mientras la votación siga abierta.",
+    "Joining is temporarily unavailable. Try again when you vote.": "Ahora mismo no puedes unirte. Inténtalo de nuevo al votar.", "You joined the party. Adventure awaits!": "¡Ya estás en el grupo! La aventura te espera.",
+    "Player name saved. Your class is unchanged.": "Nombre guardado. Tu clase sigue siendo la misma.",
+    "QUEST COMPLETE · Another step toward LV.38!": "MISIÓN COMPLETADA · ¡Un paso más hacia el nivel 38!", "NEW QUEST · A new objective awaits.": "NUEVA MISIÓN · Nos espera otro reto.",
+    "SECRET REVEALED · A new path is open.": "MISIÓN SECRETA REVELADA · Se abre un nuevo camino.", "THE PARTY DECIDES · A new vote is open.": "EL GRUPO DECIDE · Hay una nueva votación.",
+    "PARTY CHOICE · The result is in!": "EL GRUPO HA ELEGIDO · ¡Ya tenemos resultado!", "NEW ADVENTURE · Leo changed games.": "NUEVA AVENTURA · Leo ha cambiado de juego.",
+    "LEVEL 38 — Operator control": "LEVEL 38 — Panel de control", "Public event page": "Página del evento", "Live event desk": "PUESTO DE MANDO", "LEVEL 38 control": "Control LEVEL 38",
+    "Connecting to live updates…": "Conectando con el directo…", "Operator sign in": "Acceso de operadores", "Use your personal operator access key.": "Introduce tu clave personal de operador.",
+    "Access key": "Clave de acceso", "Sign in": "Entrar", "Signed in as": "Sesión de", "Sign out": "Salir", "Loading progress…": "Cargando progreso…", "Loading…": "Cargando…",
+    "Change game": "Cambiar juego", "Activate a quest before completing it. Check the quest number before confirming completion.": "Activa la misión antes de completarla. Comprueba su número antes de confirmar.",
+    "Live controls": "Controles del directo", "Active quests": "Misiones activas", "Quest roster": "Lista de misiones", "Quest management": "Gestión de misiones", "Poll management": "Gestión de votaciones", "Configuration / status": "Configuración y estado",
+    "Undo available": "Se puede deshacer", "Undo unavailable": "No se puede deshacer", "Game source": "Origen del juego", "Manual selection": "Selección manual", "Twitch disabled": "Twitch desactivado",
+    "Channel": "Canal", "Latest category": "Última categoría", "Mapped game": "Juego vinculado", "Last EventSub update": "Última actualización de EventSub", "Subscription": "Suscripción",
+    "Return to Twitch Auto": "Volver a Twitch automático", "Changing the current game above activates a manual override. Twitch cannot replace it until you return to auto.": "Al cambiar el juego se activa la selección manual. Twitch no podrá sustituirlo hasta que vuelvas al modo automático.",
+    "Sync now": "Sincronizar", "Ensure subscription": "Comprobar suscripción", "Recreate subscription": "Recrear suscripción", "Configure Twitch category mappings": "Configurar categorías de Twitch",
+    "Enter the numeric Twitch category ID for each existing game. Names are labels; the ID determines the match. Save, then use Sync now to apply the latest category in auto mode.": "Introduce el ID numérico de la categoría de Twitch de cada juego. El ID determina la vinculación. Guarda y pulsa Sincronizar para aplicar la categoría en modo automático.",
+    "Recent operator actions": "Acciones recientes", "Undo latest action": "Deshacer última acción", "Recent activity": "Historial de actividad", "Loading history…": "Cargando historial…",
+    "Poll controls": "Controles de votación", "Voting rounds": "Rondas de votación", "Create voting round": "Crear ronda de votación", "Question": "Pregunta", "Poll type": "Tipo de votación",
+    "Next quest": "Siguiente misión", "Next game": "Siguiente juego", "Yes / No": "Sí / No", "Custom choices": "Opciones libres", "Options (2–8 before opening)": "Opciones (de 2 a 8 para abrir)",
+    "Add option": "Añadir opción", "Save draft": "Guardar borrador", "Start fresh": "Empezar de nuevo", "A new round keeps previous votes and results in history.": "Las rondas anteriores conservan sus votos y resultados en el historial.",
+    "Enable JavaScript to use operator control.": "Activa JavaScript para usar el panel de control.", "Sign in to operate the event.": "Inicia sesión para gestionar el evento.",
+    "Close this poll and stop accepting votes?": "¿Cerrar esta votación y dejar de recibir votos?", "Enter a reason before overriding the winner.": "Indica el motivo antes de cambiar la opción ganadora.",
+    "Override the selected poll winner? The reason will be recorded.": "¿Cambiar la opción ganadora? El motivo quedará registrado.", "Progress {before} → {after}": "Progreso {before} → {after}",
+    "No operator actions yet.": "Aún no hay acciones de operadores.", "No action yet.": "Aún no hay acciones.", "Only this latest action can be undone. Undo preserves the activity history.": "Solo se puede deshacer la última acción. El historial de actividad se conserva.",
+    "Change saved.": "Cambio guardado.", "{action} #{number} — {title}?": "¿{action} #{number} — {title}?", " The quest will be hidden again, but viewers may already have seen it.": " La misión volverá a ocultarse, pero puede que los espectadores ya la hayan visto.",
+    "Undo: {description}?{notice}": "¿Deshacer: {description}?{notice}", "Choose an option": "Elige una opción", "{label} (no longer available — replace)": "{label} (ya no está disponible; sustitúyela)",
+    "Poll option {number}": "Opción {number}", "Remove option": "Quitar opción", "New round from poll #{number}": "Nueva ronda a partir de la #{number}", "Edit draft #{number}": "Editar borrador #{number}",
+    "Disabled": "Desactivado", "Connected": "Conectado", "Connecting": "Conectando", "Error": "Error", "Game source: Manual Override{operator}": "Origen del juego: selección manual{operator}", " by {name}": " por {name}", "Game source: Twitch Auto": "Origen del juego: Twitch automático",
+    "Broadcaster": "Canal", "Not configured": "Sin configurar", "No category received": "No se ha recibido ninguna categoría", "Unmapped Twitch category — current game preserved": "Categoría sin vincular; se mantiene el juego actual", "No mapped category": "Sin categoría vinculada", "No EventSub update yet": "Aún no hay actualizaciones de EventSub",
+    "enabled": "activa", "unknown": "desconocida", "webhook callback verification pending": "verificación pendiente", "webhook callback verification failed": "verificación fallida", "notification failures exceeded": "demasiados errores de notificación", "authorization revoked": "autorización revocada", "user removed": "usuario eliminado", "version removed": "versión retirada", "pending": "pendiente",
+    "Replace this channel's LEVEL 38 subscription? Use this after rotating the webhook secret or if verification is stuck.": "¿Sustituir la suscripción de LEVEL 38 de este canal? Úsalo tras renovar el secreto del webhook o si la verificación se ha bloqueado.",
+    "Twitch category ID (blank clears)": "ID de categoría de Twitch (vacío para desvincular)", "Category name (optional)": "Nombre de categoría (opcional)", "Save mapping": "Guardar vinculación",
+    "Try again": "Volver a intentar", "Request failed. Please try again.": "No se ha podido realizar la solicitud. Inténtalo de nuevo.",
+    "LEVEL 38 is being prepared. Please check back soon.": "Estamos preparando LEVEL 38. Vuelve dentro de poco.", "LEVEL 38 is temporarily unavailable. Please try again shortly.": "LEVEL 38 no está disponible temporalmente. Inténtalo en unos instantes.",
+    "activated quest #{number} “{title}”": "activó la misión #{number} «{title}»", "completed quest #{number} “{title}”": "completó la misión #{number} «{title}»", "failed quest #{number} “{title}”": "marcó como fallida la misión #{number} «{title}»",
+    "skipped quest #{number} “{title}”": "omitió la misión #{number} «{title}»", "revealed quest #{number} “{title}”": "reveló la misión #{number} «{title}»", "made available quest #{number} “{title}”": "habilitó la misión #{number} «{title}»",
+    "changed game from {before} to {after}": "cambió de juego de {before} a {after}", "configured game “{title}”": "configuró el juego «{title}»", "mapped Twitch category for “{title}”": "vinculó la categoría de Twitch de «{title}»", "returned game source to Twitch Auto": "volvió al modo automático de Twitch",
+    "accepted poll #{number} winner from {before} to {after}": "confirmó la ganadora de la ronda #{number}: de {before} a {after}", "overrode poll #{number} winner from {before} to {after}": "cambió la ganadora de la ronda #{number}: de {before} a {after}",
+    "created poll #{number} “{title}”": "creó la ronda #{number} «{title}»", "edited poll #{number} “{title}”": "editó la ronda #{number} «{title}»", "opened poll #{number} “{title}”": "abrió la ronda #{number} «{title}»", "closed poll #{number} “{title}”": "cerró la ronda #{number} «{title}»",
+    "undid {action} (#{entity})": "deshizo {action} (#{entity})", "quest activated": "la activación de una misión", "quest completed": "la finalización de una misión", "quest failed": "el fallo de una misión", "quest skipped": "la omisión de una misión", "quest revealed": "la revelación de una misión", "quest available": "la habilitación de una misión", "game changed": "el cambio de juego", "poll opened": "la apertura de una votación", "poll closed": "el cierre de una votación",
+    "Legacy activity": "Actividad anterior"
+  };
+  Object.assign(es, {
+  "LV.38": "NV.38",
+  "Expected a JSON object.": "Se esperaba un objeto JSON.",
+  "Enter a nickname.": "Introduce un nombre.",
+  "Use 2–24 characters without control characters or angle brackets.": "Usa de 2 a 24 caracteres, sin caracteres de control ni corchetes angulares.",
+  "A valid state revision is required.": "Se necesita una revisión válida del estado.",
+  "Invalid identifier.": "Identificador no válido.",
+  "Invalid quest action.": "Acción de misión no válida.",
+  "Invalid poll type.": "Tipo de votación no válido.",
+  "Use up to 8 poll options.": "Puedes añadir hasta 8 opciones.",
+  "Choose open or close.": "Elige abrir o cerrar.",
+  "Poll question": "Pregunta de la votación",
+  "Option": "Opción",
+  "Override reason": "Motivo del cambio",
+  "Game title": "Título del juego",
+  "Twitch category name": "Nombre de categoría de Twitch",
+  "{label} is required.": "Falta este campo: {label}.",
+  "{label} must be 2–{max} characters without control characters or angle brackets.": "{label} debe tener de 2 a {max} caracteres, sin caracteres de control ni corchetes angulares.",
+  "No operator action to undo.": "No hay ninguna acción que deshacer.",
+  "The latest action was already undone. Earlier history cannot be rewound.": "La última acción ya se ha deshecho. No se puede retroceder más en el historial.",
+  "The latest operator action is not reversible. Earlier actions cannot be undone past it.": "La última acción no es reversible. No se pueden deshacer acciones anteriores.",
+  "Use a manual game override to replace Twitch auto. Automatic game changes cannot be undone.": "Selecciona el juego manualmente para sustituir el modo automático. Los cambios automáticos no se pueden deshacer.",
+  "This older action does not contain a complete undo snapshot.": "Esta acción antigua no contiene todos los datos necesarios para deshacerla.",
+  "The quest has changed since this action.": "La misión ha cambiado desde esta acción.",
+  "This quest is in an open poll. Close the poll before changing its state.": "Esta misión aparece en una votación abierta. Ciérrala antes de cambiar su estado.",
+  "A published poll references this quest, so it cannot be hidden again.": "Una votación publicada incluye esta misión, por lo que no se puede volver a ocultar.",
+  "The current game has changed since this action.": "El juego actual ha cambiado desde esta acción.",
+  "The previous game is no longer enabled.": "El juego anterior ya no está habilitado.",
+  "The poll, votes, or result changed after this action.": "La votación, los votos o el resultado han cambiado desde esta acción.",
+  "Votes have been received. Opening this round can no longer be undone.": "Ya se han recibido votos. No se puede deshacer la apertura de esta ronda.",
+  "The winner has been accepted or overridden. This poll cannot be reopened by undo.": "Ya se ha confirmado la opción ganadora. No se puede reabrir esta votación al deshacer.",
+  "Another poll is open.": "Hay otra votación abierta.",
+  "Only the latest operator action can be undone. Review the current undo action.": "Solo se puede deshacer la última acción. Comprueba cuál es antes de continuar.",
+  "Your viewer session expired. Reload the page to join again.": "Tu sesión ha caducado. Recarga la página para volver a unirte.",
+  "Your viewer session expired. Reload to join again.": "Tu sesión ha caducado. Recarga para volver a unirte.",
+  "Provide enabled and a sort order from 0 to 10000.": "Indica si está habilitado y un orden de 0 a 10000.",
+  "Use a local /img/ image path or null.": "Usa una ruta local de /img/ o un valor nulo.",
+  "Twitch integration is disabled.": "La integración de Twitch está desactivada.",
+  "Twitch action not found.": "No se ha encontrado esa acción de Twitch.",
+  "Enter a numeric Twitch category ID, or clear the mapping.": "Introduce un ID numérico de categoría de Twitch o elimina la vinculación.",
+  "Sign in with an operator access key.": "Inicia sesión con una clave de operador.",
+  "This action requires the owner role.": "Esta acción solo está disponible para el propietario.",
+  "Invalid operator access key.": "La clave de operador no es válida.",
+  "Too many requests. Please try again later.": "Demasiadas solicitudes. Inténtalo más tarde.",
+  "Use the LEVEL 38 page on the configured site to make changes.": "Realiza los cambios desde la página de LEVEL 38 del sitio configurado.",
+  "LEVEL 38 route not found.": "No se ha encontrado esta página de LEVEL 38.",
+  "Invalid JSON body.": "El contenido JSON no es válido.",
+  "Request body is too large.": "La solicitud es demasiado grande.",
+  "Compressed request bodies are not supported.": "No se admiten solicitudes con contenido comprimido.",
+  "Poll not found.": "No se ha encontrado la votación.",
+  "Choose available, revealed quests from enabled games.": "Elige misiones disponibles y reveladas de juegos habilitados.",
+  "Choose an enabled game from this event.": "Elige un juego habilitado de este evento.",
+  "Poll options must be distinct.": "Las opciones de la votación deben ser distintas.",
+  "A poll needs 2–8 options before opening.": "Una votación necesita de 2 a 8 opciones para abrirse.",
+  "A quest option is no longer available. Edit the draft first.": "Una misión ya no está disponible. Edita primero el borrador.",
+  "A game option is no longer enabled.": "Uno de los juegos ya no está habilitado.",
+  "The controls changed. Review the latest state and try again.": "Los controles han cambiado. Revisa el estado actual e inténtalo de nuevo.",
+  "Operator access is no longer available.": "El acceso de operador ya no está disponible.",
+  "Quest not found.": "No se ha encontrado la misión.",
+  "This quest's game is disabled.": "El juego de esta misión está deshabilitado.",
+  "Close the poll containing this quest before changing its state.": "Cierra la votación que incluye esta misión antes de cambiar su estado.",
+  "Enabled game not found in this event.": "No se ha encontrado ese juego habilitado en este evento.",
+  "That game is already selected.": "Ese juego ya está seleccionado.",
+  "Game not found.": "No se ha encontrado el juego.",
+  "That Twitch category is already mapped to another game.": "Esa categoría de Twitch ya está vinculada a otro juego.",
+  "Only draft polls can be edited. Create a new round instead.": "Solo se pueden editar borradores. Crea una nueva ronda.",
+  "A poll with voting history cannot be edited.": "No se puede editar una votación que ya tiene votos.",
+  "Close the current poll first. Only one poll can be open.": "Cierra primero la votación actual. Solo puede haber una abierta.",
+  "A quest's game is disabled.": "El juego de una de las misiones está deshabilitado.",
+  "Close the poll before selecting a winner.": "Cierra la votación antes de elegir una ganadora.",
+  "Choose an option from this poll.": "Elige una opción de esta votación.",
+  "A result is already selected. Use an explicit override to change it.": "Ya hay un resultado seleccionado. Usa la acción de cambiar ganadora para modificarlo.",
+  "Accept a leading option, or supply an override reason. Zero-vote polls require an override.": "Acepta una de las opciones más votadas o indica el motivo del cambio. Si no hay votos, el motivo es obligatorio.",
+  "That option is already the winner.": "Esa opción ya es la ganadora.",
+  "Choose a nickname before voting.": "Elige un nombre antes de votar.",
+  "This poll is no longer open.": "Esta votación ya no está abierta.",
+  "Switch current game and finish its active quests/open polls before disabling this game.": "Cambia el juego actual y termina sus misiones activas y votaciones abiertas antes de deshabilitarlo.",
+  "Cannot {action} a {status} quest.": "No se puede {action} una misión en estado {status}.",
+  "Cannot {action} this poll.": "No se puede {action} esta votación.",
+  "activate": "activar",
+  "complete": "completar",
+  "fail": "marcar como fallida",
+  "skip": "omitir",
+  "reveal": "revelar",
+  "available": "disponible",
+  "active": "activa",
+  "completed": "completada",
+  "failed": "fallida",
+  "skipped": "omitida",
+  "locked": "bloqueada",
+  "secret": "secreta",
+  "open": "abrir",
+  "close": "cerrar",
+  "Twitch synchronization is unavailable. Check configuration, database and callback, then retry.": "La sincronización de Twitch no está disponible. Comprueba la configuración, la base de datos y la URL de retorno antes de reintentar.",
+  "Twitch integration is initializing.": "La integración de Twitch se está iniciando.",
+  "Set TWITCH_CLIENT_ID and TWITCH_CLIENT_SECRET.": "Configura TWITCH_CLIENT_ID y TWITCH_CLIENT_SECRET.",
+  "Set TWITCH_EVENTSUB_SECRET to 10–100 printable ASCII characters (64 random hex characters recommended).": "Configura TWITCH_EVENTSUB_SECRET con entre 10 y 100 caracteres ASCII imprimibles (se recomiendan 64 caracteres hexadecimales aleatorios).",
+  "Set a numeric broadcaster ID or a valid Twitch login.": "Configura un ID numérico de canal o un nombre de usuario de Twitch válido.",
+  "TWITCH_EVENTSUB_CALLBACK_URL must be the public LEVEL38_ORIGIN HTTPS URL plus /level38/twitch/eventsub (port 443).": "TWITCH_EVENTSUB_CALLBACK_URL debe ser la URL HTTPS pública de LEVEL38_ORIGIN seguida de /level38/twitch/eventsub (puerto 443)."
+});
+  Object.assign(es, {
+  "TEST / PREVIEW": "PRUEBA / VISTA PREVIA",
+  "Visual preview — event progress is unchanged.": "Vista previa: el progreso del evento no cambia.",
+  "OWNER · RESET / TEST TOOLS": "PROPIETARIO · REINICIO Y PRUEBAS",
+  "These actions affect the shared event and connected viewers. Reset actions cannot be undone.": "Estas acciones afectan al evento compartido y a los espectadores conectados. Los reinicios no se pueden deshacer.",
+  "Finale preview": "Vista previa del final",
+  "Show a labeled preview on all connected public and control pages. Real progress and unlock sequence stay unchanged.": "Muestra una prueba identificada en todas las páginas públicas y de control conectadas. No cambia el progreso ni la secuencia real del final.",
+  "TEST · PREVIEW LEVEL 38 FINALE": "PRUEBA · VER FINAL DE LEVEL 38",
+  "Reset event progress": "Reiniciar progreso del evento",
+  "Restore quest starting states and hide secrets. Select the first enabled game in manual mode. Archive all current polls; keep participants, votes and audit history.": "Devuelve las misiones a su estado inicial y oculta las secretas. Selecciona el primer juego habilitado en modo manual. Archiva las votaciones; conserva participantes, votos e historial.",
+  "RESET EVENT PROGRESS": "REINICIAR PROGRESO",
+  "Clear test participants": "Borrar participantes de prueba",
+  "Clear all viewer names/classes and expire their sessions. Archive current polls and retain anonymous vote history. Progress and operators remain unchanged.": "Borra los nombres y clases de los espectadores y caduca sus sesiones. Archiva las votaciones y conserva los votos anónimos. No cambia el progreso ni los operadores.",
+  "CLEAR TEST PARTICIPANTS": "BORRAR PARTICIPANTES DE PRUEBA",
+  "Prepare clean event": "Preparar evento limpio",
+  "Combine progress reset and participant cleanup. Archive previous polls and keep the audit trail. Quest definitions, translations, games and operator keys are preserved.": "Reinicia el progreso y limpia los participantes. Archiva las votaciones y conserva el historial. Mantiene las misiones, traducciones, juegos y claves de operador.",
+  "Type RESET LEVEL 38 to confirm": "Escribe RESET LEVEL 38 para confirmar",
+  "PREPARE CLEAN EVENT": "PREPARAR EVENTO LIMPIO",
+  "Archived test rounds · read only": "Rondas de prueba archivadas · solo lectura",
+  "No archived test rounds.": "No hay rondas de prueba archivadas.",
+  "Show a TEST finale on all currently connected public and control pages? Progress will not change.": "¿Mostrar un final de PRUEBA en todas las páginas públicas y de control conectadas? El progreso no cambiará.",
+  "Reset progress to zero and archive all current polls? Participants and history will be kept. This cannot be undone.": "¿Reiniciar el progreso a cero y archivar todas las votaciones actuales? Se conservarán los participantes y el historial. No se puede deshacer.",
+  "Clear all viewer names/classes and expire their sessions? All current polls will be archived with their votes. Operators and progress will be kept. This cannot be undone.": "¿Borrar los nombres y clases de todos los espectadores y caducar sus sesiones? Se archivarán las votaciones con sus votos. Se conservarán los operadores y el progreso. No se puede deshacer.",
+  "The confirmation does not match this action.": "La confirmación no coincide con esta acción.",
+  "Owner action not found.": "No se ha encontrado esa acción de propietario.",
+  "reset event progress": "reinició el progreso del evento",
+  "cleared test participants": "borró los participantes de prueba",
+  "prepared a clean event": "preparó un evento limpio",
+  "previewed the finale for connected clients": "mostró una vista previa del final a los clientes conectados"
+});
+  const en = Object.fromEntries(Object.keys(es).map(key => [key, key]));
+  Object.assign(en, { AVAILABLE: "Available", ACTIVE: "Active", COMPLETED: "Completed", FAILED: "Failed", SKIPPED: "Skipped", LOCKED: "Locked", SECRET: "Secret", OPEN: "Open", CLOSED: "Closed", DRAFT: "Draft", NEXT_QUEST: "Next quest", NEXT_GAME: "Next game", YES_NO: "Yes / No", CUSTOM: "Custom choices", OWNER: "Owner", MODERATOR: "Moderator", VIEWER: "Viewer", MANUAL_OVERRIDE: "Manual selection", AUTO_TWITCH: "Twitch Auto" });
+  const catalogs = { en, es };
+  // Count-sensitive labels share the same keys in server and browser rendering.
+  const singular = {
+    es: { "{count} ACTIVE": "{count} ACTIVA", "{count} TO GO ✦": "FALTA {count} ✦", "{count} secret quests waiting to be revealed.": "{count} misión secreta por descubrir.", "{count} KNOWN QUESTS": "{count} MISIÓN CONOCIDA", "{count} HIDDEN": "{count} OCULTA" },
+    en: { "{count} secret quests waiting to be revealed.": "{count} secret quest waiting to be revealed.", "{count} KNOWN QUESTS": "{count} KNOWN QUEST" }
+  };
+  // The API keeps its existing English error contract. Match only known system templates;
+  // custom poll/quest/player content never passes through this resolver.
+  const errorTemplates = ["{label} is required.", "{label} must be 2–{max} characters without control characters or angle brackets.", "Cannot {action} a {status} quest.", "Cannot {action} this poll."];
+  const matchers = errorTemplates.map(key => {
+    const names = [];
+    const expression = key.split(/(\{\w+\})/).map(part => {
+      if (/^\{\w+\}$/.test(part)) { names.push(part.slice(1,-1)); return "(.+?)"; }
+      return part.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    }).join("");
+    return { key, names, pattern: new RegExp(`^${expression}$`) };
+  });
+  function translate(lang, key, params = {}) {
+    if (!key) return "";
+    if (!en[key]) {
+      for (const matcher of matchers) {
+        const match = String(key).match(matcher.pattern);
+        if (match && key !== matcher.key) return translate(lang, matcher.key, Object.fromEntries(matcher.names.map((name, i) => [name, catalogs[lang]?.[match[i+1]] ?? match[i+1]])));
+      }
+      if (lang === "es" && /^Twitch .+ failed(?: \(HTTP \d+\)| or timed out)\. Check configuration and retry\.$/.test(key)) return "La operación de Twitch ha fallado o ha tardado demasiado. Comprueba la configuración e inténtalo de nuevo.";
+    }
+    const text = (Number(params.count) === 1 ? singular[lang]?.[key] : undefined) ?? catalogs[lang]?.[key] ?? en[key] ?? key;
+    return String(text).replace(/\{(\w+)\}/g, (match, name) => params[name] === undefined ? match : String(params[name]));
+  }
+  function questText(quest, field, lang) {
+    const other = lang === "es" ? "en" : "es";
+    const options = [quest.translations?.[lang]?.[field], quest.translations?.[other]?.[field], quest[field]];
+    return options.find(value => typeof value === "string" && value.trim())?.trim() || translate(lang, field === "title" ? "Quest" : "No description available.");
+  }
+  function language(preference, browser, control = false) {
+    return ["es", "en"].includes(preference) ? preference : control ? "es" : /^es(?:-|$)/i.test(browser || "") ? "es" : "en";
+  }
+  return { catalogs, translate, questText, language };
+});

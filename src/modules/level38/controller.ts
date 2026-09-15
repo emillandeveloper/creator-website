@@ -1,3 +1,4 @@
+import { ownerConfirmations, OwnerAction } from "./owner-tools";
 import { Request, Response } from "express";
 import { PrismaClient } from "@prisma/client";
 import { Level38Auth } from "./auth";
@@ -103,6 +104,14 @@ export class Level38Controller {
     const operator = await this.auth.requireOperator(req);
     const body = bodyObject(req.body);
     res.json(await this.service.undo(operator.id, identifier(body.auditId), revision(body.controlRevision ?? body.revision)));
+  };
+
+  ownerTool = async (req: Request, res: Response): Promise<void> => {
+    const operator = await this.auth.requireOwner(req);
+    const action = req.params.action;
+    if (!Object.prototype.hasOwnProperty.call(ownerConfirmations, action)) throw new Level38Error(404, "Owner action not found.");
+    const body = bodyObject(req.body);
+    res.json(await this.service.ownerTool(operator.id, action as OwnerAction, body.confirmation, revision(body.controlRevision)));
   };
 
   configureGame = async (req: Request, res: Response): Promise<void> => {

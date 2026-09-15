@@ -1,12 +1,16 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<%= lang %>">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>LEVEL 38</title>
   <link rel="stylesheet" href="/css/level38.css">
+  <link rel="stylesheet" href="/css/level38-locale.css">
+  <script defer src="/js/level38/translations.js"></script>
+  <script defer src="/js/level38/locale.js"></script>
 </head>
 <body class="level38">
-  <main class="l38-shell"><a href="/">← Creator hub</a><h1>LEVEL 38</h1><p><%= message %></p><a href="/level38">Try again</a></main>
+  <div id="l38-class-names" hidden data-names="<%= JSON.stringify(classNames) %>"></div>
+  <main class="l38-shell"><%- include("language") %><a href="/" data-i18n="← Creator hub"><%= t("← Creator hub") %></a><h1>LEVEL 38</h1><p data-i18n="<%= message %>"><%= t(message) %></p><a href="/level38" data-i18n="Try again"><%= t("Try again") %></a></main>
 </body>
 </html>

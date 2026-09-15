@@ -7,11 +7,12 @@ import { Level38Config } from "./config";
 import { Level38Controller } from "./controller";
 import { createLevel38Routes } from "./routes";
 import { EVENT_SLUG, Level38Service, Level38State } from "./service";
-import { UnlockEvent } from "./celebration";
+import { UnlockEvent, PreviewEvent } from "./celebration";
 import { readTwitchConfig } from "./twitch/config";
 import { TwitchApi } from "./twitch/api";
 import { TwitchStore, Publisher } from "./twitch/store";
 import { TwitchIntegration } from "./twitch/integration";
+import { localization } from "./localization";
 
 const domainEvents = ["quest:activated", "quest:completed", "quest:failed", "quest:skipped", "quest:revealed", "quest:available", "poll:created", "poll:edited", "poll:opened", "poll:vote-updated", "poll:closed", "poll:winner", "game:changed", "game:configured", "action:undone"] as const;
 type DomainEvent = typeof domainEvents[number];
@@ -19,10 +20,12 @@ type ServerEvents = Record<DomainEvent, (event: { revision: number }) => void> &
   "level38:state": (state: Level38State) => void;
   "level38:unavailable": () => void;
   "level38:unlocked": (event: UnlockEvent) => void;
+  "level38:celebration-preview": (event: PreviewEvent) => void;
 }
 
 export function mountLevel38(app: Application, server: HttpServer, config: Level38Config) {
   if (!config.enabled) {
+    app.use("/level38", localization);
     app.use("/level38", (req, res) => {
       const message = "LEVEL 38 is being prepared. Please check back soon.";
       if (req.path.startsWith("/api/")) res.status(503).json({ error: message });
@@ -41,6 +44,7 @@ export function mountLevel38(app: Application, server: HttpServer, config: Level
     channel.emit("level38:state", state);
     // Domain notifications contain no entity metadata or operator information.
     if (domainEvents.includes(change.type as DomainEvent)) channel.emit(change.type as DomainEvent, { revision: change.revision });
+    if (change.preview) channel.emit("level38:celebration-preview", change.preview);
     if (change.unlock) channel.emit("level38:unlocked", change.unlock);
   };
   const service = new Level38Service(db, publish);

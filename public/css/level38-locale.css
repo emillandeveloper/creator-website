@@ -1,0 +1,24 @@
+.level38 .l38-language { display: flex; align-items: center; gap: 6px; flex: 0 0 auto; }
+.level38 #celebration-preview-label { padding: 8px; border: 2px solid #90bee0; color: #bce2ff; background: #18354b; }
+.level38 .l38-language button { font: 11px/1.5 "Silkscreen", monospace; min-width: 44px; padding: 8px; background: #142437; color: #d3dfeb; border: 2px solid #637c94; box-shadow: inset 0 -2px #0a1421; }
+.level38 .l38-language button[aria-pressed="true"] { border-color: #e4be73; color: #f1d394; background: #293240; }
+.level38 .l38-language > span { color: #a3b2c2; }
+.l38-public .l38-nav > .l38-language { width: auto; }
+.level38 [data-i18n] { overflow-wrap: anywhere; }
+.l38-public .l38-level-up-copy h2 { font-size: clamp(24px, 4vw, 48px); }
+@media (max-width: 850px) {
+  .l38-public .l38-nav > .l38-language { margin-left: auto; }
+}
+@media (max-width: 650px) {
+  .l38-public .l38-nav > div:not(.l38-language) { order: 2; }
+  .l38-public .l38-nav .l38-brand { font-size: 8px; gap: 5px; }
+  .l38-public .l38-section-heading { align-items: flex-start; }
+  .l38-public .l38-section-heading h2 { font-size: 14px; }
+  .l38-public .l38-log-toolbar { grid-template-columns: minmax(0, 1fr); }
+  .l38-public .l38-option { grid-template-columns: minmax(0,1fr) auto; }
+  .l38-public .l38-option > span:first-child { grid-column: 1 / -1; }
+  .l38-public .l38-option button { justify-self: end; }
+  .l38-public .l38-option .l38-percent { text-align: left; }
+  .l38-public .l38-identity { flex-wrap: wrap; }
+  .l38-public .l38-secret-placeholder > strong { white-space: normal; }
+}

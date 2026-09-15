@@ -1,0 +1,29 @@
+<details class="l38-owner-tools l38-panel" id="owner-tools">
+  <summary data-i18n="OWNER · RESET / TEST TOOLS"><%= t('OWNER · RESET / TEST TOOLS') %></summary>
+  <p data-i18n="These actions affect the shared event and connected viewers. Reset actions cannot be undone."><%= t('These actions affect the shared event and connected viewers. Reset actions cannot be undone.') %></p>
+  <section>
+    <h3 data-i18n="Finale preview"><%= t('Finale preview') %></h3>
+    <p data-i18n="Show a labeled preview on all connected public and control pages. Real progress and unlock sequence stay unchanged."><%= t('Show a labeled preview on all connected public and control pages. Real progress and unlock sequence stay unchanged.') %></p>
+    <button type="button" class="l38-secondary" data-owner-tool="preview" data-i18n="TEST · PREVIEW LEVEL 38 FINALE"><%= t('TEST · PREVIEW LEVEL 38 FINALE') %></button>
+  </section>
+  <section>
+    <h3 data-i18n="Reset event progress"><%= t('Reset event progress') %></h3>
+    <p data-i18n="Restore quest starting states and hide secrets. Select the first enabled game in manual mode. Archive all current polls; keep participants, votes and audit history."><%= t('Restore quest starting states and hide secrets. Select the first enabled game in manual mode. Archive all current polls; keep participants, votes and audit history.') %></p>
+    <button type="button" class="l38-danger" data-owner-tool="progress" data-i18n="RESET EVENT PROGRESS"><%= t('RESET EVENT PROGRESS') %></button>
+  </section>
+  <section>
+    <h3 data-i18n="Clear test participants"><%= t('Clear test participants') %></h3>
+    <p data-i18n="Clear all viewer names/classes and expire their sessions. Archive current polls and retain anonymous vote history. Progress and operators remain unchanged."><%= t('Clear all viewer names/classes and expire their sessions. Archive current polls and retain anonymous vote history. Progress and operators remain unchanged.') %></p>
+    <button type="button" class="l38-danger" data-owner-tool="participants" data-i18n="CLEAR TEST PARTICIPANTS"><%= t('CLEAR TEST PARTICIPANTS') %></button>
+  </section>
+  <section>
+    <h3 data-i18n="Prepare clean event"><%= t('Prepare clean event') %></h3>
+    <p data-i18n="Combine progress reset and participant cleanup. Archive previous polls and keep the audit trail. Quest definitions, translations, games and operator keys are preserved."><%= t('Combine progress reset and participant cleanup. Archive previous polls and keep the audit trail. Quest definitions, translations, games and operator keys are preserved.') %></p>
+    <form id="prepare-event-form">
+      <label for="reset-confirmation" data-i18n="Type RESET LEVEL 38 to confirm"><%= t('Type RESET LEVEL 38 to confirm') %></label>
+      <input id="reset-confirmation" required pattern="RESET LEVEL 38" maxlength="14" autocomplete="off" spellcheck="false">
+      <button type="submit" class="l38-danger" data-i18n="PREPARE CLEAN EVENT"><%= t('PREPARE CLEAN EVENT') %></button>
+    </form>
+  </section>
+  <details><summary data-i18n="Archived test rounds · read only"><%= t('Archived test rounds · read only') %></summary><ol id="archived-polls"></ol></details>
+</details>

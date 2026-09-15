@@ -1,0 +1,87 @@
+/* A compact live-operation desk using the public page's RPG window vocabulary. */
+.l38-control .l38-panel.l38-owner-tools { border-color: #bb818b; margin-top: 24px; }
+.l38-owner-tools > summary { color: #f0b7b7; font: 12px/1.7 "Silkscreen", monospace; cursor: pointer; padding: 12px 0; }
+.l38-owner-tools > section { padding: 20px 0; border-top: 2px solid #654b59; }
+.l38-owner-tools > section p { max-width: 75ch; }
+.l38-owner-tools #archived-polls { max-height: 400px; overflow: auto; overflow-wrap: anywhere; }
+.l38-control .l38-level-up-copy h2 { font-size: clamp(24px, 4vw, 48px); }
+.l38-control { --l38-frame: #70849b; --l38-frame-shadow: inset 0 0 0 2px #09131f, inset 0 0 0 4px #30445c, 4px 4px #060c15; }
+.l38-control .l38-shell { max-width: 1440px; padding-top: 20px; }
+.l38-control .l38-nav { padding: 12px 16px; background: #131f30; border: 2px solid var(--l38-frame); box-shadow: var(--l38-frame-shadow); }
+.l38-control .l38-nav a { padding: 10px 4px; min-height: 44px; }
+.l38-control header { padding: 24px 0 8px; display: flex; align-items: baseline; flex-wrap: wrap; gap: 8px 24px; }
+.l38-control header .l38-eyebrow { flex-basis: 100%; margin-bottom: 0; }
+.l38-control h1 { font-size: clamp(24px, 3.5vw, 38px); }
+.l38-control h2 { font-size: 15px; }
+.l38-control .l38-panel { padding: 20px; border: 2px solid var(--l38-frame); box-shadow: var(--l38-frame-shadow); margin-bottom: 20px; }
+.l38-control .l38-command-nav { display: flex; flex-wrap: wrap; gap: 12px; margin: 0 0 24px; }
+.l38-control .l38-command-nav a { font: 11px/1.6 "Silkscreen", monospace; background: #21384d; padding: 12px; border: 2px solid #7c96ad; box-shadow: inset 0 -3px #0e2033, 3px 3px #060c15; text-decoration: none; min-height: 44px; }
+.l38-control .l38-live-desk { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 24px; }
+.l38-control .l38-live-desk > .l38-panel:first-child { background: #192b34; border-color: #a6a575; }
+.l38-control #logout { float: right; margin: 0 0 12px 12px; }
+.l38-control #progress-text { clear: both; }
+.l38-control .l38-segments { height: 30px; border: 2px solid #637b6a; margin: 16px 0; }
+.l38-control progress.l38-sr-only { width: 1px; height: 1px; }
+.l38-control .l38-live-status { display: flex; flex-wrap: wrap; gap: 8px; }
+.l38-control .l38-tag { border: 2px solid #637b95; background: #10221e; white-space: normal; font-size: 9px; }
+.l38-control #undo-description { font-size: 15px; color: #e4d2a3; }
+.l38-control #undo-reason { font-size: 13px; }
+.l38-control .l38-control-workspace { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 24px; align-items: start; }
+.l38-control .l38-control-workspace > * { min-width: 0; scroll-margin-top: 16px; }
+.l38-control .l38-quest-section { border: 2px solid #526b83; background: #121f30; margin: 0 0 20px; padding: 16px; box-shadow: inset 0 0 0 2px #080f1b, 3px 3px #060c15; }
+.l38-control .l38-quest-section[data-quest-section="ACTIVE"] { border-color: #bba16a; background: #1c2b30; }
+.l38-control .l38-quest-section > summary { font: 12px/1.7 "Silkscreen", monospace; padding: 8px 0; min-height: 44px; cursor: pointer; }
+.l38-control .l38-quest-section > h2 { margin-bottom: 16px; }
+.l38-control .l38-quest-section[open] > summary { margin-bottom: 16px; border-bottom: 2px solid #40556a; }
+.l38-control .l38-quest-section .l38-grid { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+.l38-control details.l38-quest-section .l38-grid { max-height: 520px; overflow-y: auto; padding: 4px 8px 8px 4px; scrollbar-color: #70849b #101c2b; }
+.l38-control .l38-card { border: 2px solid #68819b; box-shadow: inset 0 0 0 2px #0a1421, 3px 3px #080e18; padding: 16px; }
+.l38-control .l38-card-top { flex-wrap: wrap; padding-bottom: 10px; border-bottom: 2px solid #3c5266; }
+.l38-control .l38-card h3 { font-size: 16px; }
+.l38-control .l38-card > p:not(.l38-meta) { font-size: 14px; line-height: 1.75; white-space: pre-line; }
+.l38-control .l38-status { font: 9px/1.6 "Silkscreen", monospace; border: 0; padding: 4px 8px; background: #0b1725; }
+.l38-control .l38-card .l38-meta { margin-bottom: 12px; }
+.l38-control .l38-card[data-status="ACTIVE"] { border-color: #d9bb71; }
+.l38-control .l38-card[data-status="COMPLETED"] { border-color: #79a985; }
+.l38-control .l38-card[data-status="FAILED"] { border-color: #bf8189; }
+.l38-control .l38-card[data-status="SECRET"] { border-color: #aa92c3; }
+.l38-control button { font: 11px/1.6 "Silkscreen", monospace; border-width: 2px; box-shadow: inset 2px 2px #f6da9d, inset -2px -3px #a77d44, 3px 3px #070e19; }
+.l38-control .l38-card button { font-size: 10px; margin: 4px 8px 4px 0; }
+.l38-control .l38-danger { box-shadow: inset 2px 2px #a66a74, inset -2px -3px #442d36, 3px 3px #070e19; border-color: #bb818b; }
+.l38-control .l38-secondary { box-shadow: inset 2px 2px #38516b, inset -2px -3px #101e30, 3px 3px #070e19; border-color: #8098b2; }
+.l38-control input, .l38-control select { border: 2px solid #71879e; box-shadow: inset 2px 2px #050d17; min-width: 0; }
+.l38-control #poll-form > input, .l38-control #poll-form > select { width: 100%; }
+.l38-control #game-form select { flex: 1 1 180px; }
+.l38-control .l38-options-editor { width: 100%; padding: 12px; border: 2px solid #586e88; background: #0c1927; }
+.l38-control .l38-options-editor legend { font-size: 12px; padding: 0 4px; }
+.l38-control .l38-option-editor { align-items: start; }
+.l38-control .l38-option-editor input, .l38-control .l38-option-editor select { min-width: 0; flex-basis: 100%; }
+.l38-control .l38-poll { border-color: #7ba0c1; }
+.l38-control .l38-poll h3 { font-size: 18px; }
+.l38-control .l38-poll .l38-meta { border-bottom: 2px solid #405770; padding-bottom: 12px; }
+.l38-control .l38-option { padding: 12px; border: 2px solid #526d89; background: #101d2e; }
+.l38-control .l38-option > span:first-child { min-width: 0; }
+.l38-control .l38-result { border: 2px solid #8cb395; }
+.l38-control .l38-poll > select, .l38-control .l38-poll > input { display: block; width: calc(100% - 10px); }
+.l38-control .l38-poll-history summary, .l38-control .l38-config-panel > summary { padding: 14px; border: 2px solid #637b95; background: #192b40; font: 11px/1.7 "Silkscreen", monospace; cursor: pointer; margin-bottom: 16px; }
+.l38-control #audit-panel { margin-top: 8px; }
+.l38-control #audit-list { max-height: 320px; padding-left: 22px; }
+.l38-control #audit-list li { padding: 12px 4px; border-bottom: 1px solid #3c5066; overflow-wrap: anywhere; }
+.l38-control #message:not(:empty) { padding: 12px 16px; border: 2px solid #c8b277; background: #233442; }
+.l38-control #message:empty { min-height: 0; margin: 0; }
+.l38-control #login-form { max-width: 580px; }
+.l38-control #access-key { flex: 1 1 240px; }
+@media (max-width: 1050px) {
+  .l38-control .l38-live-desk { grid-template-columns: minmax(0, 1fr) minmax(0, .85fr); }
+  .l38-control .l38-control-workspace { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; }
+}
+@media (max-width: 800px) {
+  .l38-control .l38-live-desk, .l38-control .l38-control-workspace { grid-template-columns: minmax(0, 1fr); gap: 0; }
+  .l38-control #logout { float: none; }
+  .l38-control .l38-panel { padding: 18px; }
+  .l38-control .l38-quest-section { padding: 12px; }
+  .l38-control .l38-shell { padding: 12px 16px 32px; }
+  .l38-control .l38-segments { gap: 2px; }
+  .l38-control input, .l38-control select { font-size: 16px; }
+  .l38-control .l38-twitch-status { grid-template-columns: minmax(0, 1fr); }
+}

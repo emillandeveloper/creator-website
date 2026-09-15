@@ -4,12 +4,14 @@ import { Level38Config } from "./config";
 import { Level38Controller } from "./controller";
 import { Level38Error } from "./errors";
 import { TwitchIntegration } from "./twitch/integration";
+import { localization } from "./localization";
 
 type AsyncHandler = (req: Request, res: Response) => Promise<void>;
 const wrap = (handler: AsyncHandler): express.RequestHandler => (req, res, next) => { handler(req, res).catch(next); };
 
 export function createLevel38Routes(controller: Level38Controller, config: Level38Config, twitch?: TwitchIntegration): Router {
   const router = Router();
+  router.use(localization);
   router.use((_req, res, next) => {
     res.set({
       "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff", "Referrer-Policy": "same-origin",
@@ -47,6 +49,7 @@ export function createLevel38Routes(controller: Level38Controller, config: Level
   router.post("/api/control/polls/:id/winner", limited(30, 60 * 1000), wrap(controller.selectWinner));
   router.post("/api/control/undo", limited(60, 60 * 1000), wrap(controller.undo));
   router.post("/api/polls/:id/vote", limited(120, 60 * 1000), wrap(controller.vote));
+  router.post("/api/owner/tools/:action", limited(12, 60 * 1000), wrap(controller.ownerTool));
   router.post("/api/owner/games/:id", limited(30, 60 * 1000), wrap(controller.configureGame));
   router.post("/api/control/twitch/:action", limited(10, 60 * 1000), wrap(controller.twitchAction));
   router.post("/api/owner/games/:id/twitch", limited(30, 60 * 1000), wrap(controller.mapTwitchGame));

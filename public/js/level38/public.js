@@ -1,6 +1,7 @@
 (function () {
   "use strict";
-  const { byId, request, renderState, renderPolls, renderSprite, connect, message } = window.Level38;
+  const t = (key, params = {}) => window.Level38I18n?.t(key, params) ?? key.replace(/\{(\w+)\}/g, (match, name) => params[name] === undefined ? match : String(params[name]));
+  const { byId, request, renderState, renderPolls, renderSprite, connect, message, setText } = window.Level38;
   const effects = window.Level38Experience;
   let state = null;
   let viewer = null;
@@ -21,26 +22,30 @@
   }
   async function refresh() {
     try { receive(await request("state")); }
-    catch { byId("connection").textContent = "Updates unavailable. Retrying…"; }
+    catch { setText("connection", "Updates unavailable. Retrying…"); }
   }
   function showViewer(next) {
     viewer = next;
-    byId("viewer-status").textContent = viewer.nickname ? `Welcome back, ${viewer.nickname}. Your party is waiting.` : "Watch the adventure, or pick a name and join the party.";
-    byId("viewer-name").textContent = viewer.nickname || "Wandering adventurer";
-    byId("viewer-class").textContent = viewer.class?.displayName || "Your story starts here";
+    byId("viewer-status").textContent = viewer.nickname ? t("Welcome back, {name}. Your party is waiting.", { name: viewer.nickname }) : t("Watch the adventure, or pick a name and join the party.");
+    byId("viewer-name").textContent = viewer.nickname || t("Wandering adventurer");
+    byId("viewer-class").textContent = viewer.class ? (window.Level38I18n?.className(viewer.class) || viewer.class.displayName) : t("Your story starts here");
     renderSprite(byId("viewer-sprite"), viewer.class);
     if (byId("join-form").hidden) byId("nickname").value = viewer.nickname || "";
-    byId("join-open").textContent = viewer.nickname ? "Edit player name" : "JOIN THE PARTY +";
-    byId("join-form").querySelector('[type="submit"]').textContent = viewer.nickname ? "Save player name" : "Join party";
+    byId("join-open").textContent = viewer.nickname ? t("Edit player name") : t("JOIN THE PARTY +");
+    byId("join-form").querySelector('[type="submit"]').textContent = viewer.nickname ? t("Save player name") : t("Join party");
     byId("join-open").disabled = false;
     if (viewer.classAssigned) {
-      byId("viewer-status").textContent = `Welcome to the party, ${viewer.nickname}!`;
-      byId("welcome-name").textContent = viewer.nickname; byId("welcome-class").textContent = viewer.class?.displayName || "Adventurer";
+      byId("viewer-status").textContent = t("Welcome to the party, {name}!", { name: viewer.nickname });
+      byId("welcome-name").textContent = viewer.nickname; byId("welcome-class").textContent = window.Level38I18n?.className(viewer.class) || viewer.class?.displayName || t("Adventurer");
       renderSprite(byId("welcome-sprite"), viewer.class);
       byId("party-welcome").hidden = false;
       clearTimeout(welcomeTimer); welcomeTimer = setTimeout(() => { byId("party-welcome").hidden = true; }, 7000);
     }
   }
+  document.addEventListener("level38:language", () => {
+    if (state) { renderState(state); renderPolls(state, handlers, myVotes, voting); }
+    if (viewer) { showViewer({ ...viewer, classAssigned: false }); byId("welcome-class").textContent = window.Level38I18n?.className(viewer.class) || viewer.class?.displayName || t("Adventurer"); }
+  });
   function session() {
     if (sessionPromise) return sessionPromise;
     sessionPromise = (async () => {
@@ -69,7 +74,10 @@
       receive(await request(`polls/${encodeURIComponent(pollId)}/vote`, { optionId }));
       myVotes = [...myVotes.filter((vote) => vote.pollId !== pollId), { pollId, optionId }];
       message("Vote saved. You can change it while the poll is open.");
-    } catch (error) { message(error.message); if (error.status === 401) viewer = null; }
+    } catch (error) {
+      message(error.message);
+      if (error.status === 401) { viewer = null; myVotes = []; await session().catch(() => {}); openJoin(); }
+    }
     finally { voting = false; if (state) renderPolls(state, handlers, myVotes, false); }
   }
   const socket = connect((next) => { effects?.observe(next); receive(next); }, refresh);
@@ -89,7 +97,14 @@
     const button = event.currentTarget.querySelector('[type="submit"]'); button.disabled = true;
     identityGeneration++;
     try {
-      const next = await request("join", { nickname: byId("nickname").value });
+      const name = byId("nickname").value;
+      let next;
+      try { next = await request("join", {nickname:name}); }
+      catch (error) {
+        if (error.status !== 401) throw error;
+        viewer = null; myVotes = []; await session();
+        next = await request("join", {nickname:name});
+      }
       closeJoin(); showViewer(next); message(next.classAssigned ? "You joined the party. Adventure awaits!" : "Player name saved. Your class is unchanged.");
       if (pendingVote) { const vote = pendingVote; pendingVote = null; await castVote(vote.pollId, vote.optionId); }
     } catch (error) { message(error.message); }

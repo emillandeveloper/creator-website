@@ -25,7 +25,7 @@ export async function undoCandidate(tx: Prisma.TransactionClient, eventId: strin
     if (!quest || !matches(questSnapshot(quest), after)) reason = "The quest has changed since this action.";
     else if (await tx.pollOption.count({ where: { questId: quest.id, poll: { status: "OPEN" } } })) reason = "This quest is in an open poll. Close the poll before changing its state.";
     else if (before.status === "SECRET" || (before.isSecret === true && before.revealedAt === null)) {
-      if (await tx.pollOption.count({ where: { questId: quest.id, poll: { status: { not: "DRAFT" } } } })) reason = "A published poll references this quest, so it cannot be hidden again.";
+      if (await tx.pollOption.count({ where: { questId: quest.id, poll: { archivedAt: null, status: { not: "DRAFT" } } } })) reason = "A published poll references this quest, so it cannot be hidden again.";
     }
   } else if (audit.action === "game:changed") {
     const event = await tx.event.findUniqueOrThrow({ where: { id: eventId } });

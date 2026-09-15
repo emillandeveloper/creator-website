@@ -1,3 +1,6 @@
+import { randomUUID } from "crypto";
+import { applyOwnerTool, OwnerAction } from "./owner-tools";
+import { PreviewEvent } from "./celebration";
 import { Prisma, PrismaClient } from "@prisma/client";
 import { canOperate, isOwner } from "./auth";
 import { Level38Error } from "./errors";
@@ -14,7 +17,7 @@ export interface Change {
   action: string; entityId: string; before: Prisma.InputJsonObject; after: Prisma.InputJsonObject;
   metadata?: Prisma.InputJsonObject; undoOfId?: string;
 }
-export type PublicChange = { type: string; revision: number; unlock?: UnlockEvent };
+export type PublicChange = { type: string; revision: number; unlock?: UnlockEvent; preview?: PreviewEvent };
 
 export class Level38Service {
   constructor(private readonly db: PrismaClient, private readonly publish?: (state: Level38State, change: PublicChange) => void) {}
@@ -49,9 +52,14 @@ export class Level38Service {
         milestone: crossedTarget ? { sequence: current.unlockSequence, occurredAt: current.lastUnlockedAt!, completed: completedAfter } : null };
     }, { maxWait: 10000, timeout: 15000 });
     this.publish?.(result.state, { type: result.type, revision: result.state.event.revision,
+      ...(result.type === "owner:preview" ? { preview: { version: 1 as const, id: randomUUID(), startsAt: Date.now() + 400, durationMs: 6500, target: result.state.event.target } } : {}),
       ...(result.milestone ? { unlock: unlockEvent(result.milestone.sequence, result.state.event.revision, result.milestone.occurredAt,
         result.milestone.completed, result.state.event.target) } : {}) });
     return result.state;
+  }
+
+  ownerTool(operatorId: string, action: OwnerAction, confirmation: unknown, expectedRevision: number): Promise<Level38State> {
+    return this.mutate(operatorId, expectedRevision, (tx, eventId) => applyOwnerTool(tx, eventId, action, confirmation), true);
   }
 
   changeQuest(operatorId: string, questId: string, action: QuestAction, expectedRevision: number): Promise<Level38State> {
@@ -176,7 +184,7 @@ export class Level38Service {
   }
 
   viewerVotes(participantId: string) {
-    return this.db.vote.findMany({ where: { participantId, poll: { event: { slug: "level38" }, status: { not: "DRAFT" } } }, select: { pollId: true, optionId: true } });
+    return this.db.vote.findMany({ where: { participantId, poll: { archivedAt: null, event: { slug: "level38" }, status: { not: "DRAFT" } } }, select: { pollId: true, optionId: true } });
   }
 
   undo(operatorId: string, auditId: string, expectedRevision: number): Promise<Level38State> {

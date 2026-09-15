@@ -15,3 +15,6 @@ export function unlockEvent(sequence: number, revision: number, occurredAt: Date
   return { version: 1, id: `level38:unlock:${sequence}`, sequence, revision, occurredAt: occurredAt.toISOString(),
     completed, target, startsAt: Date.now() + 400, durationMs: 6500 };
 }
+
+// Preview has no durable sequence, revision or completed-count claim.
+export interface PreviewEvent { version: 1; id: string; startsAt: number; durationMs: number; target: number }

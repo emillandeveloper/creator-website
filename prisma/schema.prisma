@@ -48,6 +48,7 @@ model Event {
   revision        Int        @default(0)
   controlRevision Int        @default(0)
   unlockSequence  Int        @default(0)
+  resetSequence   Int        @default(0)
   lastUnlockedAt  DateTime?
   currentGameId   String?
   gameSource      GameSource @default(AUTO_TWITCH)
@@ -91,7 +92,10 @@ model Quest {
   number      Int
   title       String
   description String
+  titleEs     String?
+  descriptionEs String?
   status      QuestStatus  @default(AVAILABLE)
+  initialStatus QuestStatus @default(AVAILABLE)
   isSecret    Boolean      @default(false)
   revealedAt  DateTime?
   completedAt DateTime?
@@ -152,6 +156,7 @@ model Poll {
   createdAt        DateTime     @default(now())
   openedAt         DateTime?
   closedAt         DateTime?
+  archivedAt       DateTime?
   voteRevision     Int          @default(0)
   winningOptionId  String?
   winningPollId    String?

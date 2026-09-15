@@ -9,7 +9,7 @@ export const pollInclude = {
 export type PollWithOptions = Prisma.PollGetPayload<{ include: typeof pollInclude }>;
 
 export async function pollOrThrow(tx: Prisma.TransactionClient, eventId: string, id: string): Promise<PollWithOptions> {
-  const poll = await tx.poll.findFirst({ where: { id, eventId }, include: pollInclude });
+  const poll = await tx.poll.findFirst({ where: { id, eventId, archivedAt: null }, include: pollInclude });
   if (!poll) throw new Level38Error(404, "Poll not found.");
   return poll;
 }

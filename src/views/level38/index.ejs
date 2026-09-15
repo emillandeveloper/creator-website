@@ -1,102 +1,105 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="<%= lang %>">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0c1523">
-  <meta name="description" content="One birthday. A party of adventurers. Help Leo complete 38 quests across his favourite RPGs. Join the LEVEL 38 adventure.">
-  <title>LEVEL 38 — Join Leo's party</title>
+  <meta name="description" data-i18n-content="One birthday. A party of adventurers. Help Leo complete 38 quests across his favourite RPGs. Join the LEVEL 38 adventure." content="<%= t("One birthday. A party of adventurers. Help Leo complete 38 quests across his favourite RPGs. Join the LEVEL 38 adventure.") %>">
+  <title data-i18n="LEVEL 38 — Join Leo&#x27;s party"><%= t("LEVEL 38 — Join Leo's party") %></title>
   <link rel="preload" href="/fonts/level38/Silkscreen-Regular.ttf" as="font" type="font/ttf" crossorigin>
   <link rel="stylesheet" href="/css/level38.css">
+  <script defer src="/js/level38/translations.js"></script>
+  <script defer src="/js/level38/locale.js"></script>
   <link rel="stylesheet" href="/css/level38-public.css">
+  <link rel="stylesheet" href="/css/level38-locale.css">
   <script defer src="/level38/socket.io/socket.io.js"></script>
   <script defer src="/js/level38/common.js"></script>
   <script defer src="/js/level38/experience.js"></script>
   <script defer src="/js/level38/public.js"></script>
 </head>
 <body class="level38 l38-public">
-  <a class="l38-skip" href="#adventure">Skip to the adventure</a>
+  <div id="l38-class-names" hidden data-names="<%= JSON.stringify(classNames) %>"></div>
+  <a class="l38-skip" href="#adventure" data-i18n="Skip to the adventure"><%= t("Skip to the adventure") %></a>
   <main class="l38-shell" id="adventure">
-    <nav class="l38-nav" aria-label="Site">
-      <a class="l38-brand" href="/"><span aria-hidden="true">✦</span> LEO NIFELHEIM <span class="l38-nav-divider">/</span> <span>LV.38</span></a>
-      <div><a href="#quest-log">Quest journal</a><a href="#voting" id="vote-nav" class="<%= state.polls.some(p => p.status === 'OPEN') ? 'is-open' : '' %>"><%= state.polls.some(p => p.status === 'OPEN') ? 'Vote now ·' : 'Vote' %></a><a href="#party">Your party</a></div>
-    </nav>
+    <nav class="l38-nav" data-i18n-aria-label="Site" aria-label="<%= t("Site") %>">
+      <a class="l38-brand" href="/"><span aria-hidden="true">✦</span> LEO NIFELHEIM <span class="l38-nav-divider">/</span> <span data-i18n="LV.38"><%= t("LV.38") %></span></a>
+      <div><a href="#quest-log" data-i18n="Quest journal"><%= t("Quest journal") %></a><a href="#voting" id="vote-nav" class="<%= state.polls.some(p => p.status === 'OPEN') ? 'is-open' : '' %>"><%= t(state.polls.some(p => p.status === 'OPEN') ? 'Vote now ·' : 'Vote') %></a><a href="#party" data-i18n="Your party"><%= t("Your party") %></a></div>
+    <%- include("language") %></nav>
     <header class="l38-hero">
       <div class="l38-hero-copy">
-        <p class="l38-eyebrow"><span class="l38-live-dot" aria-hidden="true"></span> THE BIRTHDAY ADVENTURE</p>
+        <p class="l38-eyebrow"><span class="l38-live-dot" aria-hidden="true"></span> <span data-i18n="THE BIRTHDAY ADVENTURE"><%= t("THE BIRTHDAY ADVENTURE") %></span></p>
         <h1>LEVEL <span>38</span><span class="l38-title-star" aria-hidden="true">✦</span></h1>
-        <p class="l38-intro">One birthday. A whole party of adventurers.</p>
-        <p>Help Leo complete 38 quests across his favourite RPGs.<br class="l38-desktop-break"> Follow the journey. Choose what happens next.</p>
-        <div class="l38-hero-links"><a class="l38-button" href="#quest-log">EXPLORE QUESTS <span aria-hidden="true">↓</span></a><span class="l38-small">Everyone has a place in the party.</span></div>
+        <p class="l38-intro" data-i18n="One birthday. A whole party of adventurers."><%= t("One birthday. A whole party of adventurers.") %></p>
+        <p><span data-i18n="Help Leo complete 38 quests across his favourite RPGs."><%= t("Help Leo complete 38 quests across his favourite RPGs.") %></span><br class="l38-desktop-break"> <span data-i18n="Follow the journey. Choose what happens next."><%= t("Follow the journey. Choose what happens next.") %></span></p>
+        <div class="l38-hero-links"><a class="l38-button" href="#quest-log"><span data-i18n="EXPLORE QUESTS"><%= t("EXPLORE QUESTS") %></span> <span aria-hidden="true">↓</span></a><span class="l38-small" data-i18n="Everyone has a place in the party."><%= t("Everyone has a place in the party.") %></span></div>
       </div>
-      <div class="l38-landscape"><img src="/img/level38/world.svg" alt="A little hilltop castle beneath a golden moon, with a winding path through the mountains." width="960" height="440"><span>YOUR NEXT ADVENTURE IS WAITING.</span></div>
+      <div class="l38-landscape"><img src="/img/level38/world.svg" data-i18n-alt="A little hilltop castle beneath a golden moon, with a winding path through the mountains." alt="<%= t("A little hilltop castle beneath a golden moon, with a winding path through the mountains.") %>" width="960" height="440"><span data-i18n="YOUR NEXT ADVENTURE IS WAITING."><%= t("YOUR NEXT ADVENTURE IS WAITING.") %></span></div>
     </header>
-    <section class="l38-progress-panel l38-panel" aria-label="Event progress">
-      <div class="l38-progress-heading"><div><p class="l38-eyebrow">THE ROAD TO LEVEL 38</p><h2 id="progress-text"><%= state.event.completed %> / <%= state.event.target %> quests completed</h2></div><span id="journey-label" class="l38-tag"><%= state.event.completed >= state.event.target ? 'TARGET REACHED' : 'ADVENTURE IN PROGRESS' %></span></div>
+    <section class="l38-progress-panel l38-panel" data-i18n-aria-label="Event progress" aria-label="<%= t("Event progress") %>">
+      <div class="l38-progress-heading"><div><p class="l38-eyebrow" data-i18n="THE ROAD TO LEVEL 38"><%= t("THE ROAD TO LEVEL 38") %></p><h2 id="progress-text"><%= t('{completed} / {target} quests completed', state.event) %></h2></div><span id="journey-label" class="l38-tag"><%= t(state.event.completed >= state.event.target ? 'TARGET REACHED' : 'ADVENTURE IN PROGRESS') %></span></div>
       <progress id="progress" class="l38-sr-only" value="<%= state.event.completed %>" max="<%= state.event.target %>" aria-labelledby="progress-text"></progress>
       <div id="progress-segments" class="l38-segments" aria-hidden="true"><% for(let i = 0; i < state.event.target; i++) { %><span class="<%= i < state.event.completed ? 'is-complete' : '' %>"></span><% } %></div>
-      <div class="l38-progress-foot"><span>Every quest brings us closer.</span><span id="progress-remaining"><%= Math.max(0, state.event.target - state.event.completed) %> TO GO <span aria-hidden="true">✦</span></span></div>
+      <div class="l38-progress-foot"><span data-i18n="Every quest brings us closer."><%= t("Every quest brings us closer.") %></span><span id="progress-remaining"><%= t('{count} TO GO ✦', {count:Math.max(0, state.event.target - state.event.completed)}) %></span></div>
     </section>
     <div class="l38-adventure-grid">
       <div class="l38-main-column">
         <section class="l38-current-game l38-panel" aria-labelledby="current-game-label">
           <div class="l38-game-emblem" aria-hidden="true"><img src="/img/level38/sword.svg" width="40" height="40" alt=""></div>
-          <div><p class="l38-eyebrow" id="current-game-label">NOW EXPLORING</p><h2 id="current-game"><%= state.games.find(game => game.id === state.event.currentGameId)?.title || 'Between adventures' %></h2><p class="l38-small">Leo's current adventure · chosen live</p></div>
-          <a href="#active-quests" class="l38-game-arrow" aria-label="Go to active objectives">↘</a>
+          <div><p class="l38-eyebrow" id="current-game-label" data-i18n="NOW EXPLORING"><%= t("NOW EXPLORING") %></p><h2 id="current-game"><%= state.games.find(game => game.id === state.event.currentGameId)?.title || t('Between adventures') %></h2><p class="l38-small" data-i18n="Leo&#x27;s current adventure · chosen live"><%= t("Leo's current adventure · chosen live") %></p></div>
+          <a href="#active-quests" class="l38-game-arrow" data-i18n-aria-label="Go to active objectives" aria-label="<%= t("Go to active objectives") %>">↘</a>
         </section>
         <section id="active-quests" class="l38-active-panel l38-panel" aria-labelledby="active-heading">
-          <div class="l38-section-heading"><h2 id="active-heading"><span aria-hidden="true">◆</span> Current objectives</h2><span id="active-count" class="l38-tag"><%= state.quests.filter(q => q.status === 'ACTIVE').length %> ACTIVE</span></div>
-          <div id="active-board"><% const active = state.quests.filter(q => q.status === 'ACTIVE'); for(const quest of active) { %><%- include('quest-card', {quest, state}) %><% } %><% if(!active.length) { %><p class="l38-empty">A moment at the campfire.<br>Leo's next objective will appear here.</p><% } %></div>
+          <div class="l38-section-heading"><h2 id="active-heading"><span aria-hidden="true">◆</span> <span data-i18n="Current objectives"><%= t("Current objectives") %></span></h2><span id="active-count" class="l38-tag"><%= t('{count} ACTIVE', {count: state.quests.filter(q => q.status === 'ACTIVE').length}) %></span></div>
+          <div id="active-board"><% const active = state.quests.filter(q => q.status === 'ACTIVE'); for(const quest of active) { %><%- include('quest-card', {quest, state}) %><% } %><% if(!active.length) { %><p class="l38-empty" data-i18n="A moment at the campfire. Leo&#x27;s next objective will appear here."><%= t("A moment at the campfire. Leo's next objective will appear here.") %></p><% } %></div>
         </section>
         <section id="voting" class="l38-voting-section" aria-labelledby="voting-heading">
-          <div class="l38-section-heading"><h2 id="voting-heading"><span aria-hidden="true">▸</span> The party decides</h2><span class="l38-small">YOUR VOICE, OUR ADVENTURE</span></div>
+          <div class="l38-section-heading"><h2 id="voting-heading"><span aria-hidden="true">▸</span> <span data-i18n="The party decides"><%= t("The party decides") %></span></h2><span class="l38-small" data-i18n="YOUR VOICE, OUR ADVENTURE"><%= t("YOUR VOICE, OUR ADVENTURE") %></span></div>
           <div id="poll-board">
             <% for(const poll of state.polls) { %>
               <section class="l38-panel l38-poll" data-status="<%= poll.status %>">
-                <p class="l38-meta">ROUND <%= String(poll.number).padStart(2, '0') %> · <%= poll.status %></p><h3><%= poll.title %></h3>
-                <p data-total><%= poll.totalVotes %> votes</p>
+                <p class="l38-meta"><%= t('ROUND {number} · {status}', {number:String(poll.number).padStart(2, '0'),status:t(poll.status)}) %></p><h3><%= poll.title %></h3>
+                <p data-total><%= t(poll.totalVotes === 1 ? '{count} vote' : '{count} votes', {count: poll.totalVotes}) %></p>
                 <% for(const option of poll.options) { const percent = poll.totalVotes ? Math.round(option.votes / poll.totalVotes * 100) : 0; %>
-                  <div class="l38-option l38-static-option <%= poll.effectiveWinnerId === option.id ? 'is-winner' : '' %>"><span><%= option.label %> — <%= option.votes %></span><span class="l38-percent"><%= percent %>%</span><div class="l38-static-meter" aria-hidden="true"><% for(let i = 0; i < 20; i++) { %><span class="<%= i < Math.round(percent / 5) ? 'is-filled' : '' %>"></span><% } %></div></div>
+                  <div class="l38-option l38-static-option <%= poll.effectiveWinnerId === option.id ? 'is-winner' : '' %>"><span><%= poll.type === 'YES_NO' ? t(option.label) : poll.type === 'NEXT_QUEST' ? questText({...option, title: option.label}, 'title') : option.label %> — <%= option.votes %></span><span class="l38-percent"><%= percent %>%</span><div class="l38-static-meter" aria-hidden="true"><% for(let i = 0; i < 20; i++) { %><span class="<%= i < Math.round(percent / 5) ? 'is-filled' : '' %>"></span><% } %></div></div>
                 <% } %>
-                <% if(poll.effectiveWinnerId) { %><p class="l38-result">Winner: <%= poll.options.find(o => o.id === poll.effectiveWinnerId)?.label %></p><% } %>
+                <% if(poll.effectiveWinnerId) { %><p class="l38-result"><%= t('Winner: {label}{override}', { label: poll.type === 'YES_NO' ? t(poll.options.find(o => o.id === poll.effectiveWinnerId)?.label) : poll.type === 'NEXT_QUEST' ? questText({...poll.options.find(o => o.id === poll.effectiveWinnerId), title: poll.options.find(o => o.id === poll.effectiveWinnerId)?.label}, 'title') : poll.options.find(o => o.id === poll.effectiveWinnerId)?.label, override: poll.overrideOptionId ? t(' (moderator override)') : '' }) %></p><% } %>
               </section>
             <% } %>
-            <% if(!state.polls.length) { %><div class="l38-panel l38-empty"><span class="l38-empty-icon" aria-hidden="true">?</span><h3>The next choice is just ahead.</h3><p>When a vote opens, choose Leo's next move right here.</p></div><% } %>
+            <% if(!state.polls.length) { %><div class="l38-panel l38-empty"><span class="l38-empty-icon" aria-hidden="true">?</span><h3 data-i18n="The next choice is just ahead."><%= t("The next choice is just ahead.") %></h3><p data-i18n="When a vote opens, choose Leo&#x27;s next move right here."><%= t("When a vote opens, choose Leo's next move right here.") %></p></div><% } %>
           </div>
         </section>
       </div>
-      <aside id="party" class="l38-party-column" aria-label="Your party membership">
+      <aside id="party" class="l38-party-column" data-i18n-aria-label="Your party membership" aria-label="<%= t("Your party membership") %>">
         <section class="l38-party-panel l38-panel">
-          <p class="l38-eyebrow">THERE'S ROOM FOR ONE MORE</p><h2>Your place in the party</h2>
-          <div class="l38-identity"><div id="viewer-sprite" class="l38-avatar-slot" aria-hidden="true"><span>?</span></div><div><span class="l38-character-label">PLAYER</span><strong id="viewer-name">Wandering adventurer</strong><span class="l38-character-label">CLASS</span><span id="viewer-class">Your story starts here</span></div></div>
-          <p id="viewer-status">Watch the adventure, or pick a name and join the party.</p>
-          <button id="join-open" type="button" disabled>JOIN THE PARTY <span aria-hidden="true">+</span></button>
+          <p class="l38-eyebrow" data-i18n="THERE&#x27;S ROOM FOR ONE MORE"><%= t("THERE'S ROOM FOR ONE MORE") %></p><h2 data-i18n="Your place in the party"><%= t("Your place in the party") %></h2>
+          <div class="l38-identity"><div id="viewer-sprite" class="l38-avatar-slot" aria-hidden="true"><span>?</span></div><div><span class="l38-character-label" data-i18n="PLAYER"><%= t("PLAYER") %></span><strong id="viewer-name" data-i18n="Wandering adventurer"><%= t("Wandering adventurer") %></strong><span class="l38-character-label" data-i18n="CLASS"><%= t("CLASS") %></span><span id="viewer-class" data-i18n="Your story starts here"><%= t("Your story starts here") %></span></div></div>
+          <p id="viewer-status" data-i18n="Watch the adventure, or pick a name and join the party."><%= t("Watch the adventure, or pick a name and join the party.") %></p>
+          <button id="join-open" type="button" disabled data-i18n="JOIN THE PARTY +"><%= t("JOIN THE PARTY +") %></button>
           <form id="join-form" hidden aria-labelledby="join-heading">
-            <p class="l38-eyebrow">PARTY REGISTRATION</p>
-            <h3 id="join-heading">Choose your player name</h3>
-            <label for="nickname">Player name · 2–24 characters</label><input id="nickname" name="nickname" minlength="2" maxlength="24" autocomplete="nickname" placeholder="e.g. Garnet" required>
-            <p class="l38-small">One random class. Yours for this adventure. All party members have an equal vote.</p>
-            <button type="submit">Join party</button><button class="l38-secondary" id="join-cancel" type="button">Cancel</button>
+            <p class="l38-eyebrow" data-i18n="PARTY REGISTRATION"><%= t("PARTY REGISTRATION") %></p>
+            <h3 id="join-heading" data-i18n="Choose your player name"><%= t("Choose your player name") %></h3>
+            <label for="nickname" data-i18n="Player name · 2–24 characters"><%= t("Player name · 2–24 characters") %></label><input id="nickname" name="nickname" minlength="2" maxlength="24" autocomplete="nickname" data-i18n-placeholder="e.g. Garnet" placeholder="<%= t("e.g. Garnet") %>" required>
+            <p class="l38-small" data-i18n="One random class. Yours for this adventure. All party members have an equal vote."><%= t("One random class. Yours for this adventure. All party members have an equal vote.") %></p>
+            <button type="submit" data-i18n="Join party"><%= t("Join party") %></button><button class="l38-secondary" id="join-cancel" type="button" data-i18n="Cancel"><%= t("Cancel") %></button>
           </form>
-          <p class="l38-small l38-party-note">No account needed. Your class stays with this browser.</p>
-          <div id="party-welcome" class="l38-party-welcome" role="status" hidden><p class="l38-eyebrow">NEW PARTY MEMBER</p><div class="l38-welcome-character"><div id="welcome-sprite" class="l38-avatar-slot" aria-hidden="true"></div><div><strong id="welcome-name"></strong><span id="welcome-class"></span></div></div><button type="button" id="welcome-dismiss" class="l38-secondary">Onward!</button></div>
+          <p class="l38-small l38-party-note" data-i18n="No account needed. Your class stays with this browser."><%= t("No account needed. Your class stays with this browser.") %></p>
+          <div id="party-welcome" class="l38-party-welcome" role="status" hidden><p class="l38-eyebrow" data-i18n="NEW PARTY MEMBER"><%= t("NEW PARTY MEMBER") %></p><div class="l38-welcome-character"><div id="welcome-sprite" class="l38-avatar-slot" aria-hidden="true"></div><div><strong id="welcome-name"></strong><span id="welcome-class"></span></div></div><button type="button" id="welcome-dismiss" class="l38-secondary" data-i18n="Onward!"><%= t("Onward!") %></button></div>
         </section>
-        <section class="l38-guide-panel l38-panel" aria-label="How the adventure works"><p class="l38-eyebrow">A SMALL GUIDE TO A BIG NIGHT</p><ol><li><span>01</span><div><strong>Follow the quest</strong><p>Leo plays. We share the journey.</p></div></li><li><span>02</span><div><strong>Choose the next move</strong><p>Vote whenever the party is called.</p></div></li><li><span>03</span><div><strong>Reach level 38 together</strong><p>38 victories. One birthday to remember.</p></div></li></ol></section>
-        <div class="l38-secret-note"><span aria-hidden="true">✧</span><div><strong>Some paths are still hidden.</strong><p id="secret-count"><%= state.secretCount %> secret quests waiting to be revealed.</p></div></div>
+        <section class="l38-guide-panel l38-panel" data-i18n-aria-label="How the adventure works" aria-label="<%= t("How the adventure works") %>"><p class="l38-eyebrow" data-i18n="A SMALL GUIDE TO A BIG NIGHT"><%= t("A SMALL GUIDE TO A BIG NIGHT") %></p><ol><li><span>01</span><div><strong data-i18n="Follow the quest"><%= t("Follow the quest") %></strong><p data-i18n="Leo plays. We share the journey."><%= t("Leo plays. We share the journey.") %></p></div></li><li><span>02</span><div><strong data-i18n="Choose the next move"><%= t("Choose the next move") %></strong><p data-i18n="Vote whenever the party is called."><%= t("Vote whenever the party is called.") %></p></div></li><li><span>03</span><div><strong data-i18n="Reach level 38 together"><%= t("Reach level 38 together") %></strong><p data-i18n="38 victories. One birthday to remember."><%= t("38 victories. One birthday to remember.") %></p></div></li></ol></section>
+        <div class="l38-secret-note"><span aria-hidden="true">✧</span><div><strong data-i18n="Some paths are still hidden."><%= t("Some paths are still hidden.") %></strong><p id="secret-count"><%= t('{count} secret quests waiting to be revealed.', {count: state.secretCount}) %></p></div></div>
       </aside>
     </div>
     <p id="message" class="l38-message" role="status" aria-live="polite"></p>
     <section id="quest-log" class="l38-journal" aria-labelledby="journal-heading">
-      <div class="l38-section-heading"><div><p class="l38-eyebrow">EVERY ADVENTURE HAS A STORY</p><h2 id="journal-heading">The quest journal</h2></div><span id="journal-count" class="l38-small"><%= state.quests.length %> KNOWN QUESTS</span></div>
-      <div class="l38-log-toolbar"><label for="quest-game">Adventure<select id="quest-game"><option value="all">All games</option><option value="current">Current game</option><% for(const game of state.games) { %><option value="<%= game.id %>"><%= game.title %></option><% } %></select></label><label for="quest-status">Quest status<select id="quest-status"><option value="all">All statuses</option><% for(const status of ['ACTIVE','AVAILABLE','COMPLETED','LOCKED','FAILED','SKIPPED','SECRET']) { %><option value="<%= status %>"><%= status[0] + status.slice(1).toLowerCase() %></option><% } %></select></label><label for="quest-search">Find a quest<input type="search" id="quest-search" placeholder="Search the journal" maxlength="100"></label></div>
+      <div class="l38-section-heading"><div><p class="l38-eyebrow" data-i18n="EVERY ADVENTURE HAS A STORY"><%= t("EVERY ADVENTURE HAS A STORY") %></p><h2 id="journal-heading" data-i18n="The quest journal"><%= t("The quest journal") %></h2></div><span id="journal-count" class="l38-small"><%= t('{count} KNOWN QUESTS', {count: state.quests.length}) %></span></div>
+      <div class="l38-log-toolbar"><label for="quest-game"><span data-i18n="Adventure"><%= t("Adventure") %></span><select id="quest-game"><option value="all" data-i18n="All games"><%= t("All games") %></option><option value="current" data-i18n="Current game"><%= t("Current game") %></option><% for(const game of state.games) { %><option value="<%= game.id %>"><%= game.title %></option><% } %></select></label><label for="quest-status"><span data-i18n="Quest status"><%= t("Quest status") %></span><select id="quest-status"><option value="all" data-i18n="All statuses"><%= t("All statuses") %></option><% for(const status of ['ACTIVE','AVAILABLE','COMPLETED','LOCKED','FAILED','SKIPPED','SECRET']) { %><option value="<%= status %>" data-i18n="<%= status %>"><%= t(status) %></option><% } %></select></label><label for="quest-search"><span data-i18n="Find a quest"><%= t("Find a quest") %></span><input type="search" id="quest-search" data-i18n-placeholder="Search the journal" placeholder="<%= t("Search the journal") %>" maxlength="100"></label></div>
       <div id="quest-board"><div class="l38-grid"><% for(const quest of state.quests) { %><%- include('quest-card', {quest, state}) %><% } %></div></div>
       <p id="quest-filter-status" class="l38-small" role="status"></p>
-      <div id="secret-placeholder" class="l38-secret-placeholder"><span aria-hidden="true">?</span><div><h3>Undiscovered quests</h3><p>Some stories are best kept secret. New paths will appear when Leo reveals them.</p></div><strong><%= state.secretCount %> HIDDEN</strong></div>
+      <div id="secret-placeholder" class="l38-secret-placeholder"><span aria-hidden="true">?</span><div><h3 data-i18n="Undiscovered quests"><%= t("Undiscovered quests") %></h3><p data-i18n="Some stories are best kept secret. New paths will appear when Leo reveals them."><%= t("Some stories are best kept secret. New paths will appear when Leo reveals them.") %></p></div><strong><%= t('{count} HIDDEN', {count: state.secretCount}) %></strong></div>
     </section>
-    <footer class="l38-footer"><span>✦ LEVEL 38 <span class="l38-small">A birthday adventure by Leo Nifelheim.</span></span><span id="connection" role="status">Connecting to the party…</span><a href="/level38/control">Operator control ↗</a></footer>
-    <noscript><p>Read the quest journal above. Enable JavaScript to join, vote, and follow live updates.</p></noscript>
+    <footer class="l38-footer"><span>✦ LEVEL 38 <span class="l38-small" data-i18n="A birthday adventure by Leo Nifelheim."><%= t("A birthday adventure by Leo Nifelheim.") %></span></span><span id="connection" role="status" data-i18n="Connecting to the party…"><%= t("Connecting to the party…") %></span><a href="/level38/control" data-i18n="Operator control ↗"><%= t("Operator control ↗") %></a></footer>
+    <noscript><p data-i18n="Read the quest journal above. Enable JavaScript to join, vote, and follow live updates."><%= t("Read the quest journal above. Enable JavaScript to join, vote, and follow live updates.") %></p></noscript>
   </main>
-  <div id="event-toast" class="l38-toast" role="status" aria-live="polite" hidden></div>
-  <div id="level-up" class="l38-level-up" hidden role="status" aria-live="polite"><canvas id="fireworks" aria-hidden="true"></canvas><div class="l38-level-up-copy"><p>✦ THE PARTY DID IT ✦</p><h2>LEVEL UP!</h2><h3>LEO REACHED LV.38</h3><p id="celebration-progress">38 / 38 QUESTS COMPLETED</p><span>One legendary birthday. Thanks for being part of it.</span><button type="button" id="celebration-dismiss">Back to the adventure</button></div></div>
+  <%- include("celebration") %>
 </body>
 </html>
