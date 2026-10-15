@@ -1,13 +1,13 @@
 import { AuditLog, Prisma, QuestStatus } from "@prisma/client";
 import { Level38Error } from "./errors";
-import { pollSnapshot } from "./poll-domain";
+import { assertGamePollEligibility, assertOpenable, pollInclude, pollSnapshot } from "./poll-domain";
 import { questSnapshot } from "./quest-domain";
 
 export function jsonObject(value: Prisma.JsonValue | null): Prisma.JsonObject {
   return value && typeof value === "object" && !Array.isArray(value) ? value : {};
 }
 
-const reversible = new Set(["quest:activated", "quest:completed", "quest:failed", "quest:skipped", "quest:revealed", "quest:available", "game:changed", "poll:opened", "poll:closed"]);
+const reversible = new Set(["quest:activated", "quest:completed", "quest:failed", "quest:skipped", "quest:revealed", "quest:available", "quest:game", "game:changed", "poll:opened", "poll:closed"]);
 const matches = (actual: object, stored: Prisma.JsonObject): boolean => Object.entries(actual).every(([key, value]) => stored[key] === value);
 
 export async function undoCandidate(tx: Prisma.TransactionClient, eventId: string): Promise<{ audit: AuditLog | null; reason: string | null }> {
@@ -21,22 +21,29 @@ export async function undoCandidate(tx: Prisma.TransactionClient, eventId: strin
   else if (["TWITCH", "TWITCH_AUTO"].includes(String(jsonObject(audit.metadata).source))) reason = "Use a manual game override to replace Twitch auto. Automatic game changes cannot be undone.";
   else if (jsonObject(audit.metadata).version !== 2) reason = "This older action does not contain a complete undo snapshot.";
   else if (audit.action.startsWith("quest:")) {
-    const quest = await tx.quest.findFirst({ where: { id: audit.entityId, eventId } });
+    const quest = await tx.quest.findFirst({ where: { id: audit.entityId, eventId, retiredAt: null } });
     if (!quest || !matches(questSnapshot(quest), after)) reason = "The quest has changed since this action.";
     else if (await tx.pollOption.count({ where: { questId: quest.id, poll: { status: "OPEN" } } })) reason = "This quest is in an open poll. Close the poll before changing its state.";
+    else if (await tx.poll.count({ where: { eventId, contextQuestId: quest.id, status: "OPEN", archivedAt: null } })) reason = "This quest has an open game poll. Close it before changing the quest.";
+    else if (typeof before.gameId !== "string" || !await tx.questGame.count({ where: { questId: quest.id, gameId: before.gameId, game: { enabled: true } } })) reason = "The previous quest game is no longer enabled and eligible.";
     else if (before.status === "SECRET" || (before.isSecret === true && before.revealedAt === null)) {
-      if (await tx.pollOption.count({ where: { questId: quest.id, poll: { archivedAt: null, status: { not: "DRAFT" } } } })) reason = "A published poll references this quest, so it cannot be hidden again.";
+      if (await tx.pollOption.count({ where: { questId: quest.id, poll: { archivedAt: null, status: { not: "DRAFT" } } } }) ||
+        await tx.poll.count({ where: { eventId, contextQuestId: quest.id, archivedAt: null, status: { not: "DRAFT" } } })) reason = "A published poll references this quest, so it cannot be hidden again.";
     }
   } else if (audit.action === "game:changed") {
     const event = await tx.event.findUniqueOrThrow({ where: { id: eventId } });
     if (event.currentGameId !== after.gameId) reason = "The current game has changed since this action.";
     else if (typeof before.gameId === "string" && !await tx.game.findFirst({ where: { id: before.gameId, eventId, enabled: true } })) reason = "The previous game is no longer enabled.";
   } else {
-    const poll = await tx.poll.findFirst({ where: { id: audit.entityId, eventId } });
+    const poll = await tx.poll.findFirst({ where: { id: audit.entityId, eventId }, include: pollInclude });
     if (!poll || !matches(pollSnapshot(poll), after)) reason = "The poll, votes, or result changed after this action.";
     else if (audit.action === "poll:opened" && (poll.voteRevision > 0 || await tx.vote.count({ where: { pollId: poll.id } }) > 0)) reason = "Votes have been received. Opening this round can no longer be undone.";
     else if (audit.action === "poll:closed" && (poll.winningOptionId || poll.overrideOptionId)) reason = "The winner has been accepted or overridden. This poll cannot be reopened by undo.";
     else if (audit.action === "poll:closed" && await tx.poll.count({ where: { eventId, status: "OPEN", id: { not: poll.id } } })) reason = "Another poll is open.";
+    else if (audit.action === "poll:closed") {
+      try { assertOpenable(poll); await assertGamePollEligibility(tx, eventId, poll); }
+      catch (error) { if (error instanceof Level38Error) reason = error.message; else throw error; }
+    }
   }
   return { audit, reason };
 }
@@ -49,6 +56,7 @@ export async function applyUndo(tx: Prisma.TransactionClient, eventId: string, a
   if (audit.action.startsWith("quest:")) {
     await tx.quest.update({ where: { id: audit.entityId }, data: {
       status: before.status as QuestStatus, isSecret: before.isSecret === true,
+      gameId: String(before.gameId),
       completedAt: typeof before.completedAt === "string" ? new Date(before.completedAt) : null,
       revealedAt: typeof before.revealedAt === "string" ? new Date(before.revealedAt) : null,
     } });

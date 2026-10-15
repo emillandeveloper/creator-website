@@ -79,7 +79,7 @@ test("Phase 2 moderator, voting, undo and concurrency workflows", { timeout: 120
     assert.match((await control()).audit[0].description, /revealed quest/);
     const hidden = snapshot(); await undo();
     assert.equal(JSON.stringify(await hidden).includes(secret.title), false);
-    assert.equal(JSON.stringify(await publicState()).includes(secret.id), false);
+    assert.equal((await publicState()).quests.find(q => q.id === secret.id).title, "???");
     assert.equal((await f.call("/")).data.includes(secret.title), false);
   });
 

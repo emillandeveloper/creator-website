@@ -4,7 +4,7 @@ import { PreviewEvent } from "./celebration";
 import { Prisma, PrismaClient } from "@prisma/client";
 import { canOperate, isOwner } from "./auth";
 import { Level38Error } from "./errors";
-import { assertOpenable, leadingOptionIds, pollOrThrow, pollSnapshot, prepareOptions } from "./poll-domain";
+import { assertGamePollEligibility, assertOpenable, leadingOptionIds, pollOrThrow, pollSnapshot, prepareOptions } from "./poll-domain";
 import { isHidden, questSnapshot, questTransition } from "./quest-domain";
 import { eventOrThrow, Level38State, readState } from "./state";
 import { applyUndo } from "./undo";
@@ -38,9 +38,9 @@ export class Level38Service {
       if (!operator || operator.disabled || !canOperate(operator.role) || (ownerOnly && !isOwner(operator.role))) {
         throw new Level38Error(403, ownerOnly ? "This action requires the owner role." : "Operator access is no longer available.");
       }
-      const completedBefore = await tx.quest.count({ where: { eventId: event.id, status: "COMPLETED" } });
+      const completedBefore = await tx.quest.count({ where: { eventId: event.id, retiredAt: null, status: "COMPLETED" } });
       const action = await change(tx, event.id);
-      const completedAfter = await tx.quest.count({ where: { eventId: event.id, status: "COMPLETED" } });
+      const completedAfter = await tx.quest.count({ where: { eventId: event.id, retiredAt: null, status: "COMPLETED" } });
       const crossedTarget = completedBefore < event.target && completedAfter >= event.target;
       if (crossedTarget) await tx.event.update({ where: { id: event.id },
         data: { unlockSequence: { increment: 1 }, lastUnlockedAt: new Date() } });
@@ -76,16 +76,52 @@ export class Level38Service {
 
   changeQuest(operatorId: string, questId: string, action: QuestAction, expectedRevision: number): Promise<Level38State> {
     return this.mutate(operatorId, expectedRevision, async (tx, eventId) => {
-      const quest = await tx.quest.findFirst({ where: { id: questId, eventId }, include: { game: true } });
+      const quest = await tx.quest.findFirst({ where: { id: questId, eventId, retiredAt: null }, include: { game: true, eligibleGames: true } });
       if (!quest) throw new Level38Error(404, "Quest not found.");
       const status = questTransition(quest, action);
       if (["activate", "available", "reveal"].includes(action) && !quest.game.enabled) throw new Level38Error(409, "This quest's game is disabled.");
+      if (action === "activate" && !quest.eligibleGames.some((association) => association.gameId === quest.gameId)) throw new Level38Error(409, "Choose an eligible game before starting this quest.");
       if (await tx.pollOption.count({ where: { questId, poll: { status: "OPEN" } } })) throw new Level38Error(409, "Close the poll containing this quest before changing its state.");
+      if (await tx.poll.count({ where: { eventId, contextQuestId: questId, status: "OPEN", archivedAt: null } })) throw new Level38Error(409, "Close this quest's game poll before changing its state.");
       const updated = await tx.quest.update({ where: { id: questId }, data: { status,
         completedAt: status === "COMPLETED" ? new Date() : null,
         ...(action === "reveal" ? { revealedAt: new Date(), isSecret: true } : {}) } });
       const names = { activate: "activated", complete: "completed", fail: "failed", skip: "skipped", reveal: "revealed", available: "available" };
       return { action: `quest:${names[action]}`, entityId: questId, before: questSnapshot(quest), after: questSnapshot(updated) };
+    });
+  }
+
+  configureQuestGames(operatorId: string, questId: string, gameIds: string[], expectedRevision: number): Promise<Level38State> {
+    if (!Array.isArray(gameIds) || !gameIds.length || gameIds.length > 100 || new Set(gameIds).size !== gameIds.length || gameIds.some((id) => typeof id !== "string" || !id)) {
+      throw new Level38Error(400, "Choose distinct eligible games for this quest.");
+    }
+    return this.mutate(operatorId, expectedRevision, async (tx, eventId) => {
+      const quest = await tx.quest.findFirst({ where: { id: questId, eventId, retiredAt: null }, include: { eligibleGames: true } });
+      if (!quest) throw new Level38Error(404, "Quest not found.");
+      if (await tx.game.count({ where: { id: { in: gameIds }, eventId } }) !== gameIds.length) throw new Level38Error(400, "Choose games from this event.");
+      if (await tx.poll.count({ where: { eventId, contextQuestId: questId, status: "OPEN", archivedAt: null } }) ||
+        await tx.pollOption.count({ where: { questId, poll: { status: "OPEN", archivedAt: null } } })) throw new Level38Error(409, "Close this quest's open poll before changing eligible games.");
+      const preservesSelection = gameIds.includes(quest.gameId);
+      if (!preservesSelection && ["ACTIVE", "COMPLETED", "FAILED", "SKIPPED"].includes(quest.status)) throw new Level38Error(409, "Keep the selected game for an active or finished quest.");
+      await tx.questGame.deleteMany({ where: { questId, gameId: { notIn: gameIds } } });
+      await tx.questGame.createMany({ data: gameIds.map((gameId) => ({ eventId, questId, gameId })), skipDuplicates: true });
+      const updated = await tx.quest.update({ where: { id: questId }, data: preservesSelection ? {} : { gameId: gameIds[0] } });
+      return { action: "quest:games", entityId: questId,
+        before: { ...questSnapshot(quest), eligibleGameIds: quest.eligibleGames.map((association) => association.gameId) },
+        after: { ...questSnapshot(updated), eligibleGameIds: gameIds } };
+    });
+  }
+
+  selectQuestGame(operatorId: string, questId: string, gameId: string, expectedRevision: number): Promise<Level38State> {
+    return this.mutate(operatorId, expectedRevision, async (tx, eventId) => {
+      const quest = await tx.quest.findFirst({ where: { id: questId, eventId, retiredAt: null }, include: { eligibleGames: { include: { game: true } } } });
+      if (!quest) throw new Level38Error(404, "Quest not found.");
+      if (["COMPLETED", "FAILED", "SKIPPED"].includes(quest.status)) throw new Level38Error(409, "A finished quest retains its selected game.");
+      if (!quest.eligibleGames.some((association) => association.gameId === gameId && association.game.enabled)) throw new Level38Error(409, "Choose an enabled eligible game for this quest.");
+      if (quest.gameId === gameId) throw new Level38Error(409, "That game is already selected for this quest.");
+      if (await tx.poll.count({ where: { eventId, contextQuestId: questId, status: "OPEN", archivedAt: null } })) throw new Level38Error(409, "Close this quest's game poll before choosing its game.");
+      const updated = await tx.quest.update({ where: { id: questId }, data: { gameId } });
+      return { action: "quest:game", entityId: questId, before: questSnapshot(quest), after: questSnapshot(updated) };
     });
   }
 
@@ -130,14 +166,14 @@ export class Level38Service {
       if (previous && previous.status !== "DRAFT") throw new Level38Error(409, "Only draft polls can be edited. Create a new round instead.");
       if (previous && (previous.voteRevision !== 0 || previous.options.some((option) => option._count.votes > 0))) throw new Level38Error(409, "A poll with voting history cannot be edited.");
       const options = await prepareOptions(tx, eventId, input);
-      const poll = previous ?? await tx.poll.create({ data: { eventId, title: input.title, type: input.type, createdById: operatorId } });
+      const poll = previous ?? await tx.poll.create({ data: { eventId, title: input.title, type: input.type, contextQuestId: input.contextQuestId ?? null, createdById: operatorId } });
       // Only unpublished, vote-free draft options can be replaced; rounds and votes are never deleted.
       if (previous) await tx.pollOption.deleteMany({ where: { pollId: poll.id } });
-      await tx.poll.update({ where: { id: poll.id }, data: { title: input.title, type: input.type } });
+      await tx.poll.update({ where: { id: poll.id }, data: { title: input.title, type: input.type, contextQuestId: input.contextQuestId ?? null } });
       await tx.pollOption.createMany({ data: options.map((option) => ({ ...option, pollId: poll.id })) });
       return { action: previous ? "poll:edited" : "poll:created", entityId: poll.id,
-        before: previous ? { title: previous.title, type: previous.type, options: previous.options.map((option) => ({ label: option.label, questId: option.questId, gameId: option.gameId })) } : {},
-        after: { title: input.title, type: input.type, number: poll.number, options } };
+        before: previous ? { title: previous.title, type: previous.type, contextQuestId: previous.contextQuestId, options: previous.options.map((option) => ({ label: option.label, questId: option.questId, gameId: option.gameId })) } : {},
+        after: { title: input.title, type: input.type, contextQuestId: input.contextQuestId ?? null, number: poll.number, options } };
     });
   }
 
@@ -148,9 +184,10 @@ export class Level38Service {
       if (action === "open") {
         if (await tx.poll.count({ where: { eventId, status: "OPEN" } })) throw new Level38Error(409, "Close the current poll first. Only one poll can be open.");
         assertOpenable(poll);
+        await assertGamePollEligibility(tx, eventId, poll);
         if (poll.type === "NEXT_QUEST") {
           const ids = poll.options.flatMap((option) => option.questId ? [option.questId] : []);
-          const enabled = await tx.quest.count({ where: { id: { in: ids }, game: { enabled: true } } });
+          const enabled = await tx.quest.count({ where: { id: { in: ids }, eventId, retiredAt: null, game: { enabled: true } } });
           if (enabled !== poll.options.length) throw new Level38Error(409, "A quest's game is disabled.");
         }
       }
@@ -168,11 +205,19 @@ export class Level38Service {
       if (!overrideReason && (poll.winningOptionId || poll.overrideOptionId)) throw new Level38Error(409, "A result is already selected. Use an explicit override to change it.");
       if (!overrideReason && !leadingOptionIds(poll).includes(optionId)) throw new Level38Error(409, "Accept a leading option, or supply an override reason. Zero-vote polls require an override.");
       if ((poll.overrideOptionId ?? poll.winningOptionId) === optionId) throw new Level38Error(409, "That option is already the winner.");
+      let questSelection: Prisma.InputJsonObject = {};
+      if (poll.type === "NEXT_GAME" && poll.contextQuestId) {
+        await assertGamePollEligibility(tx, eventId, poll);
+        if (!option.game || !option.game.enabled) throw new Level38Error(409, "The winning game is no longer enabled.");
+        const quest = await tx.quest.findFirstOrThrow({ where: { id: poll.contextQuestId, eventId, retiredAt: null } });
+        await tx.quest.update({ where: { id: quest.id }, data: { gameId: option.game.id } });
+        questSelection = { questId: quest.id, previousGameId: quest.gameId, selectedGameId: option.game.id };
+      }
       const updated = await tx.poll.update({ where: { id: poll.id }, data: overrideReason
         ? { overrideOptionId: optionId, overridePollId: poll.id, overrideReason, winnerAcceptedAt: new Date() }
         : { winningOptionId: optionId, winningPollId: poll.id, winnerAcceptedAt: new Date() } });
       const oldLabel = poll.options.find((item) => item.id === (poll.overrideOptionId ?? poll.winningOptionId))?.label ?? null;
-      return { action: "poll:winner", entityId: poll.id, before: { ...pollSnapshot(poll), winnerLabel: oldLabel }, after: { ...pollSnapshot(updated), winnerLabel: option.label }, metadata: { override: !!overrideReason } };
+      return { action: "poll:winner", entityId: poll.id, before: { ...pollSnapshot(poll), winnerLabel: oldLabel }, after: { ...pollSnapshot(updated), winnerLabel: option.label, ...questSelection }, metadata: { override: !!overrideReason } };
     });
   }
 
@@ -185,8 +230,9 @@ export class Level38Service {
       if (!participant.nickname) throw new Level38Error(403, "Choose a nickname before voting.");
       const poll = await pollOrThrow(tx, event.id, pollId);
       if (poll.status !== "OPEN") throw new Level38Error(409, "This poll is no longer open.");
+      await assertGamePollEligibility(tx, event.id, poll);
       const option = poll.options.find((item) => item.id === optionId);
-      if (!option || (option.quest && isHidden(option.quest))) throw new Level38Error(400, "Choose an option from this poll.");
+      if (!option || (option.quest && (isHidden(option.quest) || option.quest.retiredAt))) throw new Level38Error(400, "Choose an option from this poll.");
       await tx.vote.upsert({ where: { pollId_participantId: { pollId, participantId } }, create: { pollId, optionId, participantId }, update: { optionId } });
       await tx.poll.update({ where: { id: poll.id }, data: { voteRevision: { increment: 1 } } });
       return readState(tx, false);
@@ -208,7 +254,7 @@ export class Level38Service {
       const game = await tx.game.findFirst({ where: { id: gameId, eventId } });
       if (!game) throw new Level38Error(404, "Game not found.");
       if (!data.enabled && (await tx.event.count({ where: { id: eventId, currentGameId: gameId } }) ||
-        await tx.quest.count({ where: { gameId, status: "ACTIVE" } }) ||
+        await tx.quest.count({ where: { gameId, retiredAt: null, status: "ACTIVE" } }) ||
         await tx.pollOption.count({ where: { poll: { status: "OPEN" }, OR: [{ gameId }, { quest: { gameId } }] } }))) {
         throw new Level38Error(409, "Switch current game and finish its active quests/open polls before disabling this game.");
       }

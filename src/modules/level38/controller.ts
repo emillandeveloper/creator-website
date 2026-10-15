@@ -8,7 +8,7 @@ import { publicClass } from "./classes";
 import { joinParticipant } from "./participants";
 import { PartyRuntime } from "./party-runtime";
 import { TwitchIntegration } from "./twitch/integration";
-import { bodyObject, identifier, nickname, pollAction, pollInput, questAction, revision, textInput } from "./validation";
+import { bodyObject, gameIdentifiers, identifier, nickname, pollAction, pollInput, questAction, revision, textInput } from "./validation";
 
 export class Level38Controller {
   constructor(
@@ -103,6 +103,16 @@ export class Level38Controller {
     const body = bodyObject(req.body);
     const state = await this.service.changeGame(operator.id, body.gameId === null ? null : identifier(body.gameId), revision(body.controlRevision ?? body.revision));
     res.json(state);
+  };
+
+  configureQuestGames = async (req: Request, res: Response): Promise<void> => {
+    const operator = await this.auth.requireOperator(req), body = bodyObject(req.body);
+    res.json(await this.service.configureQuestGames(operator.id, identifier(req.params.id), gameIdentifiers(body.gameIds), revision(body.controlRevision)));
+  };
+
+  selectQuestGame = async (req: Request, res: Response): Promise<void> => {
+    const operator = await this.auth.requireOperator(req), body = bodyObject(req.body);
+    res.json(await this.service.selectQuestGame(operator.id, identifier(req.params.id), identifier(body.gameId), revision(body.controlRevision)));
   };
 
   savePoll = async (req: Request, res: Response): Promise<void> => {

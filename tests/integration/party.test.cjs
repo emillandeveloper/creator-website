@@ -101,7 +101,7 @@ test('Phase 5 additive upgrade preserves existing participant identity and opt-i
   await f.start();assert.equal((await fetch(f.origin+'/healthz')).status,503);
   f.cli('migrate','deploy');
   assert.deepEqual(await f.db.participant.findMany(),before.map(p=>({...p,streamVisible:true})));
-  assert.deepEqual(await f.db.event.findMany(),eventBefore.map(e=>({...e,partyEnabled:true,partyNameMode:'ENTRY',partyMaxVisible:30})));
+  assert.deepEqual(await f.db.event.findMany(),eventBefore.map(e=>({...e,partyEnabled:true,partyNameMode:'ALWAYS',partyMaxVisible:30})));
   assert.equal((await fetch(f.origin+'/healthz')).status,200);
   assert.match(f.cli('migrate','deploy').toString(),/No pending migrations/);
 });

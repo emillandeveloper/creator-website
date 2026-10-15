@@ -15,6 +15,7 @@
     "db:migrate:dev": "prisma migrate dev",
     "db:seed": "node dist/modules/level38/commands.js seed",
     "level38:operator": "node dist/modules/level38/commands.js operator",
+    "level38:quest-catalog": "node dist/modules/level38/commands.js quest-catalog",
     "test": "npm run build && node --test tests/*.test.cjs",
     "test:integration": "npm run build && node --test tests/integration/*.test.cjs"
   },

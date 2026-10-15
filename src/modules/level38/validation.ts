@@ -53,6 +53,7 @@ export function textInput(value: unknown, label: string, max = 160): string {
 export interface PollInput {
   title: string;
   type: PollType;
+  contextQuestId?: string | null;
   options: { label?: string; questId?: string; gameId?: string }[];
 }
 
@@ -62,6 +63,8 @@ export function pollInput(value: unknown): PollInput {
     throw new Level38Error(400, "Invalid poll type.");
   }
   const type = body.type as PollType;
+  const contextQuestId = body.contextQuestId === undefined || body.contextQuestId === null ? null : identifier(body.contextQuestId);
+  if (contextQuestId && type !== "NEXT_GAME") throw new Level38Error(400, "Only a next-game poll can target a quest.");
   if (!Array.isArray(body.options) || body.options.length > 8) throw new Level38Error(400, "Use up to 8 poll options.");
   const options = body.options.map((value: unknown) => {
     const option = bodyObject(value);
@@ -69,7 +72,14 @@ export function pollInput(value: unknown): PollInput {
     if (type === "NEXT_GAME") return { gameId: identifier(option.gameId) };
     return { label: textInput(option.label, "Option", 100) };
   });
-  return { title: textInput(body.title, "Poll question"), type, options: type === "YES_NO" ? [{ label: "Yes" }, { label: "No" }] : options };
+  return { title: textInput(body.title, "Poll question"), type, contextQuestId, options: type === "YES_NO" ? [{ label: "Yes" }, { label: "No" }] : options };
+}
+
+export function gameIdentifiers(value: unknown): string[] {
+  if (!Array.isArray(value) || value.length < 1 || value.length > 100) throw new Level38Error(400, "Choose 1–100 eligible games.");
+  const ids = value.map(identifier);
+  if (new Set(ids).size !== ids.length) throw new Level38Error(400, "Eligible games must be distinct.");
+  return ids;
 }
 
 export function pollAction(value: unknown): "open" | "close" {

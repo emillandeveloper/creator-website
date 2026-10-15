@@ -77,6 +77,7 @@ test('Phase 5 transparent overlay, real presence, responsive crowds and three-mi
   assert.deepEqual(await page.locator('.party-avatar').evaluateAll(nodes=>nodes.map(n=>n.dataset.presenceId)),beforeIds);
   const rev=async()=>(await f.db.event.findFirstOrThrow()).controlRevision;
   const configure=async patch=>{const r=await f.call('/api/control/party',{enabled:true,nameMode:'ENTRY',maxVisible:30,...patch,controlRevision:await rev()},owner.cookie);assert.equal(r.status,200);};
+  await configure({}); // Explicit ENTRY regression; Phase 5.1 now defaults to ALWAYS.
   await page.waitForTimeout(5200);assert.equal(await page.locator('.party-name:not(.is-faded)').count(),0);
   await configure({nameMode:'ALWAYS'});await page.waitForFunction(()=>[...document.querySelectorAll('.party-name')].every(el=>!el.hidden&&!el.classList.contains('is-faded')));
   await capture('1280-35-overflow-always');

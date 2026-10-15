@@ -49,7 +49,8 @@ test("class draw has exactly 24 equal slots, followed by five equal variant slot
     for (let j = 0; j < count; j++) assert.equal(randomVariantId(id, max => { assert.equal(max, count); return j; }), CLASS_CATALOG[i].variants[j].variantId);
   }
   assert.equal(randomVariantId("retired"), null);
-  assert.ok(CLASS_CATALOG.some(c => c.id === randomClassId()));
+  const sampledClass = randomClassId();
+  assert.ok(CLASS_CATALOG.some(c => c.id === sampledClass));
 });
 
 test("one shared clock repeats walk and ends a three-cycle celebration at 1500ms", () => {

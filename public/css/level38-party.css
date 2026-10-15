@@ -7,9 +7,13 @@ html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; background:
 .party-art, .party-art .l38-sprite { position: absolute; left: 0; top: 0; width: 32px; height: 48px; }
 .party-art img { display: block; width: 32px; height: 48px; max-width: none; image-rendering: pixelated; }
 .l38-sprite-fallback { color: #e1c178; font: 24px Silkscreen, monospace; }
-.party-name { position: absolute; bottom: 54px; left: 50%; transform: translateX(-50%); max-width: 110px; padding: 3px 5px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; color: #fff6da; background: #101927df; border: 1px solid #839bb0; font: 12px/1.25 Arial, sans-serif; opacity: 1; transition: opacity .3s linear; }
+.party-name { position: absolute; bottom: 55px; left: 50%; transform: translateX(-50%); width: max-content; max-width: 124px; padding: 2px 4px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; color: #fff8df; background: #101927c9; border-bottom: 2px solid #e1c178; box-shadow: -1px 0 #101927, 1px 0 #101927, 0 -1px #101927; text-shadow: 1px 1px #000, -1px 0 #000, 0 -1px #000; font: 700 13px/16px Arial, sans-serif; opacity: 1; transition: opacity .3s linear; }
 .party-name.is-faded { opacity: 0; }
 #party-overflow { position: fixed; right: 12px; bottom: 8px; color: #ffe3a1; background: #101927df; padding: 4px 6px; font: 10px Silkscreen, monospace; }
-#party-preview-controls { position: fixed; top: 12px; left: 12px; max-width: calc(100% - 24px); display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding: 12px; border: 2px solid #8ba0b1; color: #ffe3a1; background: #101927; font: 12px Arial, sans-serif; }
+#party-fireworks { position: fixed; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; pointer-events: none; }
+#party-celebration { position: fixed; top: 27%; left: 50%; transform: translateX(-50%); max-width: calc(100% - 32px); padding: 12px 24px; border: 2px solid #e1c178; box-shadow: 4px 4px #101927aa, inset 0 0 0 3px #101927; color: #fff4cf; background: #101927d9; text-align: center; pointer-events: none; text-shadow: 2px 2px #000; }
+#party-celebration span { display: block; font: 32px/1.3 Silkscreen, monospace; }
+#party-celebration strong { display: block; margin-top: 6px; color: #e1c178; font: 12px/1.5 Silkscreen, monospace; }
+#party-preview-controls { position: fixed; z-index: 1; top: 12px; left: 12px; max-width: calc(100% - 24px); display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding: 12px; border: 2px solid #8ba0b1; color: #ffe3a1; background: #101927; font: 12px Arial, sans-serif; }
 #party-preview-controls button, #party-preview-controls select { min-height: 36px; font: inherit; }
 @media (prefers-reduced-motion: reduce) { .party-name { transition: none; } }

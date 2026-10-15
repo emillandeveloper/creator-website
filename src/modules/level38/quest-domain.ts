@@ -24,6 +24,6 @@ export function questTransition(quest: Quest, action: QuestAction): QuestStatus 
 }
 
 export function questSnapshot(quest: Quest) {
-  return { title: quest.title, number: quest.number, status: quest.status, isSecret: quest.isSecret,
+  return { title: quest.title, number: quest.number, gameId: quest.gameId, status: quest.status, isSecret: quest.isSecret,
     revealedAt: quest.revealedAt?.toISOString() ?? null, completedAt: quest.completedAt?.toISOString() ?? null };
 }

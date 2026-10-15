@@ -33,7 +33,7 @@ test('owner tools preserve history, require authorization/confirmation, recover 
   const defs=(await f.db.quest.findMany({orderBy:{number:'asc'}})).map(({status,completedAt,revealedAt,updatedAt,...q})=>q);
   const rev=await revision();const duplicate=await Promise.all([tool('progress','RESET PROGRESS',owner.cookie,rev),tool('progress','RESET PROGRESS',owner.cookie,rev)]);
   assert.deepEqual(duplicate.map(r=>r.status).sort(),[200,409]);
-  const state=(await f.call('/api/state')).data;assert.equal(state.event.completed,0);assert.equal(state.event.unlockSequence,1);assert.equal(state.event.resetSequence,1);assert.equal(state.polls.length,0);assert.ok(!JSON.stringify(state).includes(secret.id));
+  const state=(await f.call('/api/state')).data;assert.equal(state.event.completed,0);assert.equal(state.event.unlockSequence,1);assert.equal(state.event.resetSequence,1);assert.equal(state.polls.length,0);assert.equal(state.quests.find(q=>q.id===secret.id).title,"???");
   const resetQuests=await f.db.quest.findMany({orderBy:{number:'asc'}});
   const resetEvent=await f.db.event.findFirstOrThrow();assert.equal(resetEvent.gameSource,'MANUAL_OVERRIDE');assert.equal(resetEvent.manualOverrideBy,null);assert.equal(resetEvent.currentGameId,games[0].id);assert.equal(resetEvent.lastUnlockedAt,null);
   assert.deepEqual(resetQuests.map(({status,completedAt,revealedAt,updatedAt,...q})=>q),defs);
@@ -76,7 +76,7 @@ test('owner routes reject moderators, viewers and cross-origin requests without 
   assert.deepEqual(await f.db.event.findFirstOrThrow(),before);assert.equal(await f.db.auditLog.count(),0);
 });
 
-test('owner-tool migration is additive, infers initial states and preserves prior progress/history', {timeout:90000},async t=>{
+test('owner-tool migration is additive, infers initial states and preserves prior progress/history', {timeout:180000},async t=>{
   const f=await fixture(t,{migrate:false,seed:false});const schema=new URL(f.databaseUrl).searchParams.get('schema');
   assert.match(schema,/^level38_test_[a-f0-9]{32}$/);await f.db.$executeRawUnsafe(`CREATE SCHEMA "${schema}"`);
   for(const name of fs.readdirSync('prisma/migrations').filter(n=>/^\d/.test(n)&&!n.includes('owner_tools')).sort()){

@@ -105,6 +105,21 @@
 .l38-card { padding: 19px; border-color: #34495d; background: #142132; display: flex; flex-direction: column; }
 .l38-card-top { display: flex; gap: 10px; justify-content: space-between; align-items: center; margin-bottom: 12px; }
 .l38-quest-number { font: 9px "Silkscreen", monospace; color: #a3b5c6; }
+.l38-quest-category { display: block; margin-bottom: 10px; font: 9px/1.6 "Silkscreen", monospace; color: #a9c3d7; }
+.l38-public .l38-card[data-category="COOPERATIVE"], .l38-control .l38-card[data-category="COOPERATIVE"] { border-left: 3px solid #8cbcae; }
+.l38-card[data-category="COOPERATIVE"] .l38-quest-category { color: #a6d9c9; }
+.l38-card[data-status="SECRET"] h3 { color: #c0aed6; letter-spacing: .15em; }
+.l38-card .l38-meta { overflow-wrap: anywhere; }
+.l38-selected-game { display: block; margin-top: 7px; color: #e1c68c; }
+.l38-control .l38-quest-game-form { padding-top: 10px; border-top: 1px solid #40556a; }
+.l38-control .l38-quest-game-form select { flex: 1 1 180px; }
+.l38-control .l38-eligibility-editor { margin-top: 12px; font-size: 12px; }
+.l38-control .l38-eligibility-editor summary { cursor: pointer; padding: 12px 0; min-height: 44px; color: #b6cadc; }
+.l38-control .l38-eligibility-choices { min-width: 0; width: 100%; max-height: 240px; overflow: auto; border: 1px solid #526b83; }
+.l38-control .l38-eligibility-choices label { display: flex; align-items: center; gap: 10px; padding: 6px 0; min-height: 44px; }
+.l38-control .l38-eligibility-choices input { flex: 0 0 20px; min-height: 20px; width: 20px; height: 20px; margin: 0; }
+.l38-control #poll-quest-context, .l38-control #poll-quest { width: 100%; }
+.l38-control #poll-quest-context label { display: block; margin-bottom: 8px; }
 .l38-status { font-size: 9px; letter-spacing: .07em; color: #aac0d5; border: 1px solid #425971; padding: 3px 6px; }
 .l38-card h3 { margin-bottom: 9px; font-size: 15px; }
 .l38-card > p:not(.l38-meta) { font-size: 13px; line-height: 1.7; color: #b5c2d0; }

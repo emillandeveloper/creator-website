@@ -1,0 +1,282 @@
+[
+  {
+    "slug": "ff1-8bit",
+    "title": "Final Fantasy I (8-bit original)",
+    "technicalNotes": {
+      "en": "NOT CHECKED. Use an original 8-bit edition for quest 58; verify access and legal emulator/controller setup if used.",
+      "es": "NOT CHECKED (NO COMPROBADO). Usar una edición original de 8 bits para la misión 58; comprobar acceso y configuración de emulador/mandos si se usa."
+    }
+  },
+  {
+    "slug": "ff3",
+    "title": "Final Fantasy III",
+    "technicalNotes": {
+      "en": "NOT CHECKED. Choose and verify the exact edition, four-character Mini access and a significant target before committing the save.",
+      "es": "NOT CHECKED (NO COMPROBADO). Elegir y comprobar la edición exacta, acceso a Mini para los cuatro personajes y un objetivo importante antes de preparar la partida."
+    }
+  },
+  {
+    "slug": "ff4",
+    "title": "Final Fantasy IV (single-player)",
+    "technicalNotes": {
+      "en": "NOT CHECKED. Single-player edition; verify a pre-Scarmiglione save with Palom, Porom and Twincast. This entry makes no multiplayer claim.",
+      "es": "NOT CHECKED (NO COMPROBADO). Edición para un jugador; comprobar una partida anterior a Scarmiglione con Palom, Porom y Twincast. Esta entrada no atribuye multijugador."
+    }
+  },
+  {
+    "slug": "ff5",
+    "title": "Final Fantasy V (single-player)",
+    "technicalNotes": {
+      "en": "NOT CHECKED. Verify the chosen single-player edition and unlocked jobs/abilities. Classic two-controller co-op is a separate entry.",
+      "es": "NOT CHECKED (NO COMPROBADO). Comprobar la edición para un jugador elegida y los trabajos/habilidades desbloqueados. La cooperativa clásica de dos mandos tiene entrada propia."
+    }
+  },
+  {
+    "slug": "ff6",
+    "title": "Final Fantasy VI (single-player)",
+    "technicalNotes": {
+      "en": "NOT CHECKED. Verify the chosen single-player edition and Edgar, Sabin, Cyan and Setzer access. Classic two-controller co-op is separate.",
+      "es": "NOT CHECKED (NO COMPROBADO). Comprobar la edición para un jugador elegida y acceso a Edgar, Sabin, Cyan y Setzer. La cooperativa clásica de dos mandos es independiente."
+    }
+  },
+  {
+    "slug": "ff7",
+    "title": "Final Fantasy VII (original)",
+    "technicalNotes": {
+      "en": "NOT CHECKED. Original game, distinct from Rebirth. Verify linked Materia, relevant abilities and original Buster Sword access.",
+      "es": "NOT CHECKED (NO COMPROBADO). Juego original, distinto de Rebirth. Comprobar Materias enlazadas, habilidades pertinentes y acceso a la Espada Mortal original."
+    }
+  },
+  {
+    "slug": "ff8",
+    "title": "Final Fantasy VIII",
+    "technicalNotes": {
+      "en": "NOT CHECKED. Verify Triple Triad, Card Mod, material-to-magic refinement, junctioning and any selected finisher/random ability.",
+      "es": "NOT CHECKED (NO COMPROBADO). Comprobar Triple Triad, Card Mod, refinado de materiales en magia, enlaces y la técnica final/aleatoria elegida."
+    }
+  },
+  {
+    "slug": "ff9",
+    "title": "Final Fantasy IX",
+    "technicalNotes": {
+      "en": "NOT CHECKED. Verify Quina and frog-catching access. PC is not claimed to have native PS1-style two-controller battle assignment.",
+      "es": "NOT CHECKED (NO COMPROBADO). Comprobar acceso a Quina y captura de ranas. No se atribuye al PC la asignación nativa de combate a dos mandos de PS1."
+    }
+  },
+  {
+    "slug": "ff10",
+    "title": "Final Fantasy X",
+    "technicalNotes": {
+      "en": "NOT CHECKED. Verify Thunder Plains lightning dodging, Blitzball and any required Overdrive, stealing or customization access.",
+      "es": "NOT CHECKED (NO COMPROBADO). Comprobar esquiva de rayos en la Llanura de los Rayos, blitzbol y acceso al Turbo, robo o personalización necesarios."
+    }
+  },
+  {
+    "slug": "ff12",
+    "title": "Final Fantasy XII",
+    "technicalNotes": {
+      "en": "NOT CHECKED. Verify programmable Gambits and a powerful encounter; prepare the entire automated battle setup before starting.",
+      "es": "NOT CHECKED (NO COMPROBADO). Comprobar Gambits configurables y un encuentro poderoso; preparar toda la configuración automática antes de empezar."
+    }
+  },
+  {
+    "slug": "ff7-rebirth",
+    "title": "Final Fantasy VII Rebirth",
+    "technicalNotes": {
+      "en": "NOT CHECKED. Distinct from FFVII original. Verify piano, Queen's Blood, synergy and any selected crafting/side-quest access.",
+      "es": "NOT CHECKED (NO COMPROBADO). Distinto de FFVII original. Comprobar piano, Sangre de la Reina, sinergias y la fabricación/misión secundaria elegidas."
+    }
+  },
+  {
+    "slug": "crisis-core-reunion",
+    "title": "Crisis Core: Final Fantasy VII Reunion",
+    "technicalNotes": {
+      "en": "NOT CHECKED. Choose the three increasing-difficulty SOLDIER missions in advance; preserve one Materia/accessory setup across the sequence.",
+      "es": "NOT CHECKED (NO COMPROBADO). Elegir de antemano tres misiones de SOLDADO de dificultad creciente; mantener una configuración de Materias/accesorios durante la secuencia."
+    }
+  },
+  {
+    "slug": "fft-remaster",
+    "title": "Final Fantasy Tactics (remaster)",
+    "technicalNotes": {
+      "en": "NOT CHECKED. Verify exact remaster edition, Ramza, monster recruitment and valid unlocked jobs. Edition-specific behavior remains unverified.",
+      "es": "NOT CHECKED (NO COMPROBADO). Comprobar la edición exacta del remaster, Ramza, reclutamiento de monstruos y trabajos válidos desbloqueados. El comportamiento de esa edición no está verificado."
+    }
+  },
+  {
+    "slug": "pokemon-hgss",
+    "title": "Pokémon HeartGold / SoulSilver",
+    "technicalNotes": {
+      "en": "NOT CHECKED. Choose HeartGold or SoulSilver, a reachable Gym Leader and legal monotype roster at its level cap; verify Pokéathlon and other selected mechanics.",
+      "es": "NOT CHECKED (NO COMPROBADO). Elegir HeartGold o SoulSilver, un líder accesible y equipo monotipo válido con su límite de nivel; comprobar Pokéathlon y las demás mecánicas elegidas."
+    }
+  },
+  {
+    "slug": "disgaea7",
+    "title": "Disgaea 7",
+    "technicalNotes": {
+      "en": "NOT CHECKED. Preferred Disgaea entry. Verify Prinny explosion chaining, three-color Geo chain, lifts/throws and selected recruitment/learning/team mechanics in this edition.",
+      "es": "NOT CHECKED (NO COMPROBADO). Entrada preferida de Disgaea. Comprobar en esta edición cadenas de explosiones Prinny, cadena Geo de tres colores, levantamientos/lanzamientos y reclutamiento/aprendizaje/ataques de equipo elegidos."
+    }
+  },
+  {
+    "slug": "kh1",
+    "title": "Kingdom Hearts I",
+    "technicalNotes": {
+      "en": "NOT CHECKED. Verify White Mushroom spell responses, original Kingdom Key, synthesis and selected powerful encounter/special.",
+      "es": "NOT CHECKED (NO COMPROBADO). Comprobar respuestas mágicas a Hongos Blancos, Cadena del Reino original, síntesis y el encuentro poderoso/especial elegidos."
+    }
+  },
+  {
+    "slug": "kh-chain-of-memories",
+    "title": "Kingdom Hearts: Chain of Memories",
+    "technicalNotes": {
+      "en": "NOT CHECKED. Choose and verify the exact Chain of Memories edition and at least three different usable Sleights.",
+      "es": "NOT CHECKED (NO COMPROBADO). Elegir y comprobar la edición exacta de Chain of Memories y al menos tres Ardides distintos utilizables."
+    }
+  },
+  {
+    "slug": "dq11",
+    "title": "Dragon Quest XI",
+    "technicalNotes": {
+      "en": "NOT CHECKED. Verify access to a party that can exclude the protagonist, a powerful enemy, horse racing and/or Fun-Size Forge as selected.",
+      "es": "NOT CHECKED (NO COMPROBADO). Comprobar acceso a un grupo que permita excluir al protagonista, un enemigo poderoso, carreras y/o Forja Fantástica según lo elegido."
+    }
+  },
+  {
+    "slug": "phantom-brave",
+    "title": "Phantom Brave (original)",
+    "technicalNotes": {
+      "en": "NOT CHECKED. Use the original Phantom Brave ruleset; verify environmental-object confinement and optional random dungeon access in the selected edition.",
+      "es": "NOT CHECKED (NO COMPROBADO). Usar las reglas del Phantom Brave original; comprobar confinamiento en objetos del entorno y mazmorras aleatorias opcionales en la edición elegida."
+    }
+  },
+  {
+    "slug": "yakuza-lad",
+    "title": "Yakuza: Like a Dragon",
+    "technicalNotes": {
+      "en": "NOT CHECKED. Verify a reachable Invested Vagabond, Dragon Kart and selected crafting, side-contract or Poundmates access.",
+      "es": "NOT CHECKED (NO COMPROBADO). Comprobar un Invested Vagabond accesible, Dragon Kart y acceso a la fabricación, encargo secundario o Poundmates elegidos."
+    }
+  },
+  {
+    "slug": "persona5-royal",
+    "title": "Persona 5 Royal",
+    "technicalNotes": {
+      "en": "NOT CHECKED. Verify a four-member party with three possible same-turn Baton Pass transfers, and selected All-Out Attack/status/weakness/side-quest access.",
+      "es": "NOT CHECKED (NO COMPROBADO). Comprobar un grupo de cuatro con tres relevos posibles de Baton Pass en el mismo turno y acceso a ataque conjunto/estados/debilidades/misiones secundarias elegidos."
+    }
+  },
+  {
+    "slug": "monster-hunter-stories2",
+    "title": "Monster Hunter Stories 2",
+    "technicalNotes": {
+      "en": "NOT CHECKED. Verify Rite of Channeling access, transferable gene, a completable bingo and the selected Monstie's battle access.",
+      "es": "NOT CHECKED (NO COMPROBADO). Comprobar acceso al Rito Canalizador, un gen transferible, bingo completable y acceso al combate con el Monstie elegido."
+    }
+  },
+  {
+    "slug": "hack-gu-last-recode",
+    "title": ".hack//G.U. Last Recode",
+    "technicalNotes": {
+      "en": "NOT CHECKED. Verify the volume/save, an available Mecha Grunty rescue and any generated optional dungeon target.",
+      "es": "NOT CHECKED (NO COMPROBADO). Comprobar volumen/partida, rescate de Mecha Grunty disponible y objetivo de mazmorra opcional generada si se elige."
+    }
+  },
+  {
+    "slug": "chrono-trigger",
+    "title": "Chrono Trigger",
+    "technicalNotes": {
+      "en": "NOT CHECKED. Verify Spekkio access, three eras represented in the party and unlocked dual/triple techniques as needed.",
+      "es": "NOT CHECKED (NO COMPROBADO). Comprobar acceso a Spekkio, tres épocas representadas en el grupo y técnicas dobles/triples desbloqueadas cuando hagan falta."
+    }
+  },
+  {
+    "slug": "tombi",
+    "title": "Tombi! / Tomba!",
+    "technicalNotes": {
+      "en": "NOT CHECKED. Choose the edition and verify an uncaptured Evil Pig, its corresponding bag and access to lift its curse.",
+      "es": "NOT CHECKED (NO COMPROBADO). Elegir la edición y comprobar un Cerdo Maligno sin capturar, su bolsa correspondiente y acceso para levantar su maldición."
+    }
+  },
+  {
+    "slug": "fantasy-life-i",
+    "title": "Fantasy Life i",
+    "technicalNotes": {
+      "en": "NOT CHECKED. Verify Artist Life, a reachable work-of-art recipe and material gathering DURING the quest; other Lives may gather.",
+      "es": "NOT CHECKED (NO COMPROBADO). Comprobar oficio de Artista, receta accesible de obra de arte y recogida de materiales DURANTE la misión; pueden recoger otros oficios."
+    }
+  },
+  {
+    "slug": "metaphor-refantazio",
+    "title": "Metaphor: ReFantazio",
+    "technicalNotes": {
+      "en": "NOT CHECKED. Verify a still-available winnable public debate and valid unlocked archetypes/synthesis for selected quests.",
+      "es": "NOT CHECKED (NO COMPROBADO). Comprobar un debate público aún disponible que se pueda ganar y arquetipos/síntesis válidos desbloqueados para las misiones elegidas."
+    }
+  },
+  {
+    "slug": "tales-berseria",
+    "title": "Tales of Berseria",
+    "technicalNotes": {
+      "en": "NOT CHECKED. For quest 49, verify 2–4 human local players through Parsec, controller mapping and each character's Mystic Arte access. For quest 57, verify the 38-hit combo counter.",
+      "es": "NOT CHECKED (NO COMPROBADO). Para la misión 49, comprobar 2–4 humanos en local mediante Parsec, asignación de mandos y Arte Mística de cada personaje. Para la 57, comprobar el contador de combo de 38 golpes."
+    }
+  },
+  {
+    "slug": "bg3",
+    "title": "Baldur's Gate 3",
+    "technicalNotes": {
+      "en": "NOT CHECKED. Quest 50 requires two human players in local split-screen through Parsec and two controllers; verify compatible surface/reaction damage. No four-player local split-screen claim.",
+      "es": "NOT CHECKED (NO COMPROBADO). La misión 50 exige dos humanos en pantalla dividida local mediante Parsec y dos mandos; comprobar daño por superficie/reacción compatible. No se atribuye pantalla dividida local para cuatro."
+    }
+  },
+  {
+    "slug": "legend-of-mana",
+    "title": "Legend of Mana",
+    "technicalNotes": {
+      "en": "NOT CHECKED. Verify the selected edition's two-human local/remote-controller setup, recruitable guest character and reachable boss; guest must land the finishing blow.",
+      "es": "NOT CHECKED (NO COMPROBADO). Comprobar en la edición elegida la configuración de dos humanos local/mandos remotos, personaje invitado y jefe accesible; el invitado debe dar el golpe final."
+    }
+  },
+  {
+    "slug": "ff4-classic-coop",
+    "title": "Final Fantasy IV (classic two-controller co-op)",
+    "technicalNotes": {
+      "en": "NOT CHECKED. Verify exact classic version and actual two-controller battle character assignment, with two humans and a pre-Cagnazzo save. Emulator/controller setup if used. PC Pixel Remaster does not supply this feature by assumption.",
+      "es": "NOT CHECKED (NO COMPROBADO). Comprobar versión clásica exacta y asignación real de personajes de combate a dos mandos, con dos humanos y partida anterior a Cagnazzo. Configurar emulador/mandos si se usa. No se presupone esta función en Pixel Remaster de PC."
+    }
+  },
+  {
+    "slug": "ff5-classic-coop",
+    "title": "Final Fantasy V (classic two-controller co-op)",
+    "technicalNotes": {
+      "en": "NOT CHECKED. Verify exact classic version, actual two-controller character assignment, two humans, unlocked jobs and a significant battle. Configure emulator/controllers if used. Do not substitute PC Pixel Remaster on an unverified multiplayer assumption.",
+      "es": "NOT CHECKED (NO COMPROBADO). Comprobar versión clásica exacta, asignación real a dos mandos, dos humanos, trabajos desbloqueados y combate importante. Configurar emulador/mandos si se usa. No sustituir por Pixel Remaster de PC suponiendo multijugador sin verificar."
+    }
+  },
+  {
+    "slug": "ff6-classic-coop",
+    "title": "Final Fantasy VI (classic two-controller co-op)",
+    "technicalNotes": {
+      "en": "NOT CHECKED. Verify an original 16-bit classic version with actual two-controller assignments for quest 54 and two humans; quest 58 can use it solo as the 16-bit leg. Emulator/controller setup if used. PC Pixel Remaster is not assumed multiplayer.",
+      "es": "NOT CHECKED (NO COMPROBADO). Comprobar versión clásica original de 16 bits con asignación real a dos mandos para la misión 54 y dos humanos; la 58 puede usarla en solitario como etapa de 16 bits. Configurar emulador/mandos si se usa. No se presupone multijugador en Pixel Remaster de PC."
+    }
+  },
+  {
+    "slug": "world-of-final-fantasy",
+    "title": "World of Final Fantasy",
+    "technicalNotes": {
+      "en": "NOT CHECKED. Verify an obtainable NEW Mirage and the game's capture/recruitment prerequisites; no rarity or level restriction is added.",
+      "es": "NOT CHECKED (NO COMPROBADO). Comprobar un Mirage NUEVO obtenible y los requisitos de captura/incorporación del juego; no se añade restricción de rareza ni nivel."
+    }
+  },
+  {
+    "slug": "digimon-next-order",
+    "title": "Digimon World Next Order",
+    "technicalNotes": {
+      "en": "NOT CHECKED. Verify a NEW obtainable/recruitable Digimon and the exact recruitment route before selecting this candidate.",
+      "es": "NOT CHECKED (NO COMPROBADO). Comprobar un Digimon NUEVO obtenible/reclutable y la ruta exacta de incorporación antes de elegir este candidato."
+    }
+  }
+]

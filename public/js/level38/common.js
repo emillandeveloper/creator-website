@@ -30,7 +30,7 @@
     }
     return data;
   }
-  function renderState(state, onAction) {
+  function renderState(state, onAction, gameActions) {
     setText("progress-text", "{completed} / {target} quests completed", state.event);
     byId("progress").max = state.event.target;
     byId("progress").value = state.event.completed;
@@ -49,7 +49,7 @@
       section.append(heading);
       const grid = element("div", undefined, "l38-grid");
       for (const quest of quests) {
-        const card = questCard(quest, state);
+        const card = questCard(quest, state, true);
         for (const action of onAction ? quest.actions || [] : []) {
           const labels = { activate: t("Activate quest"), complete: t("Complete quest"), fail: t("Fail quest"), skip: t("Skip quest"), reveal: t("Reveal secret"), available: t("Make available") };
           const button = element("button", labels[action]);
@@ -59,6 +59,7 @@
           button.addEventListener("click", () => onAction(quest, action));
           card.append(button);
         }
+        if (gameActions) appendQuestGameControls(card, quest, state, gameActions);
         grid.append(card);
       }
       if (!quests.length) grid.append(element("p", t("No quests here yet.")));
@@ -73,20 +74,66 @@
   let journalState = null;
   let journalSignature = "";
   let filtersBound = false;
-  function questCard(quest, state) {
+  const eligibleIds = quest => quest.eligibleGameIds || (quest.gameId ? [quest.gameId] : []);
+  function questCard(quest, state, control = false) {
     const card = element("article", undefined, "l38-card"); card.dataset.status = quest.status;
+    card.dataset.questNumber = quest.number;
+    card.dataset.category = quest.category || "GAME_SPECIFIC";
+    const hidden = quest.hidden && !control;
     const top = element("div", undefined, "l38-card-top");
     top.append(element("span", t("QUEST {number}", { number: String(quest.number).padStart(2, "0") }), "l38-quest-number"), element("span", t(quest.status), "l38-status"));
-    card.append(top, element("h3", questText(quest, "title")), element("p", questText(quest, "description")), element("p", `◇ ${state.games.find((g) => g.id === quest.gameId)?.title || t("Adventure")}`, "l38-meta"));
+    card.append(top, element("span", t(quest.category || "GAME_SPECIFIC"), "l38-quest-category"), element("h3", hidden ? "???" : questText(quest, "title")), element("p", hidden ? t("Hidden until Leo reveals this quest.") : questText(quest, "description")));
+    if (!hidden) {
+      const games = state.games.filter(game => eligibleIds(quest).includes(game.id));
+      const meta = element("p", undefined, "l38-meta");
+      if (games.length) meta.append(element("span", `${t("Eligible games")}: ${games.map(game => game.title).join(" · ")}`));
+      if (games.length > 1 && quest.gameId) {
+        const chosen = state.games.find(game => game.id === quest.gameId);
+        if (chosen) meta.append(element("span", `${t("Selected game")}: ${chosen.title}`, "l38-selected-game"));
+      }
+      if (games.length) card.append(meta);
+    }
     return card;
+  }
+  function appendQuestGameControls(card, quest, state, actions) {
+    const games = state.games.filter(game => eligibleIds(quest).includes(game.id));
+    if (!quest.hidden && games.length && !["COMPLETED", "FAILED", "SKIPPED"].includes(quest.status)) {
+      const form = element("form", undefined, "l38-quest-game-form");
+      const select = element("select"); select.id = `quest-game-${quest.id}`;
+      const label = element("label", t("Selected game")); label.htmlFor = select.id;
+      for (const game of games) {
+        const option = element("option", game.title); option.value = game.id;
+        option.disabled = !game.enabled; select.append(option);
+      }
+      select.value = quest.gameId || games.find(game => game.enabled)?.id || "";
+      const save = element("button", t("Choose game manually")); save.type = "submit";
+      save.disabled = !games.some(game => game.enabled);
+      form.append(label, select, save);
+      form.addEventListener("submit", event => { event.preventDefault(); actions.selectGame(quest, select.value); });
+      card.append(form);
+    }
+    const editor = element("details", undefined, "l38-eligibility-editor");
+    editor.append(element("summary", t("Edit eligible games")));
+    const form = element("form");
+    const choices = element("fieldset", undefined, "l38-eligibility-choices");
+    choices.append(element("legend", t("Eligible games")));
+    for (const game of state.games) {
+      const label = element("label");
+      const input = element("input"); input.type = "checkbox"; input.value = game.id; input.checked = eligibleIds(quest).includes(game.id);
+      label.append(input, document.createTextNode(game.title)); choices.append(label);
+    }
+    const save = element("button", t("Save eligible games")); save.type = "submit";
+    form.append(choices, save);
+    form.addEventListener("submit", event => { event.preventDefault(); actions.eligibility(quest, Array.from(choices.querySelectorAll("input:checked"), input => input.value)); });
+    editor.append(form); card.append(editor);
   }
   function filterJournal() {
     const state = journalState;
     if (!state) return;
     const game = byId("quest-game").value; const status = byId("quest-status").value;
     const search = byId("quest-search").value.trim().toLocaleLowerCase();
-    const quests = state.quests.filter((quest) => !quest.hidden && (game === "all" || quest.gameId === (game === "current" ? state.event.currentGameId : game)) &&
-      (status === "all" || quest.status === status) && `${questText(quest, "title")} ${questText(quest, "description")}`.toLocaleLowerCase().includes(search));
+    const quests = state.quests.filter((quest) => (game === "all" || (!quest.hidden && eligibleIds(quest).includes(game === "current" ? state.event.currentGameId : game))) &&
+      (status === "all" || quest.status === status) && (quest.hidden ? `??? ${t("Hidden until Leo reveals this quest.")}` : `${questText(quest, "title")} ${questText(quest, "description")}`).toLocaleLowerCase().includes(search));
     const grid = element("div", undefined, "l38-grid");
     for (const quest of quests) grid.append(questCard(quest, state));
     if (!quests.length) grid.append(element("p", status === "SECRET" ? t("Hidden quests have no public details yet.") : t("No quests on this path. Try another filter."), "l38-empty"));
@@ -117,7 +164,7 @@
     const options = [["all", t("All games")], ["current", t("Current game")], ...state.games.map((g) => [g.id, g.title])];
     game.replaceChildren(...options.map(([value, title]) => { const option = element("option", title); option.value = value; return option; }));
     game.value = options.some(([id]) => id === selected) ? selected : "all";
-    setText("journal-count", "{count} KNOWN QUESTS", { count: state.quests.length });
+    setText("journal-count", "{count} QUESTS", { count: state.quests.length });
     if (!filtersBound) {
       filtersBound = true;
       for (const id of ["quest-game", "quest-status"]) byId(id).addEventListener("change", filterJournal);
@@ -246,6 +293,8 @@
   function auditDescription(entry, state) {
     if (!entry) return t("No action yet.");
     if (entry.action === "party:configured") return t("updated party overlay settings");
+    if (entry.action === "quest:game") return t("selected game for quest #{number}", {number:entry.after?.number});
+    if (entry.action === "quest:games") return t("configured eligible games for quest #{number}", {number:entry.after?.number});
     const ownerActions = {"owner:progress":"reset event progress", "owner:participants":"cleared test participants", "owner:prepare":"prepared a clean event", "owner:preview":"previewed the finale for connected clients"};
     if (ownerActions[entry.action]) return t(ownerActions[entry.action]);
     const before = entry.before || {}, after = entry.after || {}, metadata = entry.metadata || {};

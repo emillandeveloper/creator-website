@@ -7,7 +7,7 @@ import { Level38State, PublicChange } from "./service";
 
 export class PartyRuntime {
   readonly presence: MemoryPartyPresence;
-  private config: PartyConfig = { enabled: true, nameMode: "ENTRY", maxVisible: 30 };
+  private config: PartyConfig = { enabled: true, nameMode: "ALWAYS", maxVisible: 30 };
   private revision = -1;
   private epoch = 0;
   private reads = new Map<string, symbol>();

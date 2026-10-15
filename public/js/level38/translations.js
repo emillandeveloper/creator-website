@@ -5,6 +5,40 @@
 })(typeof window === "undefined" ? globalThis : window, function () {
   "use strict";
   const es = {
+    "MULTI_GAME": "Varios juegos", "GAME_SPECIFIC": "Juego específico", "COOPERATIVE": "Cooperativa",
+    "Hidden until Leo reveals this quest.": "Oculta hasta que Leo revele esta misión.",
+    "Eligible games": "Juegos elegibles", "Selected game": "Juego seleccionado",
+    "Choose game manually": "Elegir juego manualmente", "Edit eligible games": "Editar juegos elegibles", "Save eligible games": "Guardar juegos elegibles",
+    "{count} QUESTS": "{count} MISIONES",
+    "selected game for quest #{number}": "eligió el juego de la misión #{number}",
+    "configured eligible games for quest #{number}": "configuró los juegos elegibles de la misión #{number}",
+    "Choose an eligible game before starting this quest.": "Elige un juego elegible antes de iniciar esta misión.",
+    "Choose distinct eligible games for this quest.": "Elige juegos elegibles diferentes para esta misión.",
+    "Choose games from this event.": "Elige juegos de este evento.",
+    "Close this quest's open poll before changing eligible games.": "Cierra la votación abierta de esta misión antes de cambiar sus juegos elegibles.",
+    "Keep the selected game for an active or finished quest.": "Conserva el juego seleccionado de una misión activa o terminada.",
+    "A finished quest retains its selected game.": "Una misión terminada conserva su juego seleccionado.",
+    "Choose an enabled eligible game for this quest.": "Elige un juego elegible y habilitado para esta misión.",
+    "That game is already selected for this quest.": "Ese juego ya está seleccionado para esta misión.",
+    "Close this quest's game poll before choosing its game.": "Cierra la votación de juego de esta misión antes de elegir su juego.",
+    "Close this quest's game poll before changing its state.": "Cierra la votación de juego de esta misión antes de cambiar su estado.",
+    "Only a next-game poll can target a quest.": "Solo una votación del siguiente juego puede estar asociada a una misión.",
+    "Choose an eligible game for this quest.": "Elige un juego elegible para esta misión.",
+    "Choose an unfinished, revealed quest for the game poll.": "Elige una misión revelada y sin terminar para la votación de juego.",
+    "A game option is no longer eligible for this quest. Edit the draft first.": "Una opción de juego ya no es elegible para esta misión. Edita primero el borrador.",
+    "The winning game is no longer enabled.": "El juego ganador ya no está habilitado.",
+    "Choose 1–100 eligible games.": "Elige entre 1 y 100 juegos elegibles.",
+    "Eligible games must be distinct.": "Los juegos elegibles deben ser diferentes.",
+    "This quest has an open game poll. Close it before changing the quest.": "Esta misión tiene una votación de juego abierta. Ciérrala antes de cambiar la misión.",
+    "The previous quest game is no longer enabled and eligible.": "El juego anterior de la misión ya no está habilitado o no es elegible.",
+    "Quest for this game vote (optional)": "Misión para esta votación de juego (opcional)",
+    "Any game (no quest context)": "Cualquier juego (sin misión asociada)",
+    "Choose a quest to offer only its eligible games. Manual game selection is always available.": "Elige una misión para ofrecer solo sus juegos elegibles. Siempre puedes elegir el juego manualmente.",
+    "ADVENTURE COMPLETE": "AVENTURA COMPLETADA",
+    "OWNER PREVIEW": "VISTA PREVIA DEL PROPIETARIO",
+    "Vote hop": "Salto al votar",
+    "Party victory": "Victoria del grupo",
+    "Preview LEVEL 38 fireworks": "Probar fuegos de LEVEL 38",
     "Appear on stream": "Aparecer en el stream",
     "While this page is open, your nickname and character may appear in Leo's stream.": "Mientras esta página esté abierta, tu nombre y personaje pueden aparecer en el stream de Leo.",
     "Party Overlay": "Grupo en el stream",
@@ -256,7 +290,7 @@
   "previewed the finale for connected clients": "mostró una vista previa del final a los clientes conectados"
 });
   const en = Object.fromEntries(Object.keys(es).map(key => [key, key]));
-  Object.assign(en, { AVAILABLE: "Available", ACTIVE: "Active", COMPLETED: "Completed", FAILED: "Failed", SKIPPED: "Skipped", LOCKED: "Locked", SECRET: "Secret", OPEN: "Open", CLOSED: "Closed", DRAFT: "Draft", NEXT_QUEST: "Next quest", NEXT_GAME: "Next game", YES_NO: "Yes / No", CUSTOM: "Custom choices", OWNER: "Owner", MODERATOR: "Moderator", VIEWER: "Viewer", MANUAL_OVERRIDE: "Manual selection", AUTO_TWITCH: "Twitch Auto" });
+  Object.assign(en, { MULTI_GAME: "Multi-game", GAME_SPECIFIC: "Game-specific", COOPERATIVE: "Cooperative", AVAILABLE: "Available", ACTIVE: "Active", COMPLETED: "Completed", FAILED: "Failed", SKIPPED: "Skipped", LOCKED: "Locked", SECRET: "Secret", OPEN: "Open", CLOSED: "Closed", DRAFT: "Draft", NEXT_QUEST: "Next quest", NEXT_GAME: "Next game", YES_NO: "Yes / No", CUSTOM: "Custom choices", OWNER: "Owner", MODERATOR: "Moderator", VIEWER: "Viewer", MANUAL_OVERRIDE: "Manual selection", AUTO_TWITCH: "Twitch Auto" });
   const catalogs = { en, es };
   // Count-sensitive labels share the same keys in server and browser rendering.
   const singular = {

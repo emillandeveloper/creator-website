@@ -47,6 +47,8 @@ export function createLevel38Routes(controller: Level38Controller, config: Level
   router.post("/api/control/logout", wrap(controller.logout));
   router.get("/api/control/state", wrap(controller.controlState));
   router.post("/api/control/quests/:id", limited(60, 60 * 1000), wrap(controller.changeQuest));
+  router.post("/api/control/quests/:id/games", limited(60, 60 * 1000), wrap(controller.configureQuestGames));
+  router.post("/api/control/quests/:id/game", limited(60, 60 * 1000), wrap(controller.selectQuestGame));
   router.post("/api/control/game", limited(30, 60 * 1000), wrap(controller.changeGame));
   router.post("/api/control/polls", limited(30, 60 * 1000), wrap(controller.savePoll));
   router.post("/api/control/polls/:id/edit", limited(60, 60 * 1000), wrap(controller.savePoll));

@@ -1,758 +1,1182 @@
 [
   {
-    "key": "ff5-opening-encounter",
+    "key": "q01-back-to-the-stone-age",
     "number": 1,
     "gameSlug": "ff5",
+    "eligibleGameSlugs": [
+      "ff5",
+      "ff6",
+      "ff7",
+      "ff9",
+      "disgaea7"
+    ],
+    "category": "MULTI_GAME",
     "isSecret": false,
     "title": {
-      "en": "Win the opening encounter",
-      "es": "Gana el primer combate"
+      "en": "Back to the Stone Age",
+      "es": "Vuelta a la Edad de Piedra"
     },
     "description": {
-      "en": "Win the first battle agreed on for this save.",
-      "es": "Gana el primer combate que acordéis para esta partida."
+      "en": "Win a battle with basic attacks as the only source of damage. Weapons, equipment, passives, automatically triggered effects and enhanced normal attacks appropriate to the game are allowed, as are movement, defense and dodging. No manually activated damaging spells, special abilities, summons or offensive items.",
+      "es": "Gana un combate causando daño solo con ataques básicos. Se permiten armas, equipo, pasivas, efectos automáticos y ataques normales mejorados compatibles con el juego, además de movimiento, defensa y esquiva. No actives manualmente hechizos de daño, habilidades especiales, invocaciones ni objetos ofensivos."
     }
   },
   {
-    "key": "ff5-no-items",
+    "key": "q02-no-safety-net",
     "number": 2,
-    "gameSlug": "ff5",
+    "gameSlug": "disgaea7",
+    "eligibleGameSlugs": [
+      "disgaea7",
+      "ff5",
+      "ff6",
+      "ff7",
+      "ff9"
+    ],
+    "category": "MULTI_GAME",
     "isSecret": false,
     "title": {
-      "en": "Win without using items",
-      "es": "Gana sin usar objetos"
+      "en": "No Safety Net",
+      "es": "Sin red de seguridad"
     },
     "description": {
-      "en": "Win a battle without using any items.",
-      "es": "Gana un combate sin usar ningún objeto."
+      "en": "Win a significant battle without recovering HP in any way: no active healing, items, regeneration, passive healing, life-steal, automatic recovery or resurrection. Defensive abilities and damage reduction are allowed.",
+      "es": "Gana un combate importante sin recuperar PV de ninguna forma: sin curación activa, objetos, regeneración, curación pasiva, robo de vida, recuperación automática ni resurrección. Se permiten habilidades defensivas y reducción de daño."
     }
   },
   {
-    "key": "ff5-hidden-chest",
+    "key": "q03-the-wrong-hero",
     "number": 3,
     "gameSlug": "ff5",
+    "eligibleGameSlugs": [
+      "ff5",
+      "ff6",
+      "ff7",
+      "ff9"
+    ],
+    "category": "MULTI_GAME",
     "isSecret": false,
     "title": {
-      "en": "Find a hidden chest",
-      "es": "Encuentra un cofre oculto"
+      "en": "The Wrong Hero",
+      "es": "El héroe equivocado"
     },
     "description": {
-      "en": "Find and open a chest off the main route.",
-      "es": "Encuentra y abre un cofre apartado del camino principal."
+      "en": "Defeat a powerful enemy with the finishing blow delivered by a character selected by the audience. Other party members may fight normally. If nobody votes, OWNER may choose the character or use a roulette; no additional poll is required.",
+      "es": "Derrota a un enemigo poderoso con el golpe final de un personaje elegido por el público. Los demás miembros del grupo pueden luchar normalmente. Si nadie vota, OWNER puede elegir al personaje o usar una ruleta; no hace falta otra votación."
     }
   },
   {
-    "key": "ff5-new-town",
+    "key": "q04-job-roulette",
     "number": 4,
-    "gameSlug": "ff5",
+    "gameSlug": "ff3",
+    "eligibleGameSlugs": [
+      "ff3",
+      "ff5",
+      "fft-remaster",
+      "metaphor-refantazio",
+      "disgaea7"
+    ],
+    "category": "MULTI_GAME",
     "isSecret": false,
     "title": {
-      "en": "Visit a new town",
-      "es": "Visita una nueva ciudad"
+      "en": "Job Roulette",
+      "es": "Cambio de profesión"
     },
     "description": {
-      "en": "Reach a town you have not visited in this run.",
-      "es": "Llega a una ciudad que aún no hayas visitado en esta partida."
+      "en": "Win a significant battle with jobs, classes or archetypes assigned by an external roulette, using only valid unlocked options. Prepare equipment and abilities after the draw. Reroll only a combination that is actually impossible.",
+      "es": "Gana un combate importante con trabajos, clases o arquetipos asignados por una ruleta externa, usando solo opciones válidas y desbloqueadas. Prepara equipo y habilidades después del sorteo. Repite el sorteo solo si la combinación es realmente imposible."
     }
   },
   {
-    "key": "ff5-optional-enemy",
+    "key": "q05-the-last-word",
     "number": 5,
-    "gameSlug": "ff5",
+    "gameSlug": "ff7",
+    "eligibleGameSlugs": [
+      "ff7",
+      "ff8",
+      "ff9",
+      "ff10",
+      "kh1"
+    ],
+    "category": "MULTI_GAME",
     "isSecret": false,
     "title": {
-      "en": "Defeat an optional enemy",
-      "es": "Derrota a un enemigo opcional"
+      "en": "The Last Word",
+      "es": "La última palabra"
     },
     "description": {
-      "en": "Defeat an enemy that is not required to advance the story.",
-      "es": "Derrota a un enemigo al que no haga falta vencer para avanzar en la historia."
+      "en": "Defeat a powerful enemy with the finishing blow from a signature special technique, such as a Limit Break, Trance ability, Overdrive or Kingdom Hearts special. The player chooses the technique; no extra roulette or public vote.",
+      "es": "Derrota a un enemigo poderoso con el golpe final de una técnica especial característica, como un Límite, una habilidad de Trance, un Turbo o un especial de Kingdom Hearts. El jugador elige la técnica; sin ruleta ni votación pública adicionales."
     }
   },
   {
-    "key": "ff5-starting-equipment",
+    "key": "q06-champions-for-a-day",
     "number": 6,
-    "gameSlug": "ff5",
+    "gameSlug": "ff8",
+    "eligibleGameSlugs": [
+      "ff8",
+      "ff10",
+      "pokemon-hgss",
+      "ff7-rebirth",
+      "ff9",
+      "yakuza-lad",
+      "dq11"
+    ],
+    "category": "MULTI_GAME",
     "isSecret": false,
     "title": {
-      "en": "Win with the starting equipment",
-      "es": "Gana con el equipo inicial"
+      "en": "Champions for a Day",
+      "es": "Campeones por un día"
     },
     "description": {
-      "en": "Win the agreed battle using your starting equipment.",
-      "es": "Gana el combate acordado con el equipo inicial."
+      "en": "Win a designated RPG minigame competition or challenge. Set its success target for the chosen game: FFVIII requires 3 consecutive Triple Triad wins; FFX a Blitzball match; HG/SS a Pokéathlon event; Rebirth a Queen's Blood opponent. Tetra Master, Dragon Kart and DQXI horse racing are also eligible. A game vote is optional.",
+      "es": "Gana una competición o desafío de minijuego de rol designado. Fija el objetivo según el juego: FFVIII exige 3 victorias consecutivas en Triple Triad; FFX, un partido de blitzbol; HG/SS, una prueba de Pokéathlon; Rebirth, un rival de Sangre de la Reina. También valen Tetra Master, Dragon Kart y las carreras de caballos de DQXI. Votar el juego es opcional."
     }
   },
   {
-    "key": "ff5-difficult-encounter",
+    "key": "q07-the-labyrinth",
     "number": 7,
-    "gameSlug": "ff5",
+    "gameSlug": "disgaea7",
+    "eligibleGameSlugs": [
+      "disgaea7",
+      "phantom-brave",
+      "hack-gu-last-recode"
+    ],
+    "category": "MULTI_GAME",
     "isSecret": false,
     "title": {
-      "en": "Survive a difficult encounter",
-      "es": "Sobrevive a un combate difícil"
+      "en": "The Labyrinth",
+      "es": "El laberinto"
     },
     "description": {
-      "en": "Overcome a challenging battle and keep the adventure going.",
-      "es": "Supera un combate difícil y sigue adelante con la aventura."
+      "en": "Complete an optional dungeon or reach a predetermined depth, such as Disgaea's Item World, a Phantom Brave random dungeon or a generated .hack//G.U. dungeon. No time limit or extra combat restrictions. Leaving before reaching the objective does not count.",
+      "es": "Completa una mazmorra opcional o alcanza una profundidad fijada de antemano, como el Mundo de los Objetos de Disgaea, una mazmorra aleatoria de Phantom Brave o una generada de .hack//G.U. Sin límite de tiempo ni restricciones de combate adicionales. Salir antes del objetivo no cuenta."
     }
   },
   {
-    "key": "ff5-new-ability",
+    "key": "q08-legend-hunter",
     "number": 8,
     "gameSlug": "ff5",
+    "eligibleGameSlugs": [
+      "ff5",
+      "ff7",
+      "ff9",
+      "ff10",
+      "kh1"
+    ],
+    "category": "MULTI_GAME",
     "isSecret": false,
     "title": {
-      "en": "Discover a new ability",
-      "es": "Descubre una nueva habilidad"
+      "en": "Legend Hunter",
+      "es": "Cazador de leyendas"
     },
     "description": {
-      "en": "Learn or unlock an ability you have not used in this run.",
-      "es": "Aprende o desbloquea una habilidad que aún no hayas usado en esta partida."
+      "en": "Defeat a particularly powerful optional boss or superboss in a meaningful encounter, not an ordinary miniboss. No additional restrictions.",
+      "es": "Derrota a un jefe opcional especialmente poderoso o a un superjefe en un encuentro relevante, no a un minijefe corriente. Sin restricciones adicionales."
     }
   },
   {
-    "key": "ff5-dungeon",
+    "key": "q09-sticky-fingers",
     "number": 9,
     "gameSlug": "ff5",
+    "eligibleGameSlugs": [
+      "ff5",
+      "ff6",
+      "ff7",
+      "ff9",
+      "ff10",
+      "disgaea7"
+    ],
+    "category": "MULTI_GAME",
     "isSecret": false,
     "title": {
-      "en": "Finish a dungeon",
-      "es": "Completa una mazmorra"
+      "en": "Sticky Fingers",
+      "es": "Manos largas"
     },
     "description": {
-      "en": "Make your way through the agreed dungeon and reach its end.",
-      "es": "Recorre la mazmorra acordada y llega hasta el final."
+      "en": "Successfully steal an item or equipment from an enemy, then win the battle and keep the loot. Any normal stealing mechanic, including Disgaea's, is allowed; the steal need not be the rarest item.",
+      "es": "Roba con éxito un objeto o pieza de equipo a un enemigo, gana el combate y conserva el botín. Vale cualquier mecánica normal de robo, incluida la de Disgaea; no tiene que ser el objeto más raro."
     }
   },
   {
-    "key": "ff5-no-fleeing",
+    "key": "q10-gotta-catch-em-all",
     "number": 10,
-    "gameSlug": "ff5",
+    "gameSlug": "pokemon-hgss",
+    "eligibleGameSlugs": [
+      "pokemon-hgss",
+      "monster-hunter-stories2",
+      "world-of-final-fantasy",
+      "disgaea7",
+      "digimon-next-order"
+    ],
+    "category": "MULTI_GAME",
     "isSecret": false,
     "title": {
-      "en": "Win without fleeing",
-      "es": "Gana sin huir"
+      "en": "Gotta Catch 'Em All!",
+      "es": "¡Hazte con todos!"
     },
     "description": {
-      "en": "Clear the agreed stretch without running from any battles.",
-      "es": "Supera el tramo acordado sin huir de ningún combate."
+      "en": "Capture, obtain or recruit a NEW collectible creature through the chosen game's appropriate recruitment mechanic: Pokémon, Monster Hunter Stories, World of Final Fantasy, Disgaea or Digimon World Next Order. No extra rarity or level restrictions.",
+      "es": "Captura, consigue o recluta una criatura coleccionable NUEVA mediante la mecánica de incorporación propia de Pokémon, Monster Hunter Stories, World of Final Fantasy, Disgaea o Digimon World Next Order. Sin restricciones adicionales de rareza ni nivel."
     }
   },
   {
-    "key": "ff5-rare-item",
+    "key": "q11-lets-get-to-work",
     "number": 11,
-    "gameSlug": "ff5",
+    "gameSlug": "ff9",
+    "eligibleGameSlugs": [
+      "ff9",
+      "ff10",
+      "dq11",
+      "yakuza-lad",
+      "kh1",
+      "ff7-rebirth"
+    ],
+    "category": "MULTI_GAME",
     "isSecret": false,
     "title": {
-      "en": "Find a rare item",
-      "es": "Encuentra un objeto raro"
+      "en": "Let's Get to Work",
+      "es": "Manos a la obra"
     },
     "description": {
-      "en": "Obtain a rare item and show the party your find.",
-      "es": "Consigue un objeto raro y enséñale el hallazgo al grupo."
+      "en": "Craft, synthesize or upgrade an item using an in-game crafting or refinement system, then actually use that item in combat. Creating it alone does not count.",
+      "es": "Fabrica, sintetiza o mejora un objeto mediante un sistema de fabricación o refinamiento del juego y úsalo de verdad en combate. Crearlo sin utilizarlo no cuenta."
     }
   },
   {
-    "key": "ff5-side-objective",
+    "key": "q12-treasure-hunter",
     "number": 12,
     "gameSlug": "ff5",
+    "eligibleGameSlugs": [
+      "ff5",
+      "ff6",
+      "ff7",
+      "ff9",
+      "kh1"
+    ],
+    "category": "MULTI_GAME",
     "isSecret": false,
     "title": {
-      "en": "Complete a side objective",
-      "es": "Completa un objetivo secundario"
+      "en": "Treasure Hunter",
+      "es": "Cazatesoros"
     },
     "description": {
-      "en": "Finish a side objective chosen for the current save.",
-      "es": "Completa un objetivo secundario elegido para la partida actual."
+      "en": "Find and collect a hidden or optional treasure that has not been obtained before. Mandatory story treasures do not count. No time limit or extra combat restrictions.",
+      "es": "Encuentra y recoge un tesoro oculto u opcional que no se haya obtenido antes. Los tesoros obligatorios de la historia no cuentan. Sin límite de tiempo ni restricciones de combate adicionales."
     }
   },
   {
-    "key": "ff5-boss",
+    "key": "q13-side-effects",
     "number": 13,
     "gameSlug": "ff5",
+    "eligibleGameSlugs": [
+      "ff5",
+      "ff6",
+      "ff7",
+      "ff9",
+      "pokemon-hgss",
+      "persona5-royal"
+    ],
+    "category": "MULTI_GAME",
     "isSecret": false,
     "title": {
-      "en": "Win a boss encounter",
-      "es": "Derrota a un jefe"
+      "en": "Side Effects",
+      "es": "Efectos secundarios"
     },
     "description": {
-      "en": "Defeat the boss chosen for this challenge.",
-      "es": "Derrota al jefe elegido para esta misión."
+      "en": "Successfully inflict two DIFFERENT negative status effects during the same battle, then win. They may affect different enemies. Simple attack or defense stat reductions do not count.",
+      "es": "Aplica con éxito dos estados alterados negativos DIFERENTES durante el mismo combate y gana. Pueden afectar a enemigos distintos. Las simples reducciones de ataque o defensa no cuentan."
     }
   },
   {
-    "key": "ff5-optional-area",
+    "key": "q14-where-it-hurts-most",
     "number": 14,
     "gameSlug": "ff5",
+    "eligibleGameSlugs": [
+      "ff5",
+      "ff6",
+      "ff7",
+      "ff9",
+      "ff10",
+      "pokemon-hgss",
+      "persona5-royal",
+      "metaphor-refantazio"
+    ],
+    "category": "MULTI_GAME",
     "isSecret": false,
     "title": {
-      "en": "Explore an optional area",
-      "es": "Explora una zona opcional"
+      "en": "Where It Hurts Most",
+      "es": "Donde más duele"
     },
     "description": {
-      "en": "Take a detour and explore an area outside the main story route.",
-      "es": "Desvíate del camino principal y explora una zona opcional."
+      "en": "Successfully exploit enemy weaknesses with at least three attacks in one battle, then win. The attacks do not need to use three different elements.",
+      "es": "Aprovecha con éxito las debilidades enemigas con al menos tres ataques en un mismo combate y gana. No tienen que ser tres elementos diferentes."
     }
   },
   {
-    "key": "ff5-save-point",
+    "key": "q15-learning-the-hard-way",
     "number": 15,
     "gameSlug": "ff5",
+    "eligibleGameSlugs": [
+      "ff5",
+      "ff9",
+      "disgaea7",
+      "fft-remaster"
+    ],
+    "category": "MULTI_GAME",
     "isSecret": false,
     "title": {
-      "en": "Reach the next save point",
-      "es": "Llega al siguiente punto de guardado"
+      "en": "Learning the Hard Way",
+      "es": "Se aprende a golpes"
     },
     "description": {
-      "en": "Reach the next save point and save your progress.",
-      "es": "Llega al siguiente punto de guardado y guarda la partida."
+      "en": "Learn a previously unknown active ability through an in-game learning mechanic, then use it and win a battle. Learning and use may happen in different battles. Blue Magic, Quina's Eat, master-disciple learning and job or equipment learning systems are eligible.",
+      "es": "Aprende una habilidad activa antes desconocida mediante una mecánica de aprendizaje del juego, úsala y gana un combate. Aprenderla y usarla puede ocurrir en combates distintos. Valen Magia Azul, Engullir de Quina, aprendizaje maestro-discípulo y sistemas de trabajos o equipo."
     }
   },
   {
-    "key": "ff5-chat-party",
+    "key": "q16-strength-in-numbers",
     "number": 16,
-    "gameSlug": "ff5",
+    "gameSlug": "chrono-trigger",
+    "eligibleGameSlugs": [
+      "chrono-trigger",
+      "ff7-rebirth",
+      "persona5-royal",
+      "disgaea7",
+      "metaphor-refantazio"
+    ],
+    "category": "MULTI_GAME",
     "isSecret": false,
     "title": {
-      "en": "Let chat choose the party",
-      "es": "Deja que el chat elija el grupo"
+      "en": "Strength in Numbers",
+      "es": "La unión hace la fuerza"
     },
     "description": {
-      "en": "Let chat pick the party for the next agreed stretch.",
-      "es": "Deja que el chat elija a los miembros del grupo para el siguiente tramo."
+      "en": "Execute a genuine combination technique involving at least two characters and win the battle. No finishing blow is required. Chrono Trigger dual/triple techs, Rebirth synergy, Persona All-Out Attacks, Disgaea team attacks and Metaphor synthesis are eligible.",
+      "es": "Ejecuta una técnica combinada real de al menos dos personajes y gana el combate. No tiene que dar el golpe final. Valen técnicas dobles/triples de Chrono Trigger, sinergias de Rebirth, ataques conjuntos de Persona, ataques de equipo de Disgaea y síntesis de Metaphor."
     }
   },
   {
-    "key": "ff5-secret-treasure",
+    "key": "q17-hero-for-hire",
     "number": 17,
-    "gameSlug": "ff5",
-    "isSecret": true,
+    "gameSlug": "dq11",
+    "eligibleGameSlugs": [
+      "dq11",
+      "yakuza-lad",
+      "ff12",
+      "ff7-rebirth",
+      "persona5-royal",
+      "fantasy-life-i"
+    ],
+    "category": "MULTI_GAME",
+    "isSecret": false,
     "title": {
-      "en": "Secret treasure hunt",
-      "es": "Búsqueda secreta del tesoro"
+      "en": "Hero for Hire",
+      "es": "Héroe por encargo"
     },
     "description": {
-      "en": "Follow the revealed clue and find the secret treasure.",
-      "es": "Sigue la pista revelada y encuentra el tesoro secreto."
+      "en": "Accept and complete a NEW optional side quest or contract, claiming its reward when relevant. A mandatory story objective does not count.",
+      "es": "Acepta y completa una misión secundaria o contrato opcional NUEVO y cobra su recompensa cuando corresponda. Un objetivo obligatorio de la historia no cuenta."
     }
   },
   {
-    "key": "ff5-secret-finale",
+    "key": "q18-money-talks",
     "number": 18,
     "gameSlug": "ff5",
-    "isSecret": true,
-    "title": {
-      "en": "Secret final encounter",
-      "es": "Combate final secreto"
-    },
-    "description": {
-      "en": "Face the secret encounter when the challenge is revealed.",
-      "es": "Afronta el combate secreto cuando se revele la misión."
-    }
-  },
-  {
-    "key": "ff6-opening-encounter",
-    "number": 19,
-    "gameSlug": "ff6",
+    "eligibleGameSlugs": [
+      "ff5",
+      "ff6",
+      "ff7",
+      "ff10",
+      "yakuza-lad"
+    ],
+    "category": "MULTI_GAME",
     "isSecret": false,
     "title": {
-      "en": "Win the opening encounter",
-      "es": "Gana el primer combate"
+      "en": "Money Talks",
+      "es": "Poderoso caballero es Don Dinero"
     },
     "description": {
-      "en": "Win the first battle agreed on for this save.",
-      "es": "Gana el primer combate que acordéis para esta partida."
+      "en": "Use an in-battle ability or mechanic that spends currency for damage or a direct combat advantage, then win. Examples include Zeninage/Gil Toss, Spare Change and Poundmates. Buying equipment before battle does not count.",
+      "es": "Usa en combate una habilidad o mecánica que gaste dinero para causar daño u obtener una ventaja de combate directa y gana. Por ejemplo, Zeninage/Lanzamonedas, Calderilla o Poundmates. Comprar equipo antes del combate no cuenta."
     }
   },
   {
-    "key": "ff6-no-items",
+    "key": "q19-an-eye-for-an-eye",
+    "number": 19,
+    "gameSlug": "ff5",
+    "eligibleGameSlugs": [
+      "ff5",
+      "ff6",
+      "ff7",
+      "ff9"
+    ],
+    "category": "MULTI_GAME",
+    "isSecret": false,
+    "title": {
+      "en": "An Eye for an Eye",
+      "es": "Ojo por ojo"
+    },
+    "description": {
+      "en": "Defeat an enemy with a counterattack or retaliatory effect triggered by that enemy's action. The retaliation must deliver the finishing blow; normal combat is allowed until then.",
+      "es": "Derrota a un enemigo con un contraataque o efecto de represalia activado por una acción de ese enemigo. La represalia debe dar el golpe final; hasta entonces se permite combatir normalmente."
+    }
+  },
+  {
+    "key": "q20-for-our-lord-rngsus",
     "number": 20,
     "gameSlug": "ff6",
+    "eligibleGameSlugs": [
+      "ff6",
+      "ff7",
+      "ff8",
+      "pokemon-hgss",
+      "bg3"
+    ],
+    "category": "MULTI_GAME",
     "isSecret": false,
     "title": {
-      "en": "Win without using items",
-      "es": "Gana sin usar objetos"
+      "en": "For Our Lord RNGsus",
+      "es": "Por nuestro señor RNGsuscristo"
     },
     "description": {
-      "en": "Win a battle without using any items.",
-      "es": "Gana un combate sin usar ningún objeto."
+      "en": "Activate and resolve an ability with a genuinely random in-game effect, then win the battle. Examples: Setzer's or Cait Sith's Slots, Selphie's slots, Pokémon Metronome or BG3 Wild Magic. Ordinary hit, critical or evasion chances do not count. The outcome need not be favorable.",
+      "es": "Activa y resuelve una habilidad con un efecto realmente aleatorio del juego y gana el combate. Ejemplos: tragaperras de Setzer o Cait Sith, ruleta de Selphie, Metrónomo de Pokémon o Magia Salvaje de BG3. Las probabilidades normales de acertar, crítico o evasión no cuentan. El resultado no tiene que ser favorable."
     }
   },
   {
-    "key": "ff6-hidden-chest",
+    "key": "q21-we-live-in-a-material-world",
     "number": 21,
-    "gameSlug": "ff6",
+    "gameSlug": "ff7",
+    "eligibleGameSlugs": [
+      "ff7"
+    ],
+    "category": "GAME_SPECIFIC",
     "isSecret": false,
     "title": {
-      "en": "Find a hidden chest",
-      "es": "Encuentra un cofre oculto"
+      "en": "We Live in a MATERIAl World",
+      "es": "Vivimos en un mundo MATERIAl"
     },
     "description": {
-      "en": "Find and open a chest off the main route.",
-      "es": "Encuentra y abre un cofre apartado del camino principal."
+      "en": "Defeat a boss after successfully triggering the effects of at least TWO DIFFERENT linked Materia combinations. Equipping them alone is insufficient. Different party members may contribute; other abilities and items are allowed.",
+      "es": "Derrota a un jefe tras activar con éxito los efectos de al menos DOS combinaciones DIFERENTES de Materias enlazadas. Equiparlas sin activarlas no basta. Pueden contribuir distintos miembros del grupo; se permiten otras habilidades y objetos."
     }
   },
   {
-    "key": "ff6-new-town",
+    "key": "q22-i-can-be-a-gym-leader-too",
     "number": 22,
-    "gameSlug": "ff6",
+    "gameSlug": "pokemon-hgss",
+    "eligibleGameSlugs": [
+      "pokemon-hgss"
+    ],
+    "category": "GAME_SPECIFIC",
     "isSecret": false,
     "title": {
-      "en": "Visit a new town",
-      "es": "Visita una nueva ciudad"
+      "en": "I Can Be a Gym Leader Too!",
+      "es": "¡Yo también puedo ser líder de gimnasio!"
     },
     "description": {
-      "en": "Reach a town you have not visited in this run.",
-      "es": "Llega a una ciudad que aún no hayas visitado en esta partida."
+      "en": "Defeat a Gym Leader with a monotype team: every participating Pokémon shares one type; dual types are allowed. Level cap: that Gym Leader's highest-level Pokémon. No permadeath. Extra restrictions, such as no healing, apply ONLY if the audience voluntarily chooses them.",
+      "es": "Derrota a un líder de gimnasio con un equipo monotipo: todos los Pokémon participantes comparten un tipo; se permiten tipos dobles. Límite de nivel: el Pokémon de mayor nivel de ese líder. Sin muerte permanente. Las restricciones extra, como no curarse, SOLO se aplican si el público las elige voluntariamente."
     }
   },
   {
-    "key": "ff6-optional-enemy",
+    "key": "q23-do-not-throw",
     "number": 23,
-    "gameSlug": "ff6",
+    "gameSlug": "disgaea7",
+    "eligibleGameSlugs": [
+      "disgaea7"
+    ],
+    "category": "GAME_SPECIFIC",
     "isSecret": false,
     "title": {
-      "en": "Defeat an optional enemy",
-      "es": "Derrota a un enemigo opcional"
+      "en": "Do Not Throw",
+      "es": "No lanzar"
     },
     "description": {
-      "en": "Defeat an enemy that is not required to advance the story.",
-      "es": "Derrota a un enemigo al que no haga falta vencer para avanzar en la historia."
+      "en": "Defeat at least TWO enemies with Prinny explosions initiated by a SINGLE throw, then clear the map. Chain explosions are allowed. You may weaken enemies and arrange positions, but both kills must come from Prinny explosions.",
+      "es": "Derrota al menos a DOS enemigos con explosiones de Prinny iniciadas por UN SOLO lanzamiento y completa el mapa. Se permiten explosiones en cadena. Puedes debilitar enemigos y preparar sus posiciones, pero ambas bajas deben proceder de explosiones de Prinny."
     }
   },
   {
-    "key": "ff6-starting-equipment",
+    "key": "q24-rng-or-rgb",
     "number": 24,
-    "gameSlug": "ff6",
+    "gameSlug": "disgaea7",
+    "eligibleGameSlugs": [
+      "disgaea7"
+    ],
+    "category": "GAME_SPECIFIC",
     "isSecret": false,
     "title": {
-      "en": "Win with the starting equipment",
-      "es": "Gana con el equipo inicial"
+      "en": "RNG or RGB?",
+      "es": "¿RNG o RGB?"
     },
     "description": {
-      "en": "Win the agreed battle using your starting equipment.",
-      "es": "Gana el combate acordado con el equipo inicial."
+      "en": "Clear a map after triggering a Geo Panel / Geo Symbol chain reaction involving at least THREE different colors that actually participate in the chain. No extra combat restrictions.",
+      "es": "Completa un mapa tras provocar una reacción en cadena de Geo Paneles / Geo Símbolos con al menos TRES colores distintos que participen de verdad en la cadena. Sin restricciones de combate adicionales."
     }
   },
   {
-    "key": "ff6-difficult-encounter",
+    "key": "q25-the-mushroom-whisperer",
     "number": 25,
-    "gameSlug": "ff6",
+    "gameSlug": "kh1",
+    "eligibleGameSlugs": [
+      "kh1"
+    ],
+    "category": "GAME_SPECIFIC",
     "isSecret": false,
     "title": {
-      "en": "Survive a difficult encounter",
-      "es": "Sobrevive a un combate difícil"
+      "en": "The Mushroom Whisperer",
+      "es": "El encantador de champiñones"
     },
     "description": {
-      "en": "Overcome a challenging battle and keep the adventure going.",
-      "es": "Supera un combate difícil y sigue adelante con la aventura."
+      "en": "Correctly respond to three White Mushroom gestures with the appropriate spells and successfully finish the encounter.",
+      "es": "Responde correctamente a tres gestos de un Hongo Blanco con los hechizos adecuados y termina el encuentro con éxito."
     }
   },
   {
-    "key": "ff6-new-ability",
+    "key": "q26-everyone-has-their-own-way",
     "number": 26,
     "gameSlug": "ff6",
+    "eligibleGameSlugs": [
+      "ff6"
+    ],
+    "category": "GAME_SPECIFIC",
     "isSecret": false,
     "title": {
-      "en": "Discover a new ability",
-      "es": "Descubre una nueva habilidad"
+      "en": "Everyone Has Their Own Way",
+      "es": "Cada uno a su manera"
     },
     "description": {
-      "en": "Learn or unlock an ability you have not used in this run.",
-      "es": "Aprende o desbloquea una habilidad que aún no hayas usado en esta partida."
+      "en": "Win one battle after using all four abilities in that battle: Edgar's Tools, Sabin's Blitz, Cyan's Bushido and Setzer's Slots.",
+      "es": "Gana un único combate tras usar en él las cuatro habilidades: Herramientas de Edgar, Blitz de Sabin, Bushido de Cyan y Tragamonedas de Setzer."
     }
   },
   {
-    "key": "ff6-dungeon",
+    "key": "q27-heart-of-the-cards",
     "number": 27,
-    "gameSlug": "ff6",
+    "gameSlug": "ff8",
+    "eligibleGameSlugs": [
+      "ff8"
+    ],
+    "category": "GAME_SPECIFIC",
     "isSecret": false,
     "title": {
-      "en": "Finish a dungeon",
-      "es": "Completa una mazmorra"
+      "en": "Heart of the Cards",
+      "es": "El corazón de las cartas"
     },
     "description": {
-      "en": "Make your way through the agreed dungeon and reach its end.",
-      "es": "Recorre la mazmorra acordada y llega hasta el final."
+      "en": "Win a card in Triple Triad, convert it with Card Mod, refine the resulting materials into magic, junction that magic to a stat, then win a battle using that setup.",
+      "es": "Gana una carta en Triple Triad, conviértela con Card Mod, refina los materiales resultantes en magia, enlaza esa magia a una estadística y gana un combate con esa configuración."
     }
   },
   {
-    "key": "ff6-no-fleeing",
+    "key": "q28-ivalice-zoo",
     "number": 28,
-    "gameSlug": "ff6",
+    "gameSlug": "fft-remaster",
+    "eligibleGameSlugs": [
+      "fft-remaster"
+    ],
+    "category": "GAME_SPECIFIC",
     "isSecret": false,
     "title": {
-      "en": "Win without fleeing",
-      "es": "Gana sin huir"
+      "en": "Ivalice Zoo",
+      "es": "El zoo de Ivalice"
     },
     "description": {
-      "en": "Clear the agreed stretch without running from any battles.",
-      "es": "Supera el tramo acordado sin huir de ningún combate."
+      "en": "Win a battle with Ramza accompanied exclusively by recruited monsters, with no other human units.",
+      "es": "Gana un combate con Ramza acompañado exclusivamente por monstruos reclutados, sin otras unidades humanas."
     }
   },
   {
-    "key": "ff6-rare-item",
+    "key": "q29-netherworld-express",
     "number": 29,
-    "gameSlug": "ff6",
+    "gameSlug": "disgaea7",
+    "eligibleGameSlugs": [
+      "disgaea7"
+    ],
+    "category": "GAME_SPECIFIC",
     "isSecret": false,
     "title": {
-      "en": "Find a rare item",
-      "es": "Encuentra un objeto raro"
+      "en": "Netherworld Express",
+      "es": "Servicio de mensajería infernal"
     },
     "description": {
-      "en": "Obtain a rare item and show the party your find.",
-      "es": "Consigue un objeto raro y enséñale el hallazgo al grupo."
+      "en": "Transport a character from one side of the map to the other through a chain of lifts and throws, then clear the stage.",
+      "es": "Transporta a un personaje de un extremo del mapa al otro mediante una cadena de levantamientos y lanzamientos y completa el escenario."
     }
   },
   {
-    "key": "ff6-side-objective",
+    "key": "q30-the-hero-is-on-holiday",
     "number": 30,
-    "gameSlug": "ff6",
+    "gameSlug": "dq11",
+    "eligibleGameSlugs": [
+      "dq11"
+    ],
+    "category": "GAME_SPECIFIC",
     "isSecret": false,
     "title": {
-      "en": "Complete a side objective",
-      "es": "Completa un objetivo secundario"
+      "en": "The Hero Is on Holiday",
+      "es": "El héroe está de vacaciones"
     },
     "description": {
-      "en": "Finish a side objective chosen for the current save.",
-      "es": "Completa un objetivo secundario elegido para la partida actual."
+      "en": "Defeat a powerful enemy without using the protagonist at any point during the battle.",
+      "es": "Derrota a un enemigo poderoso sin utilizar al protagonista en ningún momento del combate."
     }
   },
   {
-    "key": "ff6-boss",
+    "key": "q31-thats-not-a-weapon",
     "number": 31,
-    "gameSlug": "ff6",
+    "gameSlug": "phantom-brave",
+    "eligibleGameSlugs": [
+      "phantom-brave"
+    ],
+    "category": "GAME_SPECIFIC",
     "isSecret": false,
     "title": {
-      "en": "Win a boss encounter",
-      "es": "Derrota a un jefe"
+      "en": "That's Not a Weapon!",
+      "es": "¡Eso no es un arma!"
     },
     "description": {
-      "en": "Defeat the boss chosen for this challenge.",
-      "es": "Derrota al jefe elegido para esta misión."
+      "en": "Clear a stage by confining Phantoms exclusively into environmental objects that are not conventional weapons.",
+      "es": "Completa un escenario confinando a los Phantoms exclusivamente en objetos del entorno que no sean armas convencionales."
     }
   },
   {
-    "key": "ff6-optional-area",
+    "key": "q32-he-doesnt-deserve-your-charity",
     "number": 32,
-    "gameSlug": "ff6",
+    "gameSlug": "yakuza-lad",
+    "eligibleGameSlugs": [
+      "yakuza-lad"
+    ],
+    "category": "GAME_SPECIFIC",
     "isSecret": false,
     "title": {
-      "en": "Explore an optional area",
-      "es": "Explora una zona opcional"
+      "en": "He Doesn't Deserve Your Charity",
+      "es": "No se merece tu caridad"
     },
     "description": {
-      "en": "Take a detour and explore an area outside the main story route.",
-      "es": "Desvíate del camino principal y explora una zona opcional."
+      "en": "Find and defeat an Invested Vagabond before it escapes. No additional job or equipment restrictions.",
+      "es": "Encuentra y derrota a un Invested Vagabond antes de que escape. Sin restricciones adicionales de trabajos ni equipo."
     }
   },
   {
-    "key": "ff6-save-point",
+    "key": "q33-kermits-revenge",
     "number": 33,
-    "gameSlug": "ff6",
+    "gameSlug": "ff9",
+    "eligibleGameSlugs": [
+      "ff9"
+    ],
+    "category": "GAME_SPECIFIC",
     "isSecret": false,
     "title": {
-      "en": "Reach the next save point",
-      "es": "Llega al siguiente punto de guardado"
+      "en": "Kermit's Revenge",
+      "es": "La rana Gustavo"
     },
     "description": {
-      "en": "Reach the next save point and save your progress.",
-      "es": "Llega al siguiente punto de guardado y guarda la partida."
+      "en": "Catch five frogs with Quina in the Qu's Marshes.",
+      "es": "Atrapa cinco ranas con Quina en los Pantanos de los Qu."
     }
   },
   {
-    "key": "ff6-chat-party",
+    "key": "q34-human-lightning-rod",
     "number": 34,
-    "gameSlug": "ff6",
+    "gameSlug": "ff10",
+    "eligibleGameSlugs": [
+      "ff10"
+    ],
+    "category": "GAME_SPECIFIC",
     "isSecret": false,
     "title": {
-      "en": "Let chat choose the party",
-      "es": "Deja que el chat elija el grupo"
+      "en": "Human Lightning Rod",
+      "es": "Pararrayos humano"
     },
     "description": {
-      "en": "Let chat pick the party for the next agreed stretch.",
-      "es": "Deja que el chat elija a los miembros del grupo para el siguiente tramo."
+      "en": "Dodge 20 consecutive lightning bolts in the Thunder Plains.",
+      "es": "Esquiva 20 rayos consecutivos en la Llanura de los Rayos."
     }
   },
   {
-    "key": "ff6-secret-treasure",
+    "key": "q35-explosive-chemistry",
     "number": 35,
-    "gameSlug": "ff6",
-    "isSecret": true,
+    "gameSlug": "ff5",
+    "eligibleGameSlugs": [
+      "ff5"
+    ],
+    "category": "GAME_SPECIFIC",
+    "isSecret": false,
     "title": {
-      "en": "Secret treasure hunt",
-      "es": "Búsqueda secreta del tesoro"
+      "en": "Explosive Chemistry",
+      "es": "Química explosiva"
     },
     "description": {
-      "en": "Follow the revealed clue and find the secret treasure.",
-      "es": "Sigue la pista revelada y encuentra el tesoro secreto."
+      "en": "Use three DIFFERENT Chemist Mix combinations during the same battle, then win.",
+      "es": "Usa tres combinaciones DIFERENTES de Mezcla del Químico durante el mismo combate y gana."
     }
   },
   {
-    "key": "ff6-secret-finale",
+    "key": "q36-pass-the-baton",
     "number": 36,
-    "gameSlug": "ff6",
-    "isSecret": true,
+    "gameSlug": "persona5-royal",
+    "eligibleGameSlugs": [
+      "persona5-royal"
+    ],
+    "category": "GAME_SPECIFIC",
+    "isSecret": false,
     "title": {
-      "en": "Secret final encounter",
-      "es": "Combate final secreto"
+      "en": "Pass the Baton!",
+      "es": "¡Pasa la patata!"
     },
     "description": {
-      "en": "Face the secret encounter when the challenge is revealed.",
-      "es": "Afronta el combate secreto cuando se revele la misión."
+      "en": "Execute a chain of three Baton Pass transfers in the same turn, then win the battle.",
+      "es": "Encadena tres relevos de Baton Pass en el mismo turno y gana el combate."
     }
   },
   {
-    "key": "ff9-opening-encounter",
+    "key": "q37-its-in-the-genes",
     "number": 37,
-    "gameSlug": "ff9",
+    "gameSlug": "monster-hunter-stories2",
+    "eligibleGameSlugs": [
+      "monster-hunter-stories2"
+    ],
+    "category": "GAME_SPECIFIC",
     "isSecret": false,
     "title": {
-      "en": "Win the opening encounter",
-      "es": "Gana el primer combate"
+      "en": "It's in the Genes!",
+      "es": "¡Está en los genes!"
     },
     "description": {
-      "en": "Win the first battle agreed on for this save.",
-      "es": "Gana el primer combate que acordéis para esta partida."
+      "en": "Transfer a gene with the Rite of Channeling, complete a gene bingo, then win a battle with that Monstie.",
+      "es": "Transfiere un gen mediante el Rito Canalizador, completa un bingo de genes y gana un combate con ese Monstie."
     }
   },
   {
-    "key": "ff9-no-items",
+    "key": "q38-saving-grunty",
     "number": 38,
-    "gameSlug": "ff9",
+    "gameSlug": "hack-gu-last-recode",
+    "eligibleGameSlugs": [
+      "hack-gu-last-recode"
+    ],
+    "category": "GAME_SPECIFIC",
     "isSecret": false,
     "title": {
-      "en": "Win without using items",
-      "es": "Gana sin usar objetos"
+      "en": "Saving Grunty",
+      "es": "Rescatando a Grunty"
     },
     "description": {
-      "en": "Win a battle without using any items.",
-      "es": "Gana un combate sin usar ningún objeto."
+      "en": "Find and rescue a Mecha Grunty in a game area.",
+      "es": "Encuentra y rescata a un Mecha Grunty en un área del juego."
     }
   },
   {
-    "key": "ff9-hidden-chest",
+    "key": "q39-clash-of-eras",
     "number": 39,
-    "gameSlug": "ff9",
+    "gameSlug": "chrono-trigger",
+    "eligibleGameSlugs": [
+      "chrono-trigger"
+    ],
+    "category": "GAME_SPECIFIC",
     "isSecret": false,
     "title": {
-      "en": "Find a hidden chest",
-      "es": "Encuentra un cofre oculto"
+      "en": "Clash of Eras",
+      "es": "Choque de épocas"
     },
     "description": {
-      "en": "Find and open a chest off the main route.",
-      "es": "Encuentra y abre un cofre apartado del camino principal."
+      "en": "Defeat Spekkio with a three-character party whose members come from three different historical eras, for example Crono, Frog and Robo. No equipment or ability restrictions.",
+      "es": "Derrota a Spekkio con un grupo de tres personajes de tres épocas históricas distintas, por ejemplo Crono, Frog y Robo. Sin restricciones de equipo ni habilidades."
     }
   },
   {
-    "key": "ff9-new-town",
+    "key": "q40-bag-that-pig",
     "number": 40,
-    "gameSlug": "ff9",
+    "gameSlug": "tombi",
+    "eligibleGameSlugs": [
+      "tombi"
+    ],
+    "category": "GAME_SPECIFIC",
     "isSecret": false,
     "title": {
-      "en": "Visit a new town",
-      "es": "Visita una nueva ciudad"
+      "en": "Bag That Pig!",
+      "es": "¡Al saco, cerdo!"
     },
     "description": {
-      "en": "Reach a town you have not visited in this run.",
-      "es": "Llega a una ciudad que aún no hayas visitado en esta partida."
+      "en": "Find and capture one of the seven Evil Pigs with its corresponding bag, lifting its curse.",
+      "es": "Encuentra y captura a uno de los siete Cerdos Malignos con su bolsa correspondiente y levanta su maldición."
     }
   },
   {
-    "key": "ff9-optional-enemy",
+    "key": "q41-a-piece-of-art",
     "number": 41,
-    "gameSlug": "ff9",
+    "gameSlug": "fantasy-life-i",
+    "eligibleGameSlugs": [
+      "fantasy-life-i"
+    ],
+    "category": "GAME_SPECIFIC",
     "isSecret": false,
     "title": {
-      "en": "Defeat an optional enemy",
-      "es": "Derrota a un enemigo opcional"
+      "en": "A Piece of Art!",
+      "es": "¡Una obra de arte!"
     },
     "description": {
-      "en": "Defeat an enemy that is not required to advance the story.",
-      "es": "Derrota a un enemigo al que no haga falta vencer para avanzar en la historia."
+      "en": "Gather the required materials DURING this quest and successfully create a work of art using the Artist Life. Other professions may gather the materials.",
+      "es": "Reúne los materiales necesarios DURANTE esta misión y crea con éxito una obra de arte con el oficio de Artista. Puedes usar otras profesiones para recoger los materiales."
     }
   },
   {
-    "key": "ff9-starting-equipment",
+    "key": "q42-vote-for-me",
     "number": 42,
-    "gameSlug": "ff9",
+    "gameSlug": "metaphor-refantazio",
+    "eligibleGameSlugs": [
+      "metaphor-refantazio"
+    ],
+    "category": "GAME_SPECIFIC",
     "isSecret": false,
     "title": {
-      "en": "Win with the starting equipment",
-      "es": "Gana con el equipo inicial"
+      "en": "Vote for Me!",
+      "es": "¡Vótame a mí!"
     },
     "description": {
-      "en": "Win the agreed battle using your starting equipment.",
-      "es": "Gana el combate acordado con el equipo inicial."
+      "en": "Participate in and WIN a public debate against another candidate for the throne. Participation alone does not count.",
+      "es": "Participa en un debate público contra otro candidato al trono y GÁNALO. Participar sin ganar no cuenta."
     }
   },
   {
-    "key": "ff9-difficult-encounter",
+    "key": "q43-play-it-again-cloud",
     "number": 43,
-    "gameSlug": "ff9",
+    "gameSlug": "ff7-rebirth",
+    "eligibleGameSlugs": [
+      "ff7-rebirth"
+    ],
+    "category": "GAME_SPECIFIC",
     "isSecret": false,
     "title": {
-      "en": "Survive a difficult encounter",
-      "es": "Sobrevive a un combate difícil"
+      "en": "Play It Again, Cloud!",
+      "es": "¡Toca otra, Cloud!"
     },
     "description": {
-      "en": "Overcome a challenging battle and keep the adventure going.",
-      "es": "Supera un combate difícil y sigue adelante con la aventura."
+      "en": "Achieve at least rank A on any available piano song. Unlimited retries are allowed.",
+      "es": "Consigue al menos rango A en cualquier canción disponible del piano. Se permiten reintentos ilimitados."
     }
   },
   {
-    "key": "ff9-new-ability",
+    "key": "q44-look-mom-no-hands",
     "number": 44,
-    "gameSlug": "ff9",
+    "gameSlug": "ff12",
+    "eligibleGameSlugs": [
+      "ff12"
+    ],
+    "category": "GAME_SPECIFIC",
     "isSecret": false,
     "title": {
-      "en": "Discover a new ability",
-      "es": "Descubre una nueva habilidad"
+      "en": "Look, Mom, No Hands!",
+      "es": "Mira mamá, ¡sin manos!"
     },
     "description": {
-      "en": "Learn or unlock an ability you have not used in this run.",
-      "es": "Aprende o desbloquea una habilidad que aún no hayas usado en esta partida."
+      "en": "Defeat a powerful enemy using Gambits only. Configure Gambits, equipment and abilities before battle; issue NO manual battle commands once the encounter starts. Automatic healing and resurrection are allowed. After a defeat, adjust Gambits before retrying if needed.",
+      "es": "Derrota a un enemigo poderoso usando solo Gambits. Configura Gambits, equipo y habilidades antes del combate; NO des órdenes manuales de combate tras iniciarse el encuentro. Se permiten curación y resurrección automáticas. Tras una derrota puedes ajustar los Gambits antes de reintentarlo."
     }
   },
   {
-    "key": "ff9-dungeon",
+    "key": "q45-soldier-of-the-month",
     "number": 45,
-    "gameSlug": "ff9",
+    "gameSlug": "crisis-core-reunion",
+    "eligibleGameSlugs": [
+      "crisis-core-reunion"
+    ],
+    "category": "GAME_SPECIFIC",
     "isSecret": false,
     "title": {
-      "en": "Finish a dungeon",
-      "es": "Completa una mazmorra"
+      "en": "SOLDIER of the Month",
+      "es": "SOLDADO del mes"
     },
     "description": {
-      "en": "Make your way through the agreed dungeon and reach its end.",
-      "es": "Recorre la mazmorra acordada y llega hasta el final."
+      "en": "Complete three predetermined SOLDIER missions in sequence and in increasing difficulty, without changing Materia or accessories between them. If any attempt fails, restart the complete three-mission sequence.",
+      "es": "Completa tres misiones de SOLDADO fijadas de antemano, consecutivas y de dificultad creciente, sin cambiar Materias ni accesorios entre ellas. Si falla un intento, reinicia la secuencia completa de tres misiones."
     }
   },
   {
-    "key": "ff9-no-fleeing",
+    "key": "q46-two-for-one",
     "number": 46,
-    "gameSlug": "ff9",
+    "gameSlug": "ff4",
+    "eligibleGameSlugs": [
+      "ff4"
+    ],
+    "category": "GAME_SPECIFIC",
     "isSecret": false,
     "title": {
-      "en": "Win without fleeing",
-      "es": "Gana sin huir"
+      "en": "Two for One!",
+      "es": "¡Dos por uno!"
     },
     "description": {
-      "en": "Clear the agreed stretch without running from any battles.",
-      "es": "Supera el tramo acordado sin huir de ningún combate."
+      "en": "Defeat Scarmiglione with ALL enemy damage coming only from Palom and Porom's Twincast. Cecil and Tellah may heal, defend or support, but may not inflict damage. Prepare a save with the twins before this boss.",
+      "es": "Derrota a Scarmiglione causando TODO el daño al enemigo solo con la magia conjunta Twincast de Palom y Porom. Cecil y Tellah pueden curar, defender o apoyar, pero no causar daño. Prepara una partida con los gemelos antes de este jefe."
     }
   },
   {
-    "key": "ff9-rare-item",
+    "key": "q47-an-ace-up-your-sleeve",
     "number": 47,
-    "gameSlug": "ff9",
+    "gameSlug": "kh-chain-of-memories",
+    "eligibleGameSlugs": [
+      "kh-chain-of-memories"
+    ],
+    "category": "GAME_SPECIFIC",
     "isSecret": false,
     "title": {
-      "en": "Find a rare item",
-      "es": "Encuentra un objeto raro"
+      "en": "An Ace Up Your Sleeve",
+      "es": "Un as bajo la manga"
     },
     "description": {
-      "en": "Obtain a rare item and show the party your find.",
-      "es": "Consigue un objeto raro y enséñale el hallazgo al grupo."
+      "en": "Win a battle after successfully executing at least THREE DIFFERENT Sleights during that battle. All other cards and healing are allowed.",
+      "es": "Gana un combate tras ejecutar con éxito al menos TRES Ardides DIFERENTES durante ese combate. Se permiten las demás cartas y la curación."
     }
   },
   {
-    "key": "ff9-side-objective",
+    "key": "q48-small-but-mighty",
     "number": 48,
-    "gameSlug": "ff9",
+    "gameSlug": "ff3",
+    "eligibleGameSlugs": [
+      "ff3"
+    ],
+    "category": "GAME_SPECIFIC",
     "isSecret": false,
     "title": {
-      "en": "Complete a side objective",
-      "es": "Completa un objetivo secundario"
+      "en": "Small but Mighty",
+      "es": "Pequeños pero matones"
     },
     "description": {
-      "en": "Finish a side objective chosen for the current save.",
-      "es": "Completa un objetivo secundario elegido para la partida actual."
+      "en": "Defeat a significant enemy with all four party members under Mini status from the start to the end of battle. Do not remove Mini during the battle. Magic and other Mini-compatible resources are allowed.",
+      "es": "Derrota a un enemigo importante con los cuatro miembros del grupo en estado Mini desde el inicio hasta el final del combate. No retires Mini durante la batalla. Se permiten magia y otros recursos compatibles con Mini."
     }
   },
   {
-    "key": "ff9-boss",
+    "key": "q49-dynamic-duo",
     "number": 49,
-    "gameSlug": "ff9",
+    "gameSlug": "tales-berseria",
+    "eligibleGameSlugs": [
+      "tales-berseria"
+    ],
+    "category": "COOPERATIVE",
     "isSecret": false,
     "title": {
-      "en": "Win a boss encounter",
-      "es": "Derrota a un jefe"
+      "en": "Dynamic Duo",
+      "es": "Dúo dinámico"
     },
     "description": {
-      "en": "Defeat the boss chosen for this challenge.",
-      "es": "Derrota al jefe elegido para esta misión."
+      "en": "With 2–4 HUMAN players participating locally through Parsec, defeat a powerful enemy. EVERY participating human must successfully execute at least one Mystic Arte during the battle; it need not land the finishing blow. With 3 or 4 players, all 3 or 4 must participate.",
+      "es": "Con 2–4 jugadores HUMANOS participando en multijugador local mediante Parsec, derrotad a un enemigo poderoso. CADA humano participante debe ejecutar con éxito al menos un Arte Mística en el combate; no tiene que dar el golpe final. Si sois 3 o 4, deben participar los 3 o 4."
     }
   },
   {
-    "key": "ff9-optional-area",
+    "key": "q50-you-bring-the-fuel",
     "number": 50,
-    "gameSlug": "ff9",
+    "gameSlug": "bg3",
+    "eligibleGameSlugs": [
+      "bg3"
+    ],
+    "category": "COOPERATIVE",
     "isSecret": false,
     "title": {
-      "en": "Explore an optional area",
-      "es": "Explora una zona opcional"
+      "en": "You Bring the Fuel!",
+      "es": "¡Tú pon la gasolina!"
     },
     "description": {
-      "en": "Take a detour and explore an area outside the main story route.",
-      "es": "Desvíate del camino principal y explora una zona opcional."
+      "en": "Two HUMAN players use local split-screen through Parsec. One prepares an elemental surface such as grease or oil; the other triggers a compatible reaction that damages an enemy. Then win the battle. Local split-screen supports 2 players, not 4.",
+      "es": "Dos jugadores HUMANOS usan pantalla dividida local mediante Parsec. Uno prepara una superficie elemental, como grasa o aceite; el otro provoca una reacción compatible que dañe a un enemigo. Después, ganad el combate. La pantalla dividida local es para 2 jugadores, no para 4."
     }
   },
   {
-    "key": "ff9-save-point",
+    "key": "q51-i-didnt-come-alone",
     "number": 51,
-    "gameSlug": "ff9",
+    "gameSlug": "legend-of-mana",
+    "eligibleGameSlugs": [
+      "legend-of-mana"
+    ],
+    "category": "COOPERATIVE",
     "isSecret": false,
     "title": {
-      "en": "Reach the next save point",
-      "es": "Llega al siguiente punto de guardado"
+      "en": "I Didn't Come Alone!",
+      "es": "¡No venía solo!"
     },
     "description": {
-      "en": "Reach the next save point and save your progress.",
-      "es": "Llega al siguiente punto de guardado y guarda la partida."
+      "en": "Two HUMAN players defeat a boss cooperatively, with the invited player delivering the finishing blow.",
+      "es": "Dos jugadores HUMANOS derrotan cooperativamente a un jefe y el jugador invitado da el golpe final."
     }
   },
   {
-    "key": "ff9-chat-party",
+    "key": "q52-ive-got-your-back",
     "number": 52,
-    "gameSlug": "ff9",
+    "gameSlug": "ff4-classic-coop",
+    "eligibleGameSlugs": [
+      "ff4-classic-coop"
+    ],
+    "category": "COOPERATIVE",
     "isSecret": false,
     "title": {
-      "en": "Let chat choose the party",
-      "es": "Deja que el chat elija el grupo"
+      "en": "I've Got Your Back!",
+      "es": "¡Yo te cubro!"
     },
     "description": {
-      "en": "Let chat pick the party for the next agreed stretch.",
-      "es": "Deja que el chat elija a los miembros del grupo para el siguiente tramo."
+      "en": "Two HUMAN players control separately assigned party members and defeat Cagnazzo. One player's characters focus on offense; the other's use healing/support only. Use a classic version with working two-controller battle character assignments, not assumed Pixel Remaster multiplayer.",
+      "es": "Dos jugadores HUMANOS controlan miembros del grupo asignados por separado y derrotan a Cagnazzo. Los personajes de uno se centran en atacar; los del otro solo curan o apoyan. Usad una versión clásica con asignación de personajes de combate a dos mandos comprobada; no presupongáis multijugador en Pixel Remaster."
     }
   },
   {
-    "key": "ff9-secret-treasure",
+    "key": "q53-you-pick-i-suffer",
     "number": 53,
-    "gameSlug": "ff9",
-    "isSecret": true,
+    "gameSlug": "ff5-classic-coop",
+    "eligibleGameSlugs": [
+      "ff5-classic-coop"
+    ],
+    "category": "COOPERATIVE",
+    "isSecret": false,
     "title": {
-      "en": "Secret treasure hunt",
-      "es": "Búsqueda secreta del tesoro"
+      "en": "You Pick, I Suffer",
+      "es": "Tú eliges, yo sufro"
     },
     "description": {
-      "en": "Follow the revealed clue and find the secret treasure.",
-      "es": "Sigue la pista revelada y encuentra el tesoro secreto."
+      "en": "Two HUMAN players each choose the jobs for the OTHER player's assigned characters. Win a significant battle without changing those jobs. Use the classic game version with actual two-controller multiplayer, not assumed Pixel Remaster multiplayer.",
+      "es": "Dos jugadores HUMANOS eligen cada uno los trabajos de los personajes asignados al OTRO. Ganad un combate importante sin cambiar esos trabajos. Usad la versión clásica con multijugador real de dos mandos; no presupongáis multijugador en Pixel Remaster."
     }
   },
   {
-    "key": "ff9-secret-finale",
+    "key": "q54-magic-and-muscle",
     "number": 54,
-    "gameSlug": "ff9",
-    "isSecret": true,
+    "gameSlug": "ff6-classic-coop",
+    "eligibleGameSlugs": [
+      "ff6-classic-coop"
+    ],
+    "category": "COOPERATIVE",
+    "isSecret": false,
     "title": {
-      "en": "Secret final encounter",
-      "es": "Combate final secreto"
+      "en": "Magic and Muscle",
+      "es": "Magia y músculo"
     },
     "description": {
-      "en": "Face the secret encounter when the challenge is revealed.",
-      "es": "Afronta el combate secreto cuando se revele la misión."
+      "en": "Two HUMAN players control their assigned characters. One handles magic and support; the other physical attacks and offensive character skills. Win a significant battle using a version with actual two-controller multiplayer, not assumed Pixel Remaster multiplayer.",
+      "es": "Dos jugadores HUMANOS controlan sus personajes asignados. Uno se ocupa de magia y apoyo; el otro, de ataques físicos y habilidades ofensivas de personaje. Ganad un combate importante con una versión que tenga multijugador real de dos mandos; no presupongáis multijugador en Pixel Remaster."
+    }
+  },
+  {
+    "key": "q55-the-cure-is-worse-than-the-disease",
+    "number": 55,
+    "gameSlug": "ff5",
+    "eligibleGameSlugs": [
+      "ff5",
+      "ff6",
+      "ff7",
+      "ff9",
+      "ff10"
+    ],
+    "category": "SECRET",
+    "isSecret": true,
+    "title": {
+      "en": "The Cure Is Worse Than the Disease",
+      "es": "La cura es peor que la enfermedad"
+    },
+    "description": {
+      "en": "Defeat an undead enemy with restorative/healing effects as the ONLY source of damage. Choose a game and enemy where healing harms the undead.",
+      "es": "Derrota a un enemigo no muerto usando efectos restaurativos o curativos como ÚNICA fuente de daño. Elige un juego y enemigo en el que curar dañe a los no muertos."
+    }
+  },
+  {
+    "key": "q56-the-enemy-of-my-enemy",
+    "number": 56,
+    "gameSlug": "ff5",
+    "eligibleGameSlugs": [
+      "ff5",
+      "ff6",
+      "ff7",
+      "ff9",
+      "bg3"
+    ],
+    "category": "SECRET",
+    "isSecret": true,
+    "title": {
+      "en": "The Enemy of My Enemy",
+      "es": "El enemigo de mi enemigo"
+    },
+    "description": {
+      "en": "Make one enemy defeat another through confusion, mind control or another mechanic that turns enemies against one another.",
+      "es": "Haz que un enemigo derrote a otro mediante confusión, control mental u otra mecánica que enfrente a los enemigos entre sí."
+    }
+  },
+  {
+    "key": "q57-38-hits-for-38-years",
+    "number": 57,
+    "gameSlug": "tales-berseria",
+    "eligibleGameSlugs": [
+      "tales-berseria"
+    ],
+    "category": "SECRET",
+    "isSecret": true,
+    "title": {
+      "en": "38 Hits for 38 Years",
+      "es": "38 golpes para 38 años"
+    },
+    "description": {
+      "en": "Achieve a combo of at least 38 consecutive hits within one battle in a game with a suitable combo system.",
+      "es": "Consigue un combo de al menos 38 golpes consecutivos dentro de un mismo combate en un juego con un sistema de combos adecuado."
+    }
+  },
+  {
+    "key": "q58-three-generations-of-heroes",
+    "number": 58,
+    "gameSlug": "ff1-8bit",
+    "eligibleGameSlugs": [
+      "ff1-8bit",
+      "ff6-classic-coop",
+      "ff9"
+    ],
+    "category": "SECRET",
+    "isSecret": true,
+    "title": {
+      "en": "Three Generations of Heroes",
+      "es": "Tres generaciones de héroes"
+    },
+    "description": {
+      "en": "Win one battle in THREE different JRPGs representing three generations: one 8-bit game, one 16-bit game and one 3D-era game, for example FFI → FFVI → FFIX. This is ONE quest and awards one completion, not three. No additional combat restrictions.",
+      "es": "Gana un combate en TRES JRPG distintos que representen tres generaciones: uno de 8 bits, uno de 16 bits y uno de la era 3D; por ejemplo, FFI → FFVI → FFIX. Es UNA misión y otorga una sola finalización, no tres. Sin restricciones de combate adicionales."
+    }
+  },
+  {
+    "key": "q59-last-one-standing",
+    "number": 59,
+    "gameSlug": "ff5",
+    "eligibleGameSlugs": [
+      "ff5",
+      "ff6",
+      "ff7",
+      "ff9",
+      "ff10"
+    ],
+    "category": "SECRET",
+    "isSecret": true,
+    "title": {
+      "en": "Last One Standing",
+      "es": "El último en pie"
+    },
+    "description": {
+      "en": "Defeat a powerful enemy and finish the battle with exactly ONE surviving party member; all other party members must be defeated/KO. No additional equipment or skill restrictions.",
+      "es": "Derrota a un enemigo poderoso y termina el combate con exactamente UN miembro del grupo superviviente; todos los demás deben estar derrotados/KO. Sin restricciones adicionales de equipo ni habilidades."
+    }
+  },
+  {
+    "key": "q60-does-this-still-work",
+    "number": 60,
+    "gameSlug": "ff7",
+    "eligibleGameSlugs": [
+      "ff7",
+      "kh1",
+      "ff7-rebirth"
+    ],
+    "category": "SECRET",
+    "isSecret": true,
+    "title": {
+      "en": "Does This Still Work?",
+      "es": "¿Esto todavía sirve?"
+    },
+    "description": {
+      "en": "Defeat a powerful enemy with the protagonist's original starting weapon equipped and meaningfully used in battle, such as Cloud's Buster Sword or KH1's Kingdom Key. Other accessories, abilities, spells and upgrades are allowed.",
+      "es": "Derrota a un enemigo poderoso con el arma inicial original del protagonista equipada y utilizada de forma relevante en combate, como la Espada Mortal de Cloud o la Cadena del Reino de KH1. Se permiten otros accesorios, habilidades, hechizos y mejoras."
     }
   }
 ]

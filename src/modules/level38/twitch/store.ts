@@ -63,7 +63,7 @@ export class TwitchStore {
       if (!game || game.id === event.currentGameId) return null;
       const current = await tx.event.update({ where: { id: event.id }, data: { currentGameId: game.id,
         revision: { increment: 1 }, controlRevision: { increment: 1 } } });
-      const completed = await tx.quest.count({ where: { eventId: event.id, status: "COMPLETED" } });
+      const completed = await tx.quest.count({ where: { eventId: event.id, retiredAt: null, status: "COMPLETED" } });
       await tx.auditLog.create({ data: { eventId: event.id, operatorId: null, operatorName: "TWITCH", action: "game:changed", entityId: event.id,
         before: { gameId: event.currentGameId, gameTitle: event.currentGame?.title ?? null, completed },
         after: { gameId: game.id, gameTitle: game.title, completed }, eventRevision: current.revision,

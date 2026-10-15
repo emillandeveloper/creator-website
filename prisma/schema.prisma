@@ -22,6 +22,13 @@ enum QuestStatus {
   SECRET
 }
 
+enum QuestCategory {
+  MULTI_GAME
+  GAME_SPECIFIC
+  COOPERATIVE
+  SECRET
+}
+
 enum PollType {
   NEXT_QUEST
   NEXT_GAME
@@ -54,7 +61,7 @@ model Event {
   gameSource      GameSource @default(AUTO_TWITCH)
   manualOverrideBy String?
   partyEnabled    Boolean @default(true)
-  partyNameMode   String  @default("ENTRY")
+  partyNameMode   String  @default("ALWAYS")
   partyMaxVisible Int     @default(30)
   currentGame     Game?      @relation("CurrentGame", fields: [currentGameId], references: [id], onDelete: Restrict)
   createdAt       DateTime   @default(now())
@@ -78,6 +85,7 @@ model Game {
   twitchCategoryName String?
   sortOrder   Int          @default(0)
   quests      Quest[]
+  eligibleQuests QuestGame[]
   pollOptions PollOption[]
   currentIn   Event[]      @relation("CurrentGame")
 
@@ -93,6 +101,9 @@ model Quest {
   gameId      String
   game        Game         @relation(fields: [gameId, eventId], references: [id, eventId], onDelete: Restrict)
   number      Int
+  catalogKey  String?
+  category    QuestCategory @default(GAME_SPECIFIC)
+  retiredAt   DateTime?
   title       String
   description String
   titleEs     String?
@@ -105,10 +116,24 @@ model Quest {
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
   pollOptions PollOption[]
+  eligibleGames QuestGame[]
 
   @@unique([id, eventId])
-  @@unique([eventId, number])
+  @@unique([eventId, catalogKey])
+  // Active display-number uniqueness is a partial index in the catalog migration.
+  @@index([eventId, number])
   @@index([eventId, status])
+}
+
+model QuestGame {
+  questId String
+  gameId  String
+  eventId String
+  quest   Quest @relation(fields: [questId, eventId], references: [id, eventId], onDelete: Restrict)
+  game    Game  @relation(fields: [gameId, eventId], references: [id, eventId], onDelete: Restrict)
+
+  @@id([questId, gameId])
+  @@index([gameId, eventId])
 }
 
 model Participant {
@@ -155,6 +180,7 @@ model Poll {
   title            String
   number           Int          @unique @default(autoincrement())
   type             PollType     @default(NEXT_QUEST)
+  contextQuestId   String?
   status           PollStatus   @default(DRAFT)
   createdById      String
   createdBy        Operator     @relation("PollCreator", fields: [createdById], references: [id], onDelete: Restrict)

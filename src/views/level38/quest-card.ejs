@@ -1,5 +1,6 @@
-<article class="l38-card" data-status="<%= quest.status %>">
+<article class="l38-card" data-status="<%= quest.status %>" data-category="<%= quest.category || 'GAME_SPECIFIC' %>" data-quest-number="<%= quest.number %>">
   <div class="l38-card-top"><span class="l38-quest-number"><%= t('QUEST {number}', {number:String(quest.number).padStart(2, '0')}) %></span><span class="l38-status"><%= t(quest.status) %></span></div>
-  <h3><%= questText(quest, 'title') %></h3><p><%= questText(quest, 'description') %></p>
-  <p class="l38-meta"><span aria-hidden="true">◇</span> <%= state.games.find(game => game.id === quest.gameId)?.title %></p>
+  <span class="l38-quest-category"><%= t(quest.category || 'GAME_SPECIFIC') %></span>
+  <h3><%= quest.hidden ? '???' : questText(quest, 'title') %></h3><p><%= quest.hidden ? t('Hidden until Leo reveals this quest.') : questText(quest, 'description') %></p>
+  <% if (!quest.hidden) { const games = state.games.filter(game => (quest.eligibleGameIds || [quest.gameId]).includes(game.id)); const chosen = state.games.find(game => game.id === quest.gameId); if (games.length) { %><p class="l38-meta"><span><%= t('Eligible games') %>: <%= games.map(game => game.title).join(' · ') %></span><% if (games.length > 1 && chosen) { %><span class="l38-selected-game"><%= t('Selected game') %>: <%= chosen.title %></span><% } %></p><% } } %>
 </article>

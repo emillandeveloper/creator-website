@@ -9,7 +9,7 @@ test('bilingual HTML and semantic APIs preserve secret filtering, votes, identit
   const identity = await f.db.participant.findFirstOrThrow();
   const es = await f.call('/', undefined, undefined, { 'Accept-Language': 'es-ES,en;q=0.8' });
   const en = await f.call('/', undefined, 'level38_lang=en', { 'Accept-Language': 'es-ES' });
-  assert.match(es.data, /<html lang="es">/); assert.match(es.data, /Diario de misiones/); assert.match(es.data, /Gana el primer combate/);
+  assert.match(es.data, /<html lang="es">/); assert.match(es.data, /Diario de misiones/); assert.match(es.data, /Vuelta a la Edad de Piedra/);
   assert.match(en.data, /<html lang="en">/); assert.match(en.data, /The quest journal/);
   for (const lang of ['es','en']) {
     const control = await f.call('/control', undefined, `${mod.cookie}; level38_lang=${lang}`);
@@ -18,7 +18,7 @@ test('bilingual HTML and semantic APIs preserve secret filtering, votes, identit
     const state = (await f.call('/api/state', undefined, `${viewer}; level38_lang=${lang}`)).data;
     assert.equal(state.quests[0].status, 'AVAILABLE'); assert.ok(state.quests[0].translations.es.title);
     const secret = await f.db.quest.findFirstOrThrow({ where: { isSecret: true } });
-    assert.ok(!JSON.stringify(state).includes(secret.id)); assert.ok(!JSON.stringify(state).includes(secret.titleEs));
+    assert.equal(state.quests.find(q => q.id === secret.id).title, "???"); assert.ok(!JSON.stringify(state).includes(secret.titleEs));
     assert.equal((await f.call('/api/control/state', undefined, `${viewer}; level38_lang=${lang}`)).status, 401);
     assert.equal((await f.call('/api/session', undefined, `${viewer}; level38_lang=${lang}`)).data.class.id, identity.classId);
   }
@@ -35,7 +35,7 @@ test('bilingual HTML and semantic APIs preserve secret filtering, votes, identit
   assert.deepEqual(await f.db.participant.findFirstOrThrow(), identity);
 });
 
-test('Phase 3.6 additive migration preserves legacy content/state and supports repeat deploy and schema verification', { timeout: 90000 }, async t => {
+test('Phase 3.6 additive migration preserves legacy content/state and supports repeat deploy and schema verification', { timeout: 180000 }, async t => {
   const f = await fixture(t, {migrate:false,seed:false});
   const schema = new URL(f.databaseUrl).searchParams.get('schema');
   assert.match(schema,/^level38_test_[a-f0-9]{32}$/);

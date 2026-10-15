@@ -2,7 +2,7 @@ import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
 import { hashToken, newToken } from "./auth";
 import { seedLevel38 } from "./seed";
-import { updateStarterQuestContent } from "./quest-content-update";
+import { syncQuestCatalog } from "./quest-content-update";
 import { backfillParticipantVariants } from "./variants";
 
 async function main(): Promise<void> {
@@ -14,13 +14,13 @@ async function main(): Promise<void> {
       console.log(JSON.stringify(await backfillParticipantVariants(db, operation === "--apply"), null, 2));
       return;
     }
-    if (command === "quest-content") {
-      if (operation && operation !== "--apply") throw new Error("Usage: node dist/modules/level38/commands.js quest-content [--apply]");
-      console.log(JSON.stringify(await updateStarterQuestContent(db, operation === "--apply"), null, 2));
+    if (command === "quest-content" || command === "quest-catalog") {
+      if ((operation && !["--apply", "--dry-run"].includes(operation)) || name || role) throw new Error("Usage: node dist/modules/level38/commands.js quest-catalog [--dry-run|--apply]");
+      console.log(JSON.stringify(await syncQuestCatalog(db, operation === "--apply"), null, 2));
       return;
     }
     if (command === "seed") {
-      console.log(await seedLevel38(db) ? "Created LEVEL 38 with 54 starter quests (6 secret)." : "LEVEL 38 already exists; no event data changed.");
+      console.log(await seedLevel38(db) ? "Created LEVEL 38 with 60 final quests (6 secret)." : "LEVEL 38 already exists; no event data changed.");
       return;
     }
     if (command !== "operator" || !name || !/^[\p{L}\p{N}_ -]{2,32}$/u.test(name)) {

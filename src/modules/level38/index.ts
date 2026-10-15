@@ -15,7 +15,7 @@ import { TwitchIntegration } from "./twitch/integration";
 import { localization } from "./localization";
 import { PartyRuntime } from "./party-runtime";
 
-const domainEvents = ["quest:activated", "quest:completed", "quest:failed", "quest:skipped", "quest:revealed", "quest:available", "poll:created", "poll:edited", "poll:opened", "poll:vote-updated", "poll:closed", "poll:winner", "game:changed", "game:configured", "action:undone"] as const;
+const domainEvents = ["quest:activated", "quest:completed", "quest:failed", "quest:skipped", "quest:revealed", "quest:available", "quest:game", "quest:games", "poll:created", "poll:edited", "poll:opened", "poll:vote-updated", "poll:closed", "poll:winner", "game:changed", "game:configured", "action:undone"] as const;
 type DomainEvent = typeof domainEvents[number];
 type ServerEvents = Record<DomainEvent, (event: { revision: number }) => void> & {
   "level38:state": (state: Level38State) => void;
@@ -69,6 +69,8 @@ export function mountLevel38(app: Application, server: HttpServer, config: Level
     });
     if (!event) return false;
     await db.participant.findFirst({ select: { variantId: true, streamVisible: true } });
+    await db.quest.findFirst({ select: { catalogKey: true, category: true, retiredAt: true, eligibleGames: { select: { gameId: true } } } });
+    await db.poll.findFirst({ select: { contextQuestId: true } });
     return true;
   }, close: async (): Promise<void> => {
     await twitch.close();

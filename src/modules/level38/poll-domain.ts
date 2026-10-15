@@ -15,12 +15,14 @@ export async function pollOrThrow(tx: Prisma.TransactionClient, eventId: string,
 }
 
 export async function prepareOptions(tx: Prisma.TransactionClient, eventId: string, input: PollInput) {
+  const context = input.contextQuestId ? await gamePollContext(tx, eventId, input.contextQuestId) : null;
+  if (context && input.type !== "NEXT_GAME") throw new Level38Error(400, "Only a next-game poll can target a quest.");
   const seen = new Set<string>();
   const options: { eventId: string; label: string; position: number; questId?: string; gameId?: string }[] = [];
   for (const [position, option] of input.options.entries()) {
     let label = option.label ?? "";
     if (input.type === "NEXT_QUEST") {
-      const quest = await tx.quest.findFirst({ where: { id: option.questId, eventId }, include: { game: true } });
+      const quest = await tx.quest.findFirst({ where: { id: option.questId, eventId, retiredAt: null }, include: { game: true } });
       if (!quest || isHidden(quest) || quest.status !== "AVAILABLE" || !quest.game.enabled) {
         throw new Level38Error(409, "Choose available, revealed quests from enabled games.");
       }
@@ -29,6 +31,9 @@ export async function prepareOptions(tx: Prisma.TransactionClient, eventId: stri
     if (input.type === "NEXT_GAME") {
       const game = await tx.game.findFirst({ where: { id: option.gameId, eventId, enabled: true } });
       if (!game) throw new Level38Error(409, "Choose an enabled game from this event.");
+      if (context && !context.eligibleGames.some((association) => association.gameId === game.id)) {
+        throw new Level38Error(409, "Choose an eligible game for this quest.");
+      }
       label = game.title;
     }
     const key = option.questId ?? option.gameId ?? label.toLocaleLowerCase("en");
@@ -39,10 +44,27 @@ export async function prepareOptions(tx: Prisma.TransactionClient, eventId: stri
   return options;
 }
 
+export async function gamePollContext(tx: Prisma.TransactionClient, eventId: string, questId: string) {
+  const quest = await tx.quest.findFirst({ where: { id: questId, eventId, retiredAt: null }, include: { eligibleGames: true } });
+  if (!quest || isHidden(quest) || ["COMPLETED", "FAILED", "SKIPPED"].includes(quest.status)) {
+    throw new Level38Error(409, "Choose an unfinished, revealed quest for the game poll.");
+  }
+  return quest;
+}
+
+export async function assertGamePollEligibility(tx: Prisma.TransactionClient, eventId: string, poll: PollWithOptions) {
+  if (!poll.contextQuestId) return;
+  if (poll.type !== "NEXT_GAME") throw new Level38Error(409, "Only a next-game poll can target a quest.");
+  const quest = await gamePollContext(tx, eventId, poll.contextQuestId);
+  if (poll.options.some((option) => !quest.eligibleGames.some((association) => association.gameId === option.gameId))) {
+    throw new Level38Error(409, "A game option is no longer eligible for this quest. Edit the draft first.");
+  }
+}
+
 export function assertOpenable(poll: PollWithOptions): void {
   if (poll.options.length < 2 || poll.options.length > 8) throw new Level38Error(409, "A poll needs 2–8 options before opening.");
   for (const option of poll.options) {
-    if (poll.type === "NEXT_QUEST" && (!option.quest || isHidden(option.quest) || option.quest.status !== "AVAILABLE")) {
+    if (poll.type === "NEXT_QUEST" && (!option.quest || option.quest.retiredAt || isHidden(option.quest) || option.quest.status !== "AVAILABLE")) {
       throw new Level38Error(409, "A quest option is no longer available. Edit the draft first.");
     }
     if (poll.type === "NEXT_GAME" && (!option.game || !option.game.enabled)) {
@@ -57,7 +79,7 @@ export function leadingOptionIds(poll: PollWithOptions): string[] {
 }
 
 export function pollSnapshot(poll: Poll) {
-  return { title: poll.title, number: poll.number, status: poll.status,
+  return { title: poll.title, number: poll.number, contextQuestId: poll.contextQuestId, status: poll.status,
     openedAt: poll.openedAt?.toISOString() ?? null, closedAt: poll.closedAt?.toISOString() ?? null,
     voteRevision: poll.voteRevision, winningOptionId: poll.winningOptionId, overrideOptionId: poll.overrideOptionId,
     overrideReason: poll.overrideReason, winnerAcceptedAt: poll.winnerAcceptedAt?.toISOString() ?? null };

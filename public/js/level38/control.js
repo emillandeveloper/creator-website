@@ -18,6 +18,7 @@
   let refreshAgain = false;
   let editingId = null;
   let editingRevision = null;
+  const eligibleIds = quest => quest.eligibleGameIds || (quest.gameId ? [quest.gameId] : []);
   const handlers = {
     control: true,
     edit: (poll) => loadEditor(poll, false),
@@ -40,11 +41,15 @@
     const controlsChanged = force || !state || next.event.controlRevision !== state.event.controlRevision;
     state = next;
     if (controlsChanged) {
-      renderState(state, changeQuest);
+      renderState(state, changeQuest, {
+        selectGame: (quest, gameId) => mutate(`control/quests/${quest.id}/game`, {gameId}),
+        eligibility: (quest, gameIds) => mutate(`control/quests/${quest.id}/games`, {gameIds}),
+      });
       const select = byId("game"); select.replaceChildren(element("option", t("Between adventures"))); select.firstChild.value = "";
       for (const game of state.games.filter((game) => game.enabled)) { const option = element("option", game.title); option.value = game.id; select.append(option); }
       select.value = state.event.currentGameId || ""; select.disabled = false;
       byId("game-form").querySelector("button").disabled = false;
+      renderPollQuestContext();
       const audit = state.audit.map((entry) => element("li", `${new Date(entry.createdAt).toLocaleTimeString(language())} · ${entry.operatorName} ${auditDescription(entry, state)}${Number.isFinite(entry.before.completed) && Number.isFinite(entry.after.completed) ? " · " + t("Progress {before} → {after}", {before: entry.before.completed, after: entry.after.completed}) : ""}`));
       byId("audit-list").replaceChildren(...(audit.length ? audit : [element("li", t("No operator actions yet."))]));
     }
@@ -87,6 +92,17 @@
   });
   byId("logout").addEventListener("click", async () => { try { await request("control/logout", {}); window.location.reload(); } catch (error) { message(error.message); } });
 
+  function renderPollQuestContext() {
+    const select = byId("poll-quest");
+    const selected = select.value;
+    const option = element("option", t("Any game (no quest context)")); option.value = "";
+    select.replaceChildren(option);
+    for (const quest of state.quests.filter(quest => !quest.hidden && !["COMPLETED", "FAILED", "SKIPPED"].includes(quest.status))) {
+      const item = element("option", `#${String(quest.number).padStart(2, "0")} · ${questText(quest, "title")}`); item.value = quest.id; select.append(item);
+    }
+    select.value = Array.from(select.options).some(option => option.value === selected) ? selected : "";
+    byId("poll-quest-context").hidden = byId("poll-type").value !== "NEXT_GAME";
+  }
   function addOption(value = {}) {
     const type = byId("poll-type").value;
     const root = byId("poll-options");
@@ -96,7 +112,8 @@
     if (type === "NEXT_QUEST" || type === "NEXT_GAME") {
       input = element("select");
       const placeholder = element("option", t("Choose an option")); placeholder.value = ""; input.append(placeholder);
-      const candidates = type === "NEXT_QUEST" ? (state?.quests || []).filter((quest) => !quest.hidden && quest.status === "AVAILABLE" && state.games.find((game) => game.id === quest.gameId)?.enabled) : (state?.games || []).filter((game) => game.enabled);
+      const contextQuest = state?.quests.find(quest => quest.id === byId("poll-quest").value);
+      const candidates = type === "NEXT_QUEST" ? (state?.quests || []).filter((quest) => !quest.hidden && quest.status === "AVAILABLE" && state.games.some(game => game.enabled && eligibleIds(quest).includes(game.id))) : (state?.games || []).filter((game) => game.enabled && (!contextQuest || eligibleIds(contextQuest).includes(game.id)));
       for (const candidate of candidates) { const item = element("option", type === "NEXT_QUEST" ? `#${candidate.number} · ${questText(candidate, "title")}` : candidate.title); item.value = candidate.id; input.append(item); }
       const selected = value.questId || value.gameId || "";
       if (selected && !candidates.some((candidate) => candidate.id === selected)) {
@@ -123,6 +140,7 @@
     editingId = clone ? null : poll.id;
     editingRevision = clone ? null : state.event.controlRevision;
     byId("poll-title").value = poll.title; byId("poll-type").value = poll.type;
+    renderPollQuestContext(); byId("poll-quest").value = poll.contextQuestId || "";
     setText("poll-editor-title", clone ? "New round from poll #{number}" : "Edit draft #{number}", {number:poll.number});
     resetOptions(poll.options);
     byId("poll-editor").scrollIntoView({ block: "start" }); byId("poll-title").focus();
@@ -130,9 +148,12 @@
   function resetEditor() {
     editingId = null; editingRevision = null;
     byId("poll-title").value = ""; setText("poll-editor-title", "Create voting round");
+    byId("poll-quest").value = "";
+    if (state) renderPollQuestContext();
     resetOptions();
   }
-  byId("poll-type").addEventListener("change", () => resetOptions());
+  byId("poll-type").addEventListener("change", () => { if (state) renderPollQuestContext(); resetOptions(); });
+  byId("poll-quest").addEventListener("change", () => resetOptions());
   byId("add-option").addEventListener("click", () => addOption());
   byId("cancel-poll-edit").addEventListener("click", resetEditor);
   byId("poll-form").addEventListener("submit", async (event) => {
@@ -142,7 +163,8 @@
       const input = row.querySelector("select, input"); const value = input.dataset.canonical || input.value;
       return type === "NEXT_QUEST" ? { questId: value } : type === "NEXT_GAME" ? { gameId: value } : { label: value };
     });
-    if (await mutate(editingId ? `control/polls/${editingId}/edit` : "control/polls", { title: byId("poll-title").value, type, options }, editingRevision)) resetEditor();
+    const contextQuestId = type === "NEXT_GAME" ? byId("poll-quest").value || null : null;
+    if (await mutate(editingId ? `control/polls/${editingId}/edit` : "control/polls", { title: byId("poll-title").value, type, options, contextQuestId }, editingRevision)) resetEditor();
   });
   document.addEventListener("level38:language", () => {
     if (!state) return;

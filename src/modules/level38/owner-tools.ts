@@ -24,9 +24,9 @@ export async function applyOwnerTool(tx: Prisma.TransactionClient, eventId: stri
   }
   if (action === "progress" || action === "prepare") {
     for (const status of ["AVAILABLE", "LOCKED", "SECRET"] as const) {
-      await tx.quest.updateMany({ where: { eventId, initialStatus: status, isSecret: false }, data: { status, completedAt: null, revealedAt: null } });
+      await tx.quest.updateMany({ where: { eventId, retiredAt: null, initialStatus: status, isSecret: false }, data: { status, completedAt: null, revealedAt: null } });
     }
-    await tx.quest.updateMany({ where: { eventId, isSecret: true }, data: { status: "SECRET", revealedAt: null, completedAt: null } });
+    await tx.quest.updateMany({ where: { eventId, retiredAt: null, isSecret: true }, data: { status: "SECRET", revealedAt: null, completedAt: null } });
     const game = await tx.game.findFirst({ where: { eventId, enabled: true }, orderBy: [{ sortOrder: "asc" }, { title: "asc" }] });
     await tx.event.update({ where: { id: eventId }, data: { currentGameId: game?.id ?? null, gameSource: "MANUAL_OVERRIDE", manualOverrideBy: null,
       lastUnlockedAt: null, resetSequence: { increment: 1 } } });

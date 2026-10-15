@@ -16,11 +16,12 @@ export async function eventOrThrow(tx: Prisma.TransactionClient) {
 export async function readState(tx: Prisma.TransactionClient, control: boolean) {
   const event = await eventOrThrow(tx);
   const games = await tx.game.findMany({ where: { eventId: event.id }, orderBy: [{ sortOrder: "asc" }, { title: "asc" }] });
-  const quests = await tx.quest.findMany({ where: { eventId: event.id }, orderBy: { number: "asc" } });
+  const quests = await tx.quest.findMany({ where: { eventId: event.id, retiredAt: null }, orderBy: { number: "asc" }, include: { eligibleGames: { orderBy: { gameId: "asc" } } } });
   for (const quest of quests) warnMissingQuestTranslations(quest);
-  const visible = control ? quests : quests.filter((quest) => !isHidden(quest));
+  const visible = quests;
   const polls = await tx.poll.findMany({ where: { eventId: event.id, archivedAt: null, ...(control ? {} : { status: { not: "DRAFT" as const } }) }, orderBy: { number: "desc" }, include: pollInclude });
-  const published = control ? polls : polls.filter((poll) => poll.options.every((option) => !option.quest || !isHidden(option.quest)));
+  const published = control ? polls : polls.filter((poll) => poll.options.every((option) => !option.quest || (!isHidden(option.quest) && !option.quest.retiredAt)) &&
+    (!poll.contextQuestId || quests.some((quest) => quest.id === poll.contextQuestId && !isHidden(quest))));
   const audit = control ? await tx.auditLog.findMany({ where: { eventId: event.id }, orderBy: { eventRevision: "desc" }, take: 40 }) : [];
   const archived = control ? await tx.poll.findMany({ where: { eventId: event.id, archivedAt: { not: null } }, orderBy: { number: "desc" }, include: pollInclude }) : [];
   const undo = control ? await undoCandidate(tx, event.id) : null;
@@ -31,15 +32,24 @@ export async function readState(tx: Prisma.TransactionClient, control: boolean) 
       unlockSequence: event.unlockSequence, resetSequence: event.resetSequence,
       ...(control ? { gameSource: event.gameSource, manualOverrideBy: event.manualOverrideBy } : {}),
       completed: quests.filter((quest) => quest.status === "COMPLETED").length, currentGameId: event.currentGameId },
-    games: games.filter((game) => control || game.enabled || game.id === event.currentGameId || visible.some((quest) => quest.gameId === game.id))
+    games: games.filter((game) => control || game.id === event.currentGameId || visible.some((quest) => !isHidden(quest) &&
+      (quest.gameId === game.id || quest.eligibleGames.some((association) => association.gameId === game.id))) ||
+      published.some((poll) => poll.options.some((option) => option.gameId === game.id)))
       .map((game) => ({ id: game.id, title: game.title, displayName: game.title, slug: game.slug, enabled: game.enabled, imagePath: game.imagePath, sortOrder: game.sortOrder,
         ...(control ? { twitchCategoryId: game.twitchCategoryId, twitchCategoryName: game.twitchCategoryName } : {}) })),
-    quests: visible.map((quest) => ({ id: quest.id, number: quest.number, gameId: quest.gameId, title: quest.title,
-      description: quest.description, translations: { en: { title: quest.title, description: quest.description }, es: { title: quest.titleEs, description: quest.descriptionEs } },
+    quests: visible.map((quest) => {
+      const redact = !control && isHidden(quest);
+      return { id: quest.id, number: quest.number, gameId: redact ? null : quest.gameId,
+      eligibleGameIds: redact ? [] : quest.eligibleGames.map((association) => association.gameId), category: redact ? "SECRET" as const : quest.category,
+      title: redact ? "???" : quest.title, description: redact ? "" : quest.description,
+      translations: { en: { title: redact ? "???" : quest.title, description: redact ? "" : quest.description },
+        es: { title: redact ? "???" : quest.titleEs, description: redact ? "" : quest.descriptionEs } },
       status: isHidden(quest) ? "SECRET" as const : quest.status, hidden: isHidden(quest),
-      ...(control ? { actions: allowedQuestActions(quest) } : {}) })),
+      ...(control ? { actions: allowedQuestActions(quest) } : {}) };
+    }),
     secretCount: quests.filter(isHidden).length,
     polls: published.map((poll) => ({ id: poll.id, number: poll.number, title: poll.title, type: poll.type, status: poll.status,
+      contextQuestId: poll.contextQuestId,
       createdAt: poll.createdAt.toISOString(), openedAt: poll.openedAt?.toISOString() ?? null, closedAt: poll.closedAt?.toISOString() ?? null,
       options: poll.options.map((option) => ({ id: option.id, label: option.label, questId: option.questId, gameId: option.gameId, votes: option._count.votes,
         ...(option.quest ? { translations: { en: { title: option.quest.title }, es: { title: option.quest.titleEs } } } : {}) })),
@@ -63,6 +73,8 @@ export async function readState(tx: Prisma.TransactionClient, control: boolean) 
 
 function describeAction(action: string, before: Prisma.JsonObject, after: Prisma.JsonObject, metadata: Prisma.JsonObject): string {
   if (action === "party:configured") return "updated party overlay settings";
+  if (action === "quest:game") return `selected game for quest #${after.number}`;
+  if (action === "quest:games") return `configured eligible games for quest #${after.number}`;
   const ownerActions: Record<string, string> = { "owner:progress": "reset event progress", "owner:participants": "cleared test participants", "owner:prepare": "prepared a clean event", "owner:preview": "previewed the finale for connected clients" };
   if (ownerActions[action]) return ownerActions[action];
   const verbs: Record<string, string> = { "quest:activated": "activated", "quest:completed": "completed", "quest:failed": "failed", "quest:skipped": "skipped", "quest:revealed": "revealed", "quest:available": "made available" };
