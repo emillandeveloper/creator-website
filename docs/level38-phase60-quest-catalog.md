@@ -38,9 +38,31 @@ For an untouched recognized 54-quest catalog, apply marks those rows retired, re
 
 For an existing canonical quest, sync updates approved prose/category metadata while preserving lifecycle, timestamps, selected game, operator-managed eligibility, poll/vote references and identity. Repeating apply after a successful sync is a true no-op, including event revisions and audits.
 
-Apply **fails atomically without changes** if legacy rows have unrecognized/custom content, a noninitial state, a reveal/completion timestamp, poll references or quest audit history. Prior progress/reset actions also require review. Partial legacy catalogs, unknown canonical identities, renumbered/retired canonical rows, conflicting equivalent game titles and a target other than 38 block apply. The dry-run prints each blocker and the intended changes without changing data. No override/reset flag is provided.
+By default, apply **fails atomically without changes** if legacy rows have unrecognized/custom content, a noninitial state, a reveal/completion timestamp, poll references or quest audit history. Prior progress/reset actions also require review. Partial legacy catalogs, unknown canonical identities, renumbered/retired canonical rows, conflicting equivalent game titles and a target other than 38 block apply. The dry-run prints each blocker and the intended changes without changing data.
 
-If blocked, the operator must decide the actual identity and meaning of each affected historical quest, whether any prior completion satisfies an approved final quest, and how to retain that history. A reviewed reconciliation implementation is required before retrying; do not delete rows, clear votes, clear timestamps, edit keys or reset the event to bypass the guard. Production state was not inspected in this phase, so whether that decision is needed is determined by its future dry-run.
+If blocked, the operator must review the historical quest identities and decide how to retain their history. Do not delete rows, clear votes, clear timestamps, edit keys or reset the event to bypass the guard. The explicit historical-retirement procedure below handles recognized legacy quests whose current lifecycle has already returned to its initial state. It does not transfer historical completions to new identities.
+
+## Reviewed historical retirement (October 19 follow-up)
+
+The production schema migration was deployed without running the separate content sync. The real production dry-run found the complete 54-row starter catalog, current initial states and zero completed/revealed timestamps, but blocked retirement because prior progress/reset actions and quest audits remain. This is intentional default protection.
+
+`prepareLegacyHistoryReview(db, backupSha256)` now produces a private review manifest. Before generating it, independently verify the actual full `pg_dump` archive SHA-256, read the entire archive and restore it into an isolated database. The helper and CLI accept the supplied backup digest; they do not open or validate the backup file themselves.
+
+The manifest binds the backup digest and approved source catalog to the event ID, event/control revisions, the exact 54 legacy IDs and all event rows in Event, Quest, Game, QuestGame, Poll, PollOption, Vote and AuditLog. The same event lock protects snapshot validation and application. Any changed scoped content invalidates the review. Every event poll must be closed and archived. Custom quest prose, active/completed/revealed state, unexpected identities or a target other than 38 still block application. Poll-option and context-only poll references are both checked, including archived rounds.
+
+With a matching manifest, sync only marks recognized legacy rows retired and creates the canonical catalog. Historical texts, states, IDs, audit payloads, eligibility links, polls, options and votes survive. Participants, operators, sessions and Twitch data are untouched. The transaction records the backup/catalog/scope digests and preservation policy in one new audit row and increments event/control revisions once. It never resets progress counters or transfers past completions.
+
+After rehearsing the operation on the restored copy, generate the production manifest, run the following dry-run and show the plan to the owner. The owner must explicitly approve this concrete production plan **before** the apply command:
+
+```sh
+npm run level38:quest-catalog -- --dry-run --reviewed-history /private/path/reviewed-legacy-history.json
+# Only after owner approval and independent verification of the backup archive hash:
+npm run level38:quest-catalog -- --apply --reviewed-history /private/path/reviewed-legacy-history.json
+```
+
+Supply the production connection through the process environment; keep credentials and manifests outside version control. A stale manifest must be reviewed again, never edited to force acceptance. Repeating the same manifest after success permits an unchanged catalog no-op; it cannot authorize a subsequent content update. A normal, separately reviewed canonical update can use the original dry-run/apply flow without a legacy manifest.
+
+Validation for this follow-up: build/TypeScript passed; the six legacy sync tests and six historical-review integration tests passed in disposable local schemas. The historical-review tests cover zero-write dry-run, atomic refusal of stale or corrupted manifests, closed/archived poll requirements, retention of historical foreign-key references, exact history/participant/session preservation, repeat no-op and CLI argument validation. A separate rehearsal against the restored production backup verified exact bilingual text, 20/28/6/6 counts, six redacted secrets, target 38, unchanged unrelated rows and a no-op reapply. Production remains unchanged until the owner's explicit approval.
 
 ## Exact commands and later production procedure
 

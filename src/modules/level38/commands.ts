@@ -1,5 +1,6 @@
 import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
+import { readFileSync } from "fs";
 import { hashToken, newToken } from "./auth";
 import { seedLevel38 } from "./seed";
 import { syncQuestCatalog } from "./quest-content-update";
@@ -15,8 +16,17 @@ async function main(): Promise<void> {
       return;
     }
     if (command === "quest-content" || command === "quest-catalog") {
-      if ((operation && !["--apply", "--dry-run"].includes(operation)) || name || role) throw new Error("Usage: node dist/modules/level38/commands.js quest-catalog [--dry-run|--apply]");
-      console.log(JSON.stringify(await syncQuestCatalog(db, operation === "--apply"), null, 2));
+      const args = process.argv.slice(3);
+      const usage = "Usage: node dist/modules/level38/commands.js quest-catalog [--dry-run|--apply] [--reviewed-history FILE]";
+      let mode: string | undefined, reviewFile: string | undefined;
+      for (let i = 0; i < args.length; i++) {
+        const argument = args[i];
+        if (["--apply", "--dry-run"].includes(argument) && !mode) mode = argument;
+        else if (argument === "--reviewed-history" && !reviewFile && args[i + 1] && !args[i + 1].startsWith("--")) reviewFile = args[++i];
+        else throw new Error(usage);
+      }
+      const review = reviewFile ? JSON.parse(readFileSync(reviewFile, "utf8")) : undefined;
+      console.log(JSON.stringify(await syncQuestCatalog(db, mode === "--apply", review), null, 2));
       return;
     }
     if (command === "seed") {

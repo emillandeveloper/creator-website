@@ -65,6 +65,25 @@ test('fresh final seed is complete and repeat sync is a no-op; canonical text up
   await syncQuestCatalog(f.db,true);const after=await f.db.quest.findUniqueOrThrow({where:{id:q.id}});assert.equal(after.status,'COMPLETED');assert.deepEqual(after.completedAt,changed.completedAt);assert.equal(after.description,QUEST_CONTENT[0].description.en);
 });
 
+test('context-only game polls, including archived rounds, block legacy retirement without any writes',{timeout:60000},async t=>{
+  const f=await fixture(t,{seed:false});const event=await seedLegacy(f.db);
+  const quest=await f.db.quest.findFirstOrThrow({where:{eventId:event.id,number:1}});
+  const owner=await f.db.operator.create({data:{name:'Context history owner',role:'OWNER',keyHash:'catalog-context-history-test-key'}});
+  const poll=await f.db.poll.create({data:{eventId:event.id,title:'Context-only game choice',type:'NEXT_GAME',contextQuestId:quest.id,createdById:owner.id}});
+  assert.equal(await f.db.pollOption.count(),0);
+  assert.equal(await f.db.auditLog.count(),0);
+  for(const archived of [false,true]){
+    if(archived)await f.db.poll.update({where:{id:poll.id},data:{status:'CLOSED',closedAt:new Date(),archivedAt:new Date()}});
+    const before=await snapshot(f.db),dry=await syncQuestCatalog(f.db);
+    assert.equal(dry.canApply,false,archived?'Archived context history must block':'Draft context history must block');
+    assert.equal(dry.blocked.length,1);
+    assert.match(dry.blocked[0],new RegExp(`Legacy quest #1 \\(${quest.id}\\).*poll or audit history`));
+    assert.deepEqual(await snapshot(f.db),before);
+    await assert.rejects(syncQuestCatalog(f.db,true),/BLOCKED/);
+    assert.deepEqual(await snapshot(f.db),before);
+  }
+});
+
 test('legacy starter variants are recognized; custom initial states and duplicate game editions stop apply',{timeout:60000},async t=>{
   const f=await fixture(t,{seed:false});const event=await seedLegacy(f.db);
   await f.db.quest.updateMany({data:{titleEs:null,descriptionEs:null,description:'Starter challenge: agree on a suitable objective for the current save before activating.'}});
