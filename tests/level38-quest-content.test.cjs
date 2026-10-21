@@ -175,8 +175,8 @@ const APPROVED_TITLES=[
     "es": "¡Vótame a mí!"
   },
   {
-    "en": "Play It Again, Cloud!",
-    "es": "¡Toca otra, Cloud!"
+    "en": "Stop Hitting It, Tifa!",
+    "es": "¡Deja de pegarle, Tifa!"
   },
   {
     "en": "Look, Mom, No Hands!",
@@ -307,6 +307,11 @@ test('mechanic-specific game candidates and editions are explicit and never impl
   assert.equal(QUEST_CONTENT[45].gameSlug,'ff4');
   assert.equal(QUEST_CONTENT[34].gameSlug,'ff5');
   assert.equal(QUEST_CONTENT[25].gameSlug,'ff6');
+  assert.equal(QUEST_CONTENT[42].key,'q43-play-it-again-cloud');
+  assert.equal(QUEST_CONTENT[42].gameSlug,'ff7-remake-intergrade');
+  assert.deepEqual(QUEST_CONTENT[42].eligibleGameSlugs,['ff7-remake-intergrade']);
+  assert.equal(QUEST_CONTENT[42].description.es,'Alcanza un 300 % o más de bonificación de daño por vulnerabilidad utilizando las habilidades de Tifa y gana el combate.');
+  assert.equal(QUEST_CONTENT[42].description.en,"Reach a stagger damage bonus of at least 300% using Tifa's abilities and win the battle.");
   const forbidden=/octopath|final fantasy xiii|ff13|ffxiii|sea of stars|sea-of-stars|castle crashers|kitaria|sacred 3|swords of ditto/i;
   for(const game of GAME_CONTENT){
     assert.doesNotMatch(game.slug+' '+game.title,forbidden);
@@ -343,7 +348,7 @@ test('approved rule-sensitive objectives preserve thresholds, optional audience 
   assert.match(en(34),/20 consecutive/);assert.match(en(35),/three DIFFERENT/);
   assert.match(en(36),/three Baton Pass transfers in the same turn/);
   assert.match(en(41),/DURING this quest/);assert.match(es(41),/DURANTE esta misión/);
-  assert.match(en(42),/WIN/);assert.match(en(43),/rank A/);
+  assert.match(en(42),/WIN/);assert.match(en(43),/at least 300%.*Tifa's abilities and win the battle/);
   assert.match(en(44),/NO manual battle commands/);assert.match(en(44),/Automatic healing and resurrection are allowed/);
   assert.match(en(45),/three predetermined/);assert.match(en(45),/without changing Materia or accessories/);assert.match(en(45),/restart the complete three-mission sequence/);
   assert.match(en(46),/ALL enemy damage coming only from Palom and Porom's Twincast/);

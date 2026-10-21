@@ -7,6 +7,17 @@ import { EVENT_SLUG } from "./state";
 const legacyDescription = "Starter challenge: agree on a suitable objective for the current save before activating.";
 const legacyDescriptionEs = "Misión de prueba: acordad un objetivo adecuado para la partida actual antes de activarla.";
 const distribution = { MULTI_GAME: 20, GAME_SPECIFIC: 28, COOPERATIVE: 6, SECRET: 6 };
+// A source correction, not a general reset of operator-managed game selections.
+const quest43Correction = {
+  version: 1 as const, key: "q43-play-it-again-cloud", number: 43,
+  fromSlug: "ff7-rebirth", toSlug: "ff7-remake-intergrade",
+  before: {
+    title: "Play It Again, Cloud!", titleEs: "¡Toca otra, Cloud!",
+    description: "Achieve at least rank A on any available piano song. Unlimited retries are allowed.",
+    descriptionEs: "Consigue al menos rango A en cualquier canción disponible del piano. Se permiten reintentos ilimitados.",
+  },
+};
+type CatalogGameChange = { id: string; number: number; fromSlug: string; toSlug: string; correctionVersion: 1 };
 const gameTitleIdentity = (title: string) => title.normalize("NFKC").toLowerCase()
   .replace(/\s*\((?:single-player|original)\)\s*/g, " ").replace(/\s+/g, " ").trim();
 
@@ -14,6 +25,7 @@ export interface CatalogSyncPlan {
   apply: boolean; canApply: boolean; blocked: string[];
   retire: { id: string; number: number }[]; create: number[]; update: number[]; unchanged: number[];
   createGames: string[]; activeAfter: number; distribution: typeof distribution;
+  gameChanges: CatalogGameChange[];
   reviewedHistory?: { allowed: true; audits: number; polls: number; votes: number; backupSha256: string; scopeSha256: string };
 }
 
@@ -77,9 +89,9 @@ export async function prepareLegacyHistoryReview(db: PrismaClient, backupSha256:
 export async function syncQuestCatalog(db: PrismaClient, apply = false, review?: LegacyHistoryReview): Promise<CatalogSyncPlan> {
   return db.$transaction(async tx => {
     const event = await lockCatalogEvent(tx);
-    const quests = await tx.quest.findMany({ where: { eventId: event.id }, include: { game: true, _count: { select: { pollOptions: true } } }, orderBy: { number: "asc" } });
+    const quests = await tx.quest.findMany({ where: { eventId: event.id }, include: { game: true, eligibleGames: true, _count: { select: { pollOptions: true } } }, orderBy: { number: "asc" } });
     const games = await tx.game.findMany({ where: { eventId: event.id } });
-    const plan: CatalogSyncPlan = { apply, canApply: false, blocked: [], retire: [], create: [], update: [], unchanged: [], createGames: [], activeAfter: 60, distribution };
+    const plan: CatalogSyncPlan = { apply, canApply: false, blocked: [], retire: [], create: [], update: [], unchanged: [], createGames: [], gameChanges: [], activeAfter: 60, distribution };
     if (event.target !== 38) plan.blocked.push("The event target is not 38. Review the event configuration before applying.");
     const old = quests.filter(q => !q.catalogKey && !q.retiredAt);
     if (old.length && old.length !== legacy.length) plan.blocked.push(`Expected the complete 54-quest legacy catalog; found ${old.length} active unkeyed rows. Operator reconciliation required.`);
@@ -135,7 +147,35 @@ export async function syncQuestCatalog(db: PrismaClient, apply = false, review?:
       if (!quest) { plan.create.push(source.number); continue; }
       if (quest.number !== source.number) plan.blocked.push(`Canonical identity ${source.key} has a different catalog number; no automatic renumbering is allowed.`);
       const data = { ...questTextData(source), category: source.category, isSecret: source.isSecret, initialStatus: source.isSecret ? "SECRET" : "AVAILABLE" };
-      if (Object.entries(data).some(([field, value]) => quest[field as keyof typeof quest] !== value)) plan.update.push(source.number);
+      if (source.key === quest43Correction.key && source.gameSlug === quest43Correction.toSlug) {
+        const oldFields = Object.entries(quest43Correction.before);
+        const hasOldText = oldFields.some(([field, value]) => quest[field as keyof typeof quest] === value);
+        const exactOldText = oldFields.every(([field, value]) => quest[field as keyof typeof quest] === value);
+        const exactNewText = Object.entries(questTextData(source)).every(([field, value]) => quest[field as keyof typeof quest] === value);
+        const oldAssociation = quest.game.slug === quest43Correction.fromSlug && quest.eligibleGames.length === 1 && quest.eligibleGames[0].gameId === quest.gameId;
+        if (hasOldText || (quest.game.slug === quest43Correction.fromSlug && !exactNewText)) {
+          if (!exactOldText || !oldAssociation || quest.category !== "GAME_SPECIFIC" || quest.isSecret ||
+              quest.status !== "AVAILABLE" || quest.initialStatus !== "AVAILABLE" || quest.completedAt || quest.revealedAt) {
+            plan.blocked.push("Quest #43 does not match the complete untouched Rebirth definition and initial state. Review its content, game associations and progress before applying this correction.");
+          } else if (quest._count.pollOptions || await tx.poll.count({ where: { eventId: event.id, contextQuestId: quest.id } })) {
+            plan.blocked.push("Quest #43 has poll references, including archived history. Review those references before replacing its objective and game.");
+          } else if (await tx.auditLog.count({ where: { eventId: event.id, entityId: quest.id } })) {
+            plan.blocked.push("Quest #43 has objective-specific audit history. Review that history before replacing its objective and game.");
+          } else {
+            plan.gameChanges.push({ id: quest.id, number: 43, fromSlug: quest43Correction.fromSlug, toSlug: quest43Correction.toSlug, correctionVersion: 1 });
+          }
+        } else if (exactNewText && quest.game.slug === quest43Correction.fromSlug) {
+          const [correctionAudit, manualAssociationAudit] = await Promise.all([
+            tx.auditLog.count({ where: { eventId: event.id, action: "catalog:synchronized", AND: [
+              { metadata: { path: ["quest43Correction", "version"], equals: 1 } },
+              { metadata: { path: ["quest43Correction", "questId"], equals: quest.id } },
+            ] } }),
+            tx.auditLog.count({ where: { eventId: event.id, entityId: quest.id, action: { in: ["quest:game", "quest:games"] } } }),
+          ]);
+          if (!correctionAudit && !manualAssociationAudit) plan.blocked.push("Quest #43 has the replacement text but retains the old Rebirth association without a reviewed correction or manual game selection. Reconcile this partial update before applying.");
+        }
+      }
+      if (plan.gameChanges.some(change => change.id === quest.id) || Object.entries(data).some(([field, value]) => quest[field as keyof typeof quest] !== value)) plan.update.push(source.number);
       else plan.unchanged.push(source.number);
     }
     if (review !== undefined && !old.length && (quests.filter(q => !q.retiredAt).length !== 60 || plan.create.length || plan.update.length || plan.createGames.length)) {
@@ -146,7 +186,7 @@ export async function syncQuestCatalog(db: PrismaClient, apply = false, review?:
       polls: reviewedScope.polls.length, votes: reviewedScope.votes.length, backupSha256: review.backupSha256.toLowerCase(), scopeSha256: review.scopeSha256.toLowerCase() };
     if (!apply) return plan;
     if (!plan.canApply) throw new Error(`Catalog synchronization BLOCKED; no changes applied. Run the dry-run and resolve these decisions:\n${plan.blocked.join("\n")}`);
-    if (!plan.retire.length && !plan.create.length && !plan.update.length && !plan.createGames.length) return plan;
+    if (!plan.retire.length && !plan.create.length && !plan.update.length && !plan.createGames.length && !plan.gameChanges.length) return plan;
 
     const gameIds = new Map(games.map(g => [g.slug, g.id]));
     for (const [sortOrder, source] of GAME_CONTENT.entries()) {
@@ -161,8 +201,16 @@ export async function syncQuestCatalog(db: PrismaClient, apply = false, review?:
       const data = { ...questTextData(source), category: source.category, isSecret: source.isSecret,
         initialStatus: source.isSecret ? "SECRET" as const : "AVAILABLE" as const };
       if (existing) {
-        // Preserve lifecycle, chosen game and operator-managed eligibility on reruns.
-        if (plan.update.includes(source.number)) await tx.quest.update({ where: { id: existing.id }, data });
+        const gameChange = plan.gameChanges.find(change => change.id === existing.id);
+        if (gameChange) {
+          const nextGameId = gameIds.get(gameChange.toSlug)!;
+          await tx.questGame.create({ data: { eventId: event.id, questId: existing.id, gameId: nextGameId } });
+          await tx.quest.update({ where: { id: existing.id }, data: { ...data, gameId: nextGameId } });
+          await tx.questGame.delete({ where: { questId_gameId: { questId: existing.id, gameId: existing.gameId } } });
+        } else if (plan.update.includes(source.number)) {
+          // Ordinary reruns preserve lifecycle, chosen game and operator-managed eligibility.
+          await tx.quest.update({ where: { id: existing.id }, data });
+        }
       } else {
         const quest = await tx.quest.create({ data: { eventId: event.id, gameId: gameIds.get(source.gameSlug)!, catalogKey: source.key,
           number: source.number, ...data, status: data.initialStatus } });
@@ -176,6 +224,8 @@ export async function syncQuestCatalog(db: PrismaClient, apply = false, review?:
     await tx.auditLog.create({ data: { eventId: event.id, operatorName: "Catalog sync", action: "catalog:synchronized", entityId: event.id,
       before: { active: old.length + quests.filter(q => q.catalogKey && !q.retiredAt).length }, after: { active: 60, distribution },
       metadata: { version: 2, retiredQuestIds: plan.retire.map(q => q.id), createdNumbers: plan.create, updatedNumbers: plan.update,
+        ...(plan.gameChanges.length ? { quest43Correction: { version: 1, questId: plan.gameChanges[0].id, catalogKey: quest43Correction.key,
+          fromSlug: quest43Correction.fromSlug, toSlug: quest43Correction.toSlug } } : {}),
         ...(plan.reviewedHistory ? { reviewedHistory: plan.reviewedHistory, catalogSha256: review!.catalogSha256.toLowerCase(), historyPolicy: "preserve-legacy-rows-and-all-history" } : {}) }, eventRevision: updated.revision } });
     return plan;
   }, { maxWait: 10000, timeout: 30000 });

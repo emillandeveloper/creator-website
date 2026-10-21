@@ -4,7 +4,7 @@ Implemented locally for Leo's October 24, 2026 event. This phase performs no pus
 
 ## Catalog and behavior
 
-The definitive source is `src/modules/level38/quest-content.json`: 60 stable `q01-…q60-…` identities, exact approved Spanish/English titles, equivalent bilingual objectives, canonical display numbers and mechanic-specific game associations. `quest-content.ts` validates the source during every build. `game-content.json` describes 35 distinct game/edition candidates; `legacy-quest-content.json` preserves the old 54 starter definitions solely for safe recognition.
+The definitive source is `src/modules/level38/quest-content.json`: 60 stable `q01-…q60-…` identities, exact approved Spanish/English titles, equivalent bilingual objectives, canonical display numbers and mechanic-specific game associations. `quest-content.ts` validates the source during every build. `game-content.json` describes 36 distinct game/edition candidates after the October 21 quest #43 correction; `legacy-quest-content.json` preserves the old 54 starter definitions solely for safe recognition.
 
 | Numbers | Category | Count |
 | --- | --- | ---: |
@@ -36,7 +36,7 @@ The migration does **not** replace content. It backfills each existing quest's s
 
 For an untouched recognized 54-quest catalog, apply marks those rows retired, reuses existing game slugs, creates missing game editions and creates the 60 canonical rows and their eligibility links. There will be **114 stored historical/current rows and exactly 60 active event quests**, never 114 active quests. Old row IDs, original numbers, texts, relationships and lifecycle states survive. A sync audit and one revision increment invalidate stale controls.
 
-For an existing canonical quest, sync updates approved prose/category metadata while preserving lifecycle, timestamps, selected game, operator-managed eligibility, poll/vote references and identity. Repeating apply after a successful sync is a true no-op, including event revisions and audits.
+For an existing canonical quest, sync updates approved prose/category metadata while preserving lifecycle, timestamps, selected game, operator-managed eligibility, poll/vote references and identity. The narrowly recognized quest #43 correction below also updates that quest's game association. Repeating apply after a successful sync is a true no-op, including event revisions and audits.
 
 By default, apply **fails atomically without changes** if legacy rows have unrecognized/custom content, a noninitial state, a reveal/completion timestamp, poll references or quest audit history. Prior progress/reset actions also require review. Partial legacy catalogs, unknown canonical identities, renumbered/retired canonical rows, conflicting equivalent game titles and a target other than 38 block apply. The dry-run prints each blocker and the intended changes without changing data.
 
@@ -63,6 +63,14 @@ npm run level38:quest-catalog -- --apply --reviewed-history /private/path/review
 Supply the production connection through the process environment; keep credentials and manifests outside version control. A stale manifest must be reviewed again, never edited to force acceptance. Repeating the same manifest after success permits an unchanged catalog no-op; it cannot authorize a subsequent content update. A normal, separately reviewed canonical update can use the original dry-run/apply flow without a legacy manifest.
 
 Validation for this follow-up: build/TypeScript passed; the six legacy sync tests and six historical-review integration tests passed in disposable local schemas. The historical-review tests cover zero-write dry-run, atomic refusal of stale or corrupted manifests, closed/archived poll requirements, retention of historical foreign-key references, exact history/participant/session preservation, repeat no-op and CLI argument validation. A separate rehearsal against the restored production backup verified exact bilingual text, 20/28/6/6 counts, six redacted secrets, target 38, unchanged unrelated rows and a no-op reapply. Production remains unchanged until the owner's explicit approval.
+
+## Quest #43 correction (October 21)
+
+Quest #43 now uses Final Fantasy VII Remake Intergrade: **Stop Hitting It, Tifa! / ¡Deja de pegarle, Tifa!**. Its approved objective is to reach at least 300% stagger damage bonus using Tifa's abilities and win the battle. Its number, row ID and stable `q43-play-it-again-cloud` key remain unchanged; the key is an identity, not a current title. The other 59 source definitions are identical.
+
+The existing catalog dry-run/apply command recognizes the exact previous Rebirth piano definition and its single Rebirth eligibility link. With an initial AVAILABLE state and no quest-specific audit or poll history, correction version 1 changes only #43's bilingual text, selected game and eligibility link. Unexpected/partial old content, operator-modified old associations, progress, revelation or poll references (including archived context-only rounds) block the transaction. The dry-run explicitly lists `gameChanges` alongside `update: [43]`. Already corrected or newly seeded rows are no-ops, and later audited operator game choices remain preserved.
+
+Remake Intergrade is a separate game row; Rebirth and its other missions survive. There are still 60 active quests, category counts 20/28/6/6, 160 canonical eligibility links and a goal of 38. This operation needs no schema migration or event reset. Use a fresh full backup, verify the exact one-quest dry-run and repeat the command after apply to confirm a no-op.
 
 ## Exact commands and later production procedure
 
@@ -94,7 +102,7 @@ The second command must report 60 unchanged quests and no retire/create/update/g
 
 The initial 160 eligibility links are deliberate candidates, not every RPG attached to every mission. OWNER and MODERATOR can edit eligible games and select one manually on the quest card. Only enabled eligible games appear in its manual selector. NEXT_GAME supports an optional quest context; the browser filters choices and the server revalidates on draft creation, opening, voting and winner selection. Accepting a scoped result persists the chosen quest game. A global event-game poll is still available. Neither game choice nor quest activation automatically creates a poll, and zero-viewer manual operation works.
 
-HeartGold/SoulSilver, Tombi!, Chrono Trigger and separate FFVII original/Rebirth records are present. Classic two-controller FFIV/V/VI have separate edition records; no native cooperative feature is claimed for PC Pixel Remasters or FFIX PC. Octopath Traveler, FFXIII, Sea of Stars and the discarded cooperative games are excluded.
+HeartGold/SoulSilver, Tombi!, Chrono Trigger and separate FFVII original, Rebirth and Remake Intergrade records are present. Classic two-controller FFIV/V/VI have separate edition records; no native cooperative feature is claimed for PC Pixel Remasters or FFIX PC. Octopath Traveler, FFXIII, Sea of Stars and the discarded cooperative games are excluded.
 
 No game or save is marked prepared. `docs/level38-save-preparation-checklist.md` covers every edition and linked quest, required mechanics/access, Parsec/controller/version details and **NOT CHECKED** status. It contains secret spoilers and belongs in operator documentation. Actual save access, edition compatibility, Prinny/Geo mechanics, Twincast encounter setup, minigame targets, controller assignment and Parsec behavior require Leo's later manual verification. No save paths, installed editions or Steam-playtime readiness are invented. Quest success remains human-confirmed; the website does not inspect gameplay footage or saves.
 

@@ -278,5 +278,13 @@
       "en": "NOT CHECKED. Verify a NEW obtainable/recruitable Digimon and the exact recruitment route before selecting this candidate.",
       "es": "NOT CHECKED (NO COMPROBADO). Comprobar un Digimon NUEVO obtenible/reclutable y la ruta exacta de incorporación antes de elegir este candidato."
     }
+  },
+  {
+    "slug": "ff7-remake-intergrade",
+    "title": "Final Fantasy VII Remake Intergrade",
+    "technicalNotes": {
+      "en": "NOT CHECKED. Distinct from FFVII original and Rebirth. Verify Tifa's abilities and an encounter allowing at least 300% stagger damage bonus, then win the battle.",
+      "es": "NOT CHECKED (NO COMPROBADO). Distinto de FFVII original y Rebirth. Comprobar las habilidades de Tifa y un encuentro que permita alcanzar al menos un 300 % de bonificación de daño por vulnerabilidad y ganar el combate."
+    }
   }
 ]

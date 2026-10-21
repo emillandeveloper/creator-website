@@ -182,7 +182,7 @@ Special checks still required:
 ## Final Fantasy VII Rebirth
 
 - Required game/edition: **Final Fantasy VII Rebirth** (`ff7-rebirth`).
-- Relevant quest numbers: 06, 11, 16, 17, 43, 60.
+- Relevant quest numbers: 06, 11, 16, 17, 60.
 - Verification status: **NOT CHECKED**.
 - Special technical requirements: NOT CHECKED. Distinct from FFVII original. Verify piano, Queen's Blood, synergy and any selected crafting/side-quest access.
 - Save access and mechanics to verify:
@@ -190,8 +190,15 @@ Special checks still required:
   - **11:** Craft/synthesize/upgrade system plus materials, then actually use the resulting item in combat. **NOT CHECKED.**
   - **16:** Real two-or-more-character combination technique, then win; no finishing-blow requirement. **NOT CHECKED.**
   - **17:** NEW optional side quest/contract that can be accepted, completed and rewarded; story objective is ineligible. **NOT CHECKED.**
-  - **43:** Any available piano song with a reachable A rank; unlimited retries. **NOT CHECKED.**
   - **60:** Protagonist's original starting weapon available, equipped and meaningfully used against powerful target; other accessories/abilities/spells/upgrades allowed. **NOT CHECKED.**
+
+## Final Fantasy VII Remake Intergrade
+
+- Required game/edition: **Final Fantasy VII Remake Intergrade** (`ff7-remake-intergrade`).
+- Relevant quest numbers: 43.
+- Verification status: **NOT CHECKED**.
+- Save access and mechanics to verify:
+  - **43:** Tifa's abilities available and an encounter allowing a stagger damage bonus of at least 300%; reach the threshold using her abilities and win the battle. **NOT CHECKED.**
 
 ## Crisis Core: Final Fantasy VII Reunion
 
@@ -458,4 +465,4 @@ Special checks still required:
 
 For each entry, Leo should record the exact edition/platform, whether a usable save exists, the accessible quest/encounter or minigame, unlocked characters/abilities, missing preparation and any controller/Parsec test result. Keep the status **NOT CHECKED** until the relevant manual check has actually happened. An available save for one quest does not verify the other quests associated with that game.
 
-All 35 distinct game/edition entries above are initially **NOT CHECKED**. There is no automatic readiness update or save subsystem in this phase.
+All 36 distinct game/edition entries above are initially **NOT CHECKED**. There is no automatic readiness update or save subsystem in this phase.

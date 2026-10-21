@@ -842,19 +842,19 @@
   {
     "key": "q43-play-it-again-cloud",
     "number": 43,
-    "gameSlug": "ff7-rebirth",
+    "gameSlug": "ff7-remake-intergrade",
     "eligibleGameSlugs": [
-      "ff7-rebirth"
+      "ff7-remake-intergrade"
     ],
     "category": "GAME_SPECIFIC",
     "isSecret": false,
     "title": {
-      "en": "Play It Again, Cloud!",
-      "es": "¡Toca otra, Cloud!"
+      "en": "Stop Hitting It, Tifa!",
+      "es": "¡Deja de pegarle, Tifa!"
     },
     "description": {
-      "en": "Achieve at least rank A on any available piano song. Unlimited retries are allowed.",
-      "es": "Consigue al menos rango A en cualquier canción disponible del piano. Se permiten reintentos ilimitados."
+      "en": "Reach a stagger damage bonus of at least 300% using Tifa's abilities and win the battle.",
+      "es": "Alcanza un 300 % o más de bonificación de daño por vulnerabilidad utilizando las habilidades de Tifa y gana el combate."
     }
   },
   {
