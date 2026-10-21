@@ -42,15 +42,38 @@ Los overlays públicos no requieren credenciales ni una sesión de operador.
 CELEBRACIONES EN EL OVERLAY DE PARTY
 La celebración de cada misión y la gran celebración de las 38 completadas
 utilizan la misma URL de party; no hay una fuente adicional que añadir.
-La corrección local hace que los personajes visibles celebren durante
+Cada misión completada hace que los personajes visibles celebren durante
 4 segundos, una sola vez por transición real a COMPLETED, y vuelvan a su
-animación habitual. La gran celebración especial conserva su prioridad.
+animación habitual. La gran celebración especial conserva su prioridad:
+los personajes repiten sus fotogramas de victoria durante los 10 segundos
+de fuegos artificiales y del número 38, y después vuelven a la normalidad.
+Con movimiento reducido se mantiene una pose estática de victoria durante
+los 4 segundos del espectáculo reducido existente.
 
-ESTADO DE ESTA ENTREGA
-Las URL anteriores corresponden a las rutas del sitio.
-La corrección de las celebraciones está implementada y probada en local;
-necesita un despliegue autorizado para estar disponible en esas URL.
-No se ha realizado push, deploy ni modificación de producción.
+CÓMO VERIFICAR EL FINALE
+1. Sin participantes: abre la preview de 5 personajes en el navegador
+   donde tengas una sesión OWNER y pulsa Preview Finale. También puedes
+   probar las cantidades 1, 15 y 30. Los ejemplos solo existen en esa
+   página: no se registran en PostgreSQL ni aparecen en la party real.
+2. Con participantes: mantén abiertas las páginas /level38 de personas
+   reales que hayan elegido aparecer en stream. Comprueba los contadores
+   del apartado Party Overlay del panel de control y la visibilidad global.
+   Abre la URL pública de party en OBS y pulsa Test Finale en el panel OWNER
+   (TEST · PREVIEW LEVEL 38 FINALE). El test llega a las fuentes conectadas
+   mediante Socket.IO y utiliza la misma celebración que el desbloqueo real.
+3. Si el contador de personajes visibles es cero, la fuente pública muestra
+   los fuegos y el 38 sin personajes: no crea participantes de prueba.
+   Utiliza la preview OWNER del paso 1 para verificar el espectáculo completo.
+4. Comprueba las poses de victoria al inicio, a los 5 y a los 9 segundos;
+   después de los 10 segundos deben volver a caminar o permanecer quietos.
+
+La preview OWNER requiere una sesión en ese navegador; OBS utiliza su propia
+sesión y la URL pública de party no necesita login. Ambos tests conservan
+misiones, votaciones, progreso y secuencia de desbloqueo. Test Finale conserva
+el registro de auditoría y la revisión de control habituales del sistema.
+
+Las URL del sitio sirven la versión desplegada. Los cambios enviados al
+repositorio necesitan que el despliegue de esa versión termine correctamente.
 
 PRUEBAS LOCALES
 Con el servidor de desarrollo iniciado, sustituye https://leonifelheim.tv

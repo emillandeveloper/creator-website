@@ -37,13 +37,14 @@ The public overlay can be read without an operator login. Opted-in presentation 
 | Viewer → `party:register` | Resolve the existing session cookie on the server; ignore all client identity fields |
 | Viewer → `party:heartbeat` | Refresh only an in-memory connection clock; ack indicates whether registration remains valid |
 | Viewer → `party:leave` | Best-effort pagehide notification; starts grace when the last connection leaves |
-| Server → `party:snapshot` | Ordered safe members and `{enabled,nameMode,maxVisible}` after an overlay connects |
+| Server → `party:snapshot` | Ordered safe members, `{enabled,nameMode,maxVisible}`, committed `revision` and numeric `serverTime` after an overlay connects |
 | Server → `party:joined` | One newly visible member |
 | Server → `party:updated` | Same presence ID with changed presentation, normally nickname |
 | Server → `party:left` | `{presenceId}` only |
-| Server → `party:action` | Targeted `{presenceId,action:"vote"}` or all-party `{action:"quest"}` |
+| Server → `party:action` | Targeted `{presenceId,action:"vote"}` or all-party quest reaction with version, stable completion ID, revision, timestamp and 4000 ms duration |
 | Server → `party:config` | Persisted, validated presentation configuration |
 | Server → `level38:unlocked` | The existing genuine unlock event, forwarded without a second progress state machine |
+| Server → `level38:celebration-preview` | OWNER Test Finale, forwarded to connected overlays without advancing the durable unlock sequence |
 
 Overlay connections have no handlers for registering members or issuing reactions/administrative commands. Sending a fabricated join/action to the namespace cannot publish it to others. Viewer registration requires the configured Origin and cookie authentication; identities supplied in handshake/event bodies are ignored. Registration is throttled and permits only one in-flight lookup per socket. Heartbeats never perform database writes.
 
@@ -95,9 +96,13 @@ After `Level38Service.vote` succeeds, the controller asks presence for the authe
 
 ## 13. Quest and finale reactions
 
-Only committed `quest:completed` notifications trigger all-party celebration: the existing two-frame, 250 ms/frame, three-cycle sequence, then walking/idle resumes. A genuine unlock forwards the existing `level38:unlocked` event and suppresses the redundant quest reaction for that same commit. The overlay deduplicates that event ID.
+Only committed `quest:completed` notifications trigger the four-second all-party quest celebration. The overlay repeats the finite victory sprite clock for that window, deduplicates completion IDs and consumes a snapshot revision baseline so refresh/reconnect does not replay reactions. A genuine unlock forwards the existing `level38:unlocked` event and suppresses the redundant quest reaction for that same commit. The overlay deduplicates that event ID.
 
-Owner fireworks preview events do not trigger the real party or change progress. Public-page fireworks code/lifecycle is unchanged. No past vote or reaction history is replayed on a newly connected overlay; its initial entry sequence is presentation only.
+The isolated OWNER preview, server-delivered Test Finale and genuine unlock all call the same `celebrate()` function. Finale avatars stop wandering, retain their placement and repeat their own victory frames for the existing ten-second fireworks/38 effect. Reduced motion uses the second victory frame as a static raised pose for the existing four-second quiet effect; most first victory frames match idle. Normal behavior resumes when the effect finishes. Fireworks render behind party sprites/names. The shared sprite renderer and fireworks engine remain unchanged by this duration fix.
+
+Test Finale does not change quests, polls, progress or the unlock sequence; its existing audit/revision behavior remains intact. A public overlay with no eligible online presence has no characters to animate. The OWNER-only `?preview=1|5|15|30` pages create browser-local examples before connecting any presentation socket, providing full visual verification without inserting fake participants. See [all overlay links and verification steps](LEVEL38-OVERLAYS.txt). No historical reaction is replayed on a new source.
+
+Finale regression validation (2026-10-21): `npm test` passes all 64 unit tests. Six related integration tests pass, including `tests/integration/party-finale.test.cjs`. The Playwright test `tests/visual/level38-party-finale.cjs` passes in installed Chrome 155 with isolated PostgreSQL schemas. It clicks the real OWNER control button, verifies 16 connected characters across two lanes, and compares that path with completing the actual 38th quest in the test schema. Full OWNER preview checks use five characters, with additional visible-victory checks for 1, 15 and 30. Actual renderer output alternates both authored victory PNGs throughout the ten-second effect, then returns to idle/walk; reduced motion holds victory frame 01 until the quiet effect ends. Captures at approximately 0.35, 5.35 and 9.35 seconds, normal-state captures, party crops and `results.json` are saved under ignored `dist/level38-finale-qa/`. This is real Chromium rendering of the OBS source routes, not a test inside the OBS application. No production database is used. Keep the OWNER preview tab visible during the manual test: hidden sources intentionally stop their effects.
 
 ## 14. Moderator controls
 

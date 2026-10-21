@@ -10,7 +10,7 @@
   let unlockSequence = 0;
   let questRevision = 0, questBaseline = 0, serverClock = null, layoutDeferred = false;
   const seenQuests = new Set(), seenPreviews = new Set();
-  let pendingPreview = null;
+  let pendingPreview = null, finaleQuiet = false;
   try { const saved = Number(sessionStorage.getItem(unlockKey)); if (Number.isSafeInteger(saved) && saved > 0) unlockSequence = saved; } catch {}
   try { const saved = Number(sessionStorage.getItem(questKey)); if (Number.isSafeInteger(saved) && saved > 0) questRevision = saved; } catch {}
   questBaseline = questRevision;
@@ -28,7 +28,7 @@
     return { member, node, art, label, job, renderer: sprites.render(art, job, { externalClock: true }), seed,
       x: 0, lane: 0, direction: seed % 2 ? -1 : 1, speed: 18 + seed % 15, phase: seed % 400,
       moving: true, pauseUntil: 0, changeAt: now + 2500 + seed % 5500, nameUntil: now + 5000,
-      celebrationAt: 0, celebrationUntil: 0, questCelebration: false, hopAt: -Infinity, placed: false };
+      celebrationAt: 0, celebrationUntil: 0, questCelebration: false, finaleCelebration: false, hopAt: -Infinity, placed: false };
   }
   function remove(id) { const a = avatars.get(id); a.renderer?.dispose(); a.node.remove(); avatars.delete(id); }
   function reconcile() {
@@ -48,12 +48,12 @@
     layout();
     const extra = config.enabled ? Math.max(0, members.size - selected.length) : 0;
     overflow.hidden = !extra; overflow.textContent = `+${extra} PARTY MEMBERS`;
-    if (!config.enabled) { clearQuestCelebrations(); finale.stop(); pendingPreview = null; }
+    if (!config.enabled) { clearCelebrations(); finale.stop(); pendingPreview = null; }
     if (running && (avatars.size || finale.active || pendingPreview !== null) && !raf) raf = requestAnimationFrame(frame);
     if (!avatars.size && !finale.active && pendingPreview === null) { cancelAnimationFrame(raf); raf = 0; previous = 0; }
   }
   function layout() {
-    const list = [...avatars.values()], frozen = new Set(list.filter(a => a.questCelebration));
+    const list = [...avatars.values()], frozen = new Set(list.filter(a => a.questCelebration || a.finaleCelebration));
     const lanes = frozen.size ? lastLanes : list.length > 15 ? 2 : 1;
     const columns = Math.ceil(list.length / lanes), spacing = (width - 144) / Math.max(1, columns);
     if (!frozen.size) crowdGap = Math.min(132, spacing);
@@ -92,15 +92,18 @@
   }
   function reaction(action, presenceId, elapsed = 0) {
     if (action === "quest" && (!running || !config.enabled || finale.active)) return;
-    const now = performance.now(), duration = action === "quest" ? questDuration : 1500;
+    const now = performance.now(), duration = action === "quest" ? questDuration : action === "finale" ? window.Level38PartyFireworks.duration : 1500;
     for (const a of avatars.values()) if (!presenceId || a.member.presenceId === presenceId) {
+      if (action === "vote" && a.finaleCelebration) continue;
       // A delayed older completion is acknowledged without shortening a newer reaction.
       if (action === "quest" && a.questCelebration && a.celebrationUntil >= now + duration - elapsed) continue;
-      a.nameUntil = now + 5000;
+      a.nameUntil = now + Math.max(5000, duration - elapsed);
       if (action === "vote") a.hopAt = now;
       else {
         a.celebrationAt = now - elapsed; a.celebrationUntil = now + duration - elapsed;
         a.questCelebration = action === "quest";
+        a.finaleCelebration = action === "finale";
+        if (a.finaleCelebration) a.hopAt = -Infinity;
         a.node.classList.toggle("is-quest-celebrating", a.questCelebration);
         if (a.questCelebration) a.node.style.setProperty("--quest-elapsed", `${-elapsed}ms`);
       }
@@ -127,9 +130,9 @@
     const baseline = height - 32 - a.lane * 86;
     a.node.style.transform = `translate(${Math.round(a.x - anchor[0] * scale)}px, ${Math.round(baseline - anchor[1] * scale - hop)}px)`;
   }
-  function clearQuestCelebrations() {
-    for (const a of avatars.values()) if (a.questCelebration) {
-      a.questCelebration = false; a.celebrationUntil = 0; a.hopAt = -Infinity;
+  function clearCelebrations() {
+    for (const a of avatars.values()) if (a.questCelebration || a.finaleCelebration) {
+      a.questCelebration = false; a.finaleCelebration = false; a.celebrationUntil = 0; a.hopAt = -Infinity;
       a.node.classList.remove("is-quest-celebrating"); a.node.style.removeProperty("--quest-elapsed");
       a.node.dataset.action = "idle"; a.renderer?.paint("idle", 0, a.direction > 0); position(a);
     }
@@ -137,8 +140,9 @@
   }
   function celebrate() {
     if (!running || !config.enabled) return;
-    clearQuestCelebrations();
-    reaction("finale"); finale.start(performance.now(), motion.matches);
+    clearCelebrations();
+    finaleQuiet = motion.matches;
+    finale.start(performance.now(), finaleQuiet); reaction("finale");
     if (!raf) raf = requestAnimationFrame(frame);
   }
   function previewCelebration(event) {
@@ -169,14 +173,19 @@
     if (!running || destroyed) return;
     if (pendingPreview !== null && now >= pendingPreview) { pendingPreview = null; celebrate(); }
     const dt = previous ? Math.min(.05, (now - previous) / 1000) : 0; previous = now;
+    // The same finite effect bounds the avatar reaction, including its existing
+    // four-second reduced-motion mode and changes to that preference mid-finale.
+    if (finale.active && motion.matches) finaleQuiet = true;
+    finale.paint(now, motion.matches);
     const list = [...avatars.values()];
-    let questEnded = false;
+    let celebrationEnded = false;
     for (const a of list) {
-      const celebrating = now < a.celebrationUntil;
-      if (!celebrating && a.questCelebration) {
-        a.questCelebration = false; a.node.classList.remove("is-quest-celebrating"); a.node.style.removeProperty("--quest-elapsed"); questEnded = true;
+      const celebrating = now < a.celebrationUntil && (!a.finaleCelebration || finale.active);
+      if (!celebrating && (a.questCelebration || a.finaleCelebration)) {
+        a.questCelebration = false; a.finaleCelebration = false; a.celebrationUntil = 0;
+        a.node.classList.remove("is-quest-celebrating"); a.node.style.removeProperty("--quest-elapsed"); celebrationEnded = true;
       }
-      if (!a.questCelebration && now >= a.changeAt) {
+      if (!celebrating && now >= a.changeAt) {
         a.moving = !a.moving; a.pauseUntil = a.moving ? 0 : now + 900 + random(a) * 2200;
         a.changeAt = a.moving ? now + 2500 + random(a) * 6000 : a.pauseUntil;
         if (a.moving && random(a) < .35) a.direction *= -1;
@@ -189,27 +198,32 @@
         if (blocked) { a.direction *= -1; a.moving = false; a.changeAt = now + 400 + random(a) * 900; }
         else a.x = next;
       }
-      const action = motion.matches ? "idle" : celebrating ? "celebration" : walking ? "walk" : "idle";
+      const action = celebrating && (!motion.matches || a.finaleCelebration) ? "celebration" : walking ? "walk" : "idle";
       const celebrationAge = now - a.celebrationAt;
-      // Victory sheets are finite (1.5s). Repeat only this overlay reaction's clock,
+      const victory = a.job.sprite?.animations.celebration;
+      const victoryCycle = victory ? victory.frames.length * victory.frameDurationMs : 1500;
+      // Victory sheets are finite. Repeat only this overlay reaction's clock,
       // without changing the shared sprite renderer or its ordinary entry animations.
-      a.renderer.paint(action, celebrating ? a.questCelebration ? celebrationAge % 1500 : celebrationAge : now + a.phase, a.direction > 0);
+      // Quiet finales still show the authored victory pose rather than hiding it in idle.
+      // The second authored frame is the raised-arm pose; frame zero commonly
+      // matches idle, so reduced motion deliberately holds the visible victory.
+      const victoryElapsed = a.finaleCelebration && finaleQuiet ? victory?.frameDurationMs || 0 : celebrationAge % victoryCycle;
+      a.renderer.paint(action, celebrating ? victoryElapsed : now + a.phase, a.direction > 0);
       const hopAge = a.questCelebration ? celebrationAge % 750 : now - a.hopAt;
-      const hop = !motion.matches && hopAge >= 0 && hopAge < 350 ? Math.sin(hopAge / 350 * Math.PI) * (a.questCelebration ? 10 : 12) : 0;
+      const hop = !a.finaleCelebration && !motion.matches && hopAge >= 0 && hopAge < 350 ? Math.sin(hopAge / 350 * Math.PI) * (a.questCelebration ? 10 : 12) : 0;
       position(a, hop);
       a.node.dataset.action = action; a.node.dataset.direction = String(a.direction); a.node.dataset.lane = String(a.lane);
       a.label.hidden = config.nameMode === "OFF";
       a.label.classList.toggle("is-faded", config.nameMode === "ENTRY" && now >= a.nameUntil);
     }
-    if (questEnded && layoutDeferred) { layoutDeferred = false; layout(); }
-    finale.paint(now, motion.matches);
+    if (celebrationEnded && layoutDeferred) { layoutDeferred = false; layout(); }
     if ((avatars.size || finale.active || pendingPreview !== null) && !raf) raf = requestAnimationFrame(frame);
   }
-  function stop() { running = false; cancelAnimationFrame(raf); raf = 0; previous = 0; pendingPreview = null; clearQuestCelebrations(); finale.stop(); }
+  function stop() { running = false; cancelAnimationFrame(raf); raf = 0; previous = 0; pendingPreview = null; clearCelebrations(); finale.stop(); }
   function start() { running = ready && !destroyed && !document.hidden; if (running && !raf && (avatars.size || finale.active || pendingPreview !== null)) raf = requestAnimationFrame(frame); }
   function resize() {
     const previousWidth = width; width = innerWidth; height = innerHeight;
-    for (const a of avatars.values()) if (!a.questCelebration) a.x = 72 + (a.x - 72) * (width - 144) / Math.max(1, previousWidth - 144);
+    for (const a of avatars.values()) if (!a.questCelebration && !a.finaleCelebration) a.x = 72 + (a.x - 72) * (width - 144) / Math.max(1, previousWidth - 144);
     layout(); finale.resize();
   }
   function visibility() { if (document.hidden) stop(); else start(); }
