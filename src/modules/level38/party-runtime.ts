@@ -85,6 +85,9 @@ export class PartyRuntime {
       if (this.questReactions.size > 512) this.questReactions.delete(this.questReactions.values().next().value!);
     }
     if (this.config.enabled) {
+      // The existing OWNER-only test reaches OBS as an ephemeral visual cue.
+      // It never claims a completed quest or increments an unlock sequence.
+      if (change.preview) this.channel.to("overlay").emit("level38:celebration-preview", change.preview);
       if (change.unlock) this.channel.to("overlay").emit("level38:unlocked", change.unlock);
       else if (quest) this.channel.to("overlay").emit("party:action", {
         action: "quest", version: 1, id: `level38:quest-completed:${change.revision}`, revision: change.revision,

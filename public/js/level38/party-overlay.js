@@ -9,7 +9,8 @@
   const questKey = "level38:party:last-quest-completion", questDuration = 4000;
   let unlockSequence = 0;
   let questRevision = 0, questBaseline = 0, serverClock = null, layoutDeferred = false;
-  const seenQuests = new Set();
+  const seenQuests = new Set(), seenPreviews = new Set();
+  let pendingPreview = null;
   try { const saved = Number(sessionStorage.getItem(unlockKey)); if (Number.isSafeInteger(saved) && saved > 0) unlockSequence = saved; } catch {}
   try { const saved = Number(sessionStorage.getItem(questKey)); if (Number.isSafeInteger(saved) && saved > 0) questRevision = saved; } catch {}
   questBaseline = questRevision;
@@ -47,9 +48,9 @@
     layout();
     const extra = config.enabled ? Math.max(0, members.size - selected.length) : 0;
     overflow.hidden = !extra; overflow.textContent = `+${extra} PARTY MEMBERS`;
-    if (!config.enabled) { clearQuestCelebrations(); finale.stop(); }
-    if (running && (avatars.size || finale.active) && !raf) raf = requestAnimationFrame(frame);
-    if (!avatars.size && !finale.active) { cancelAnimationFrame(raf); raf = 0; previous = 0; }
+    if (!config.enabled) { clearQuestCelebrations(); finale.stop(); pendingPreview = null; }
+    if (running && (avatars.size || finale.active || pendingPreview !== null) && !raf) raf = requestAnimationFrame(frame);
+    if (!avatars.size && !finale.active && pendingPreview === null) { cancelAnimationFrame(raf); raf = 0; previous = 0; }
   }
   function layout() {
     const list = [...avatars.values()], frozen = new Set(list.filter(a => a.questCelebration));
@@ -140,17 +141,33 @@
     reaction("finale"); finale.start(performance.now(), motion.matches);
     if (!raf) raf = requestAnimationFrame(frame);
   }
+  function previewCelebration(event) {
+    // The OWNER test uses the existing server-generated, non-durable preview.
+    // Do not touch unlockSequence/sessionStorage or create a second RAF.
+    if (!running || !config.enabled || finale.active || !event || event.version !== 1 ||
+        typeof event.id !== "string" || !event.id || seenPreviews.has(event.id) ||
+        !Number.isFinite(event.startsAt)) return;
+    const serverNow = serverClock ? serverClock.time + performance.now() - serverClock.local : Date.now();
+    const delay = event.startsAt - serverNow;
+    if (Math.abs(delay) > 8000) return;
+    seenPreviews.add(event.id);
+    if (seenPreviews.size > 32) seenPreviews.delete(seenPreviews.values().next().value);
+    pendingPreview = performance.now() + Math.max(0, Math.min(1000, delay));
+    if (!raf) raf = requestAnimationFrame(frame);
+  }
   function unlock(event) {
     // Only the genuine server event enters here. Its durable sequence is the dedupe key;
     // snapshots never replay history, and local preview never writes this acknowledgement.
     if (!event || event.version !== 1 || !Number.isSafeInteger(event.sequence) || event.sequence <= unlockSequence || event.id !== `level38:unlock:${event.sequence}`) return;
     unlockSequence = event.sequence;
     try { sessionStorage.setItem(unlockKey, String(unlockSequence)); } catch {}
+    pendingPreview = null;
     celebrate();
   }
   function frame(now) {
     raf = 0;
     if (!running || destroyed) return;
+    if (pendingPreview !== null && now >= pendingPreview) { pendingPreview = null; celebrate(); }
     const dt = previous ? Math.min(.05, (now - previous) / 1000) : 0; previous = now;
     const list = [...avatars.values()];
     let questEnded = false;
@@ -186,10 +203,10 @@
     }
     if (questEnded && layoutDeferred) { layoutDeferred = false; layout(); }
     finale.paint(now, motion.matches);
-    if (avatars.size || finale.active) raf = requestAnimationFrame(frame);
+    if ((avatars.size || finale.active || pendingPreview !== null) && !raf) raf = requestAnimationFrame(frame);
   }
-  function stop() { running = false; cancelAnimationFrame(raf); raf = 0; previous = 0; clearQuestCelebrations(); finale.stop(); }
-  function start() { running = ready && !destroyed && !document.hidden; if (running && !raf && (avatars.size || finale.active)) raf = requestAnimationFrame(frame); }
+  function stop() { running = false; cancelAnimationFrame(raf); raf = 0; previous = 0; pendingPreview = null; clearQuestCelebrations(); finale.stop(); }
+  function start() { running = ready && !destroyed && !document.hidden; if (running && !raf && (avatars.size || finale.active || pendingPreview !== null)) raf = requestAnimationFrame(frame); }
   function resize() {
     const previousWidth = width; width = innerWidth; height = innerHeight;
     for (const a of avatars.values()) if (!a.questCelebration) a.x = 72 + (a.x - 72) * (width - 144) / Math.max(1, previousWidth - 144);
@@ -230,6 +247,7 @@
     socket.on("party:config", next => { config = next; reconcile(); });
     socket.on("party:action", event => { if (event?.action === "quest") questCompleted(event); else if (event?.action === "vote") reaction("vote", event.presenceId); });
     socket.on("level38:unlocked", unlock);
+    socket.on("level38:celebration-preview", previewCelebration);
     socket.on("disconnect", () => {
       ready = false; stop(); stage.hidden = true; overflow.hidden = true;
       // A frame/placeholder request can fail while offline. Recreate image resources

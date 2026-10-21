@@ -56,6 +56,20 @@ test('genuine overlay finale dedupes across reconnect/refresh; quest and fake pr
   p.socket.emit('level38:unlocked',p.event(3));p.socket.emit('party:config',{enabled:false,nameMode:'ALWAYS',maxVisible:30});assert.equal(p.visible(),false);assert.equal(p.frames.size,0);
 });
 
+test('the server-delivered OWNER test starts OBS fireworks once without consuming the real unlock',async t=>{
+  const p=await client(t);p.snapshot();p.animate(1);
+  const event={version:1,id:'owner-test-1',startsAt:Date.now(),durationMs:6500,target:38};
+  p.socket.emit('level38:celebration-preview',event);p.animate(50);
+  assert.equal(p.visible(),true);
+  assert.equal(p.w.document.querySelector('.party-avatar').dataset.action,'celebration');
+  assert.equal(p.w.sessionStorage.getItem('level38:party:last-unlock'),null);
+  p.socket.emit('level38:celebration-preview',event);p.animate(200);
+  p.animate(10001);assert.equal(p.visible(),false);
+  p.socket.emit('level38:celebration-preview',event);p.animate(100);assert.equal(p.visible(),false);
+  p.socket.emit('level38:unlocked',p.event(1));assert.equal(p.visible(),true);
+  assert.equal(p.w.sessionStorage.getItem('level38:party:last-unlock'),'1');
+});
+
 test('OWNER visual preview stays isolated; reduced motion and zero-avatar effects finish cleanly',async t=>{
   const p=await client(t,{preview:true,reduced:true});p.animate(1);
   p.w.document.getElementById('preview-finale').click();p.animate(50);assert.equal(p.visible(),true);const draws=p.draws;
@@ -70,7 +84,7 @@ test('finite fireworks budget, restart, resize, reduced-motion switch and dispos
   const effect=p.w.Level38PartyFireworks.create(canvas,banner);effect.start(0);let peak=0;
   for(let now=0;now<=10000;now+=17){effect.paint(now);peak=Math.max(peak,effect.particleCount);assert.ok(effect.particleCount<=900);}
   effect.paint(10000);
-  assert.ok(peak>=300);assert.equal(effect.active,false);assert.equal(effect.particleCount,0);assert.equal(canvas.width,1);
+  assert.ok(peak>=300);assert.equal(effect.numberBursts,2);assert.equal(effect.active,false);assert.equal(effect.particleCount,0);assert.equal(canvas.width,1);
   effect.start(20000);effect.resize();effect.paint(20050,true);const draws=p.draws;effect.paint(22000,true);assert.equal(p.draws,draws);effect.paint(24000,true);assert.equal(effect.active,false);
   effect.start(30000);effect.start(30010);effect.stop();effect.stop();assert.equal(effect.particleCount,0);assert.equal(banner.hidden,true);
 });
