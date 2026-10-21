@@ -79,7 +79,9 @@ test('owner routes reject moderators, viewers and cross-origin requests without 
 test('owner-tool migration is additive, infers initial states and preserves prior progress/history', {timeout:180000},async t=>{
   const f=await fixture(t,{migrate:false,seed:false});const schema=new URL(f.databaseUrl).searchParams.get('schema');
   assert.match(schema,/^level38_test_[a-f0-9]{32}$/);await f.db.$executeRawUnsafe(`CREATE SCHEMA "${schema}"`);
-  for(const name of fs.readdirSync('prisma/migrations').filter(n=>/^\d/.test(n)&&!n.includes('owner_tools')).sort()){
+  // The pre-OBS baseline predates deadlines, whose backfill depends on archivedAt
+  // from owner_tools. Deploy both pending migrations in their real order below.
+  for(const name of fs.readdirSync('prisma/migrations').filter(n=>/^\d/.test(n)&&n<'202610210012'&&!n.includes('owner_tools')).sort()){
     f.cli('db','execute','--file',`prisma/migrations/${name}/migration.sql`,'--schema','prisma/schema.prisma');f.cli('migrate','resolve','--applied',name);
   }
   await f.db.$executeRaw`INSERT INTO "Event" (id,slug,title,"unlockSequence","updatedAt") VALUES ('e','level38','LEVEL 38',7,NOW())`;

@@ -54,6 +54,7 @@ export interface PollInput {
   title: string;
   type: PollType;
   contextQuestId?: string | null;
+  durationSeconds?: number;
   options: { label?: string; questId?: string; gameId?: string }[];
 }
 
@@ -72,7 +73,16 @@ export function pollInput(value: unknown): PollInput {
     if (type === "NEXT_GAME") return { gameId: identifier(option.gameId) };
     return { label: textInput(option.label, "Option", 100) };
   });
-  return { title: textInput(body.title, "Poll question"), type, contextQuestId, options: type === "YES_NO" ? [{ label: "Yes" }, { label: "No" }] : options };
+  return { title: textInput(body.title, "Poll question"), type, contextQuestId,
+    durationSeconds: body.durationSeconds === undefined ? 60 : pollSeconds(body.durationSeconds),
+    options: type === "YES_NO" ? [{ label: "Yes" }, { label: "No" }] : options };
+}
+
+export function pollSeconds(value: unknown): number {
+  if (typeof value !== "number" || !Number.isSafeInteger(value) || value < 1 || value > 3600) {
+    throw new Level38Error(400, "Choose a duration from 1 to 3600 whole seconds.");
+  }
+  return value;
 }
 
 export function gameIdentifiers(value: unknown): string[] {
@@ -82,7 +92,7 @@ export function gameIdentifiers(value: unknown): string[] {
   return ids;
 }
 
-export function pollAction(value: unknown): "open" | "close" {
-  if (value !== "open" && value !== "close") throw new Level38Error(400, "Choose open or close.");
+export function pollAction(value: unknown): "open" | "close" | "cancel" {
+  if (value !== "open" && value !== "close" && value !== "cancel") throw new Level38Error(400, "Choose open, close or cancel.");
   return value;
 }

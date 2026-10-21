@@ -71,6 +71,11 @@
 .l38-control #message:empty { min-height: 0; margin: 0; }
 .l38-control #login-form { max-width: 580px; }
 .l38-control #access-key { flex: 1 1 240px; }
+.l38-control .l38-poll-countdown { font: 18px 'Silkscreen', monospace; color: #e4be73; font-variant-numeric: tabular-nums; margin: 12px 0; }
+.l38-control .l38-poll-countdown.is-ending { color: #ffba9b; }
+.l38-control .l38-poll-finish { color: #b7cce0; border-left: 3px solid #71869a; padding-left: 10px; }
+.l38-control #poll-duration { max-width: 180px; }
+.l38-control .l38-obs-links p:last-child { margin-bottom: 0; }
 @media (max-width: 1050px) {
   .l38-control .l38-live-desk { grid-template-columns: minmax(0, 1fr) minmax(0, .85fr); }
   .l38-control .l38-control-workspace { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; }

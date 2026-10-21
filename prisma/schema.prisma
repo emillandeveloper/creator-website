@@ -186,6 +186,10 @@ model Poll {
   createdBy        Operator     @relation("PollCreator", fields: [createdById], references: [id], onDelete: Restrict)
   createdAt        DateTime     @default(now())
   openedAt         DateTime?
+  durationSeconds  Int          @default(60)
+  endsAt           DateTime?
+  cancelledAt      DateTime?
+  closeReason      String?
   closedAt         DateTime?
   archivedAt       DateTime?
   voteRevision     Int          @default(0)
@@ -202,6 +206,7 @@ model Poll {
 
   @@unique([id, eventId])
   @@index([eventId, status])
+  @@index([eventId, status, endsAt])
 }
 
 model PollOption {

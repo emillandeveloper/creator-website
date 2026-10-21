@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="<%= overlayLang %>">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>LEVEL 38 · Quest overlay</title>
+  <link rel="stylesheet" href="/css/level38-overlays.css">
+  <script defer src="/js/level38/translations.js"></script>
+  <script defer src="/level38/socket.io/socket.io.js"></script>
+  <script defer src="/js/level38/overlays.js"></script>
+</head>
+<body class="l38-obs" data-overlay="quest" data-overlay-lang="<%= overlayLang %>">
+  <main id="overlay-stage">
+    <section id="quest-overlay" class="obs-panel obs-quest" hidden aria-live="polite" aria-atomic="true">
+      <header class="obs-header"><span class="obs-brand">LEVEL <b>38</b></span><span id="quest-number" class="obs-eyebrow"></span><span id="quest-active" class="obs-active"></span></header>
+      <div id="quest-complete" class="obs-complete" hidden><span class="obs-pixel-star" aria-hidden="true">✦</span><strong id="quest-complete-label"></strong><span class="obs-pixel-star" aria-hidden="true">✦</span></div>
+      <p id="quest-game" class="obs-game"></p><h1 id="quest-title"></h1><p id="quest-objective" class="obs-objective"></p>
+    </section>
+  </main>
+</body>
+</html>

@@ -8,7 +8,7 @@ import { publicClass } from "./classes";
 import { joinParticipant } from "./participants";
 import { PartyRuntime } from "./party-runtime";
 import { TwitchIntegration } from "./twitch/integration";
-import { bodyObject, gameIdentifiers, identifier, nickname, pollAction, pollInput, questAction, revision, textInput } from "./validation";
+import { bodyObject, gameIdentifiers, identifier, nickname, pollAction, pollInput, pollSeconds, questAction, revision, textInput } from "./validation";
 
 export class Level38Controller {
   constructor(
@@ -40,6 +40,20 @@ export class Level38Controller {
       preview = Number(req.query.preview);
     }
     res.render("level38/party-overlay", { preview });
+  };
+
+  private overlayLanguage(req: Request): "es" | "en" {
+    if (req.query.lang === undefined) return "es";
+    if (req.query.lang !== "es" && req.query.lang !== "en") throw new Level38Error(400, "Choose overlay language es or en.");
+    return req.query.lang;
+  }
+
+  pollOverlay = async (req: Request, res: Response): Promise<void> => {
+    res.render("level38/poll-overlay", { overlayLang: this.overlayLanguage(req) });
+  };
+
+  questOverlay = async (req: Request, res: Response): Promise<void> => {
+    res.render("level38/quest-overlay", { overlayLang: this.overlayLanguage(req) });
   };
 
   streamVisibility = async (req: Request, res: Response): Promise<void> => {
@@ -125,6 +139,11 @@ export class Level38Controller {
     const operator = await this.auth.requireOperator(req);
     const body = bodyObject(req.body);
     res.json(await this.service.changePoll(operator.id, identifier(req.params.id), pollAction(body.action), revision(body.controlRevision ?? body.revision)));
+  };
+
+  extendPoll = async (req: Request, res: Response): Promise<void> => {
+    const operator = await this.auth.requireOperator(req), body = bodyObject(req.body);
+    res.json(await this.service.extendPoll(operator.id, identifier(req.params.id), pollSeconds(body.seconds), revision(body.controlRevision)));
   };
 
   selectWinner = async (req: Request, res: Response): Promise<void> => {

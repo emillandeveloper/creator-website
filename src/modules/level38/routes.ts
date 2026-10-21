@@ -37,6 +37,8 @@ export function createLevel38Routes(controller: Level38Controller, config: Level
   router.get("/", wrap(controller.publicPage));
   router.get("/control", wrap(controller.controlPage));
   router.get("/overlay/party", wrap(controller.partyOverlay));
+  router.get("/overlay/poll", wrap(controller.pollOverlay));
+  router.get("/overlay/quest", wrap(controller.questOverlay));
   router.get("/api/state", wrap(controller.publicState));
   router.get("/api/classes", (_req, res) => { res.json(SPRITE_MANIFEST); });
   router.get("/api/session", limited(300, 60 * 60 * 1000), wrap(controller.session));
@@ -53,6 +55,7 @@ export function createLevel38Routes(controller: Level38Controller, config: Level
   router.post("/api/control/polls", limited(30, 60 * 1000), wrap(controller.savePoll));
   router.post("/api/control/polls/:id/edit", limited(60, 60 * 1000), wrap(controller.savePoll));
   router.post("/api/control/polls/:id/status", limited(60, 60 * 1000), wrap(controller.changePoll));
+  router.post("/api/control/polls/:id/extend", limited(60, 60 * 1000), wrap(controller.extendPoll));
   router.post("/api/control/polls/:id/winner", limited(30, 60 * 1000), wrap(controller.selectWinner));
   router.post("/api/control/undo", limited(60, 60 * 1000), wrap(controller.undo));
   router.post("/api/polls/:id/vote", limited(120, 60 * 1000), wrap(controller.vote));

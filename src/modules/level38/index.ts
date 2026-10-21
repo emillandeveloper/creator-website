@@ -14,8 +14,9 @@ import { TwitchStore, Publisher } from "./twitch/store";
 import { TwitchIntegration } from "./twitch/integration";
 import { localization } from "./localization";
 import { PartyRuntime } from "./party-runtime";
+import { PollRuntime } from "./poll-runtime";
 
-const domainEvents = ["quest:activated", "quest:completed", "quest:failed", "quest:skipped", "quest:revealed", "quest:available", "quest:game", "quest:games", "poll:created", "poll:edited", "poll:opened", "poll:vote-updated", "poll:closed", "poll:winner", "game:changed", "game:configured", "action:undone"] as const;
+const domainEvents = ["quest:activated", "quest:completed", "quest:failed", "quest:skipped", "quest:revealed", "quest:available", "quest:game", "quest:games", "poll:created", "poll:edited", "poll:opened", "poll:vote-updated", "poll:closed", "poll:cancelled", "poll:extended", "poll:winner", "game:changed", "game:configured", "action:undone"] as const;
 type DomainEvent = typeof domainEvents[number];
 type ServerEvents = Record<DomainEvent, (event: { revision: number }) => void> & {
   "level38:state": (state: Level38State) => void;
@@ -42,8 +43,10 @@ export function mountLevel38(app: Application, server: HttpServer, config: Level
   });
   const channel = io.of("/level38");
   let party: PartyRuntime;
+  let polls: PollRuntime;
   const publish: Publisher = (state, change) => {
     party?.publish(state, change);
+    polls?.update(state);
     channel.emit("level38:state", state);
     // Domain notifications contain no entity metadata or operator information.
     if (domainEvents.includes(change.type as DomainEvent)) channel.emit(change.type as DomainEvent, { revision: change.revision });
@@ -51,6 +54,7 @@ export function mountLevel38(app: Application, server: HttpServer, config: Level
     if (change.unlock) channel.emit("level38:unlocked", change.unlock);
   };
   const service = new Level38Service(db, publish);
+  polls = new PollRuntime(service);
   const auth = new Level38Auth(db, config);
   party = new PartyRuntime(io.of("/level38-party"), db, auth, () => service.state(), config.origin);
   const twitchConfig = readTwitchConfig();
@@ -60,7 +64,7 @@ export function mountLevel38(app: Application, server: HttpServer, config: Level
   });
   const controller = new Level38Controller(db, auth, service, twitch, party);
   app.use("/level38", createLevel38Routes(controller, config, twitch));
-  server.once("listening", () => twitch.start());
+  server.once("listening", () => { twitch.start(); polls.start(); });
   return { ready: async (): Promise<boolean> => {
     // A small, read-only readiness query: migrations and seed must precede enablement.
     // Probe the current additive columns as well, so an older schema cannot pass readiness.
@@ -70,9 +74,10 @@ export function mountLevel38(app: Application, server: HttpServer, config: Level
     if (!event) return false;
     await db.participant.findFirst({ select: { variantId: true, streamVisible: true } });
     await db.quest.findFirst({ select: { catalogKey: true, category: true, retiredAt: true, eligibleGames: { select: { gameId: true } } } });
-    await db.poll.findFirst({ select: { contextQuestId: true } });
+    await db.poll.findFirst({ select: { contextQuestId: true, durationSeconds: true, endsAt: true, cancelledAt: true, closeReason: true } });
     return true;
   }, close: async (): Promise<void> => {
+    await polls.close();
     await twitch.close();
     party.close();
     await new Promise<void>((resolve) => io.close(() => resolve()));

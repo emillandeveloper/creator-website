@@ -19,6 +19,7 @@ export async function undoCandidate(tx: Prisma.TransactionClient, eventId: strin
   if (audit.undoOfId) reason = "The latest action was already undone. Earlier history cannot be rewound.";
   else if (!reversible.has(audit.action)) reason = "The latest operator action is not reversible. Earlier actions cannot be undone past it.";
   else if (["TWITCH", "TWITCH_AUTO"].includes(String(jsonObject(audit.metadata).source))) reason = "Use a manual game override to replace Twitch auto. Automatic game changes cannot be undone.";
+  else if (jsonObject(audit.metadata).source === "TIMER") reason = "An expired poll cannot be reopened. Create a new round instead.";
   else if (jsonObject(audit.metadata).version !== 2) reason = "This older action does not contain a complete undo snapshot.";
   else if (audit.action.startsWith("quest:")) {
     const quest = await tx.quest.findFirst({ where: { id: audit.entityId, eventId, retiredAt: null } });
@@ -39,6 +40,7 @@ export async function undoCandidate(tx: Prisma.TransactionClient, eventId: strin
     if (!poll || !matches(pollSnapshot(poll), after)) reason = "The poll, votes, or result changed after this action.";
     else if (audit.action === "poll:opened" && (poll.voteRevision > 0 || await tx.vote.count({ where: { pollId: poll.id } }) > 0)) reason = "Votes have been received. Opening this round can no longer be undone.";
     else if (audit.action === "poll:closed" && (poll.winningOptionId || poll.overrideOptionId)) reason = "The winner has been accepted or overridden. This poll cannot be reopened by undo.";
+    else if (audit.action === "poll:closed" && (poll.cancelledAt || !poll.endsAt || poll.endsAt.getTime() <= Date.now())) reason = "An expired or cancelled poll cannot be reopened. Create a new round instead.";
     else if (audit.action === "poll:closed" && await tx.poll.count({ where: { eventId, status: "OPEN", id: { not: poll.id } } })) reason = "Another poll is open.";
     else if (audit.action === "poll:closed") {
       try { assertOpenable(poll); await assertGamePollEligibility(tx, eventId, poll); }
@@ -64,9 +66,9 @@ export async function applyUndo(tx: Prisma.TransactionClient, eventId: string, a
     // Undo restores the game while retaining explicit human control of its source.
     await tx.event.update({ where: { id: eventId }, data: { currentGameId: typeof before.gameId === "string" ? before.gameId : null, gameSource: "MANUAL_OVERRIDE" } });
   } else if (audit.action === "poll:opened") {
-    await tx.poll.update({ where: { id: audit.entityId }, data: { status: "DRAFT", openedAt: null, closedAt: null } });
+    await tx.poll.update({ where: { id: audit.entityId }, data: { status: "DRAFT", openedAt: null, closedAt: null, endsAt: null, cancelledAt: null, closeReason: null } });
   } else if (audit.action === "poll:closed") {
-    await tx.poll.update({ where: { id: audit.entityId }, data: { status: "OPEN", closedAt: null } });
+    await tx.poll.update({ where: { id: audit.entityId }, data: { status: "OPEN", closedAt: null, cancelledAt: null, closeReason: null } });
   }
   return { action: "action:undone", entityId: audit.entityId, undoOfId: audit.id,
     before: jsonObject(audit.after) as Prisma.InputJsonObject, after: before as Prisma.InputJsonObject,

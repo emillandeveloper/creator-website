@@ -18,6 +18,7 @@
   let refreshAgain = false;
   let editingId = null;
   let editingRevision = null;
+  let clockServer = Date.now(), clockLocal = performance.now();
   const eligibleIds = quest => quest.eligibleGameIds || (quest.gameId ? [quest.gameId] : []);
   const handlers = {
     control: true,
@@ -25,8 +26,10 @@
     clone: (poll) => loadEditor(poll, true),
     status: (pollId, action) => {
       if (action === "close" && !window.confirm(t("Close this poll and stop accepting votes?"))) return;
+      if (action === "cancel" && !window.confirm(t("Cancel this poll? Votes will remain in history and no winner will be announced."))) return;
       mutate(`control/polls/${pollId}/status`, { action });
     },
+    extend: pollId => mutate(`control/polls/${pollId}/extend`, {seconds:30}),
     winner: (pollId, optionId, overrideReason) => {
       if (overrideReason !== null && overrideReason.trim().length < 2) { message("Enter a reason before overriding the winner."); return; }
       if (overrideReason !== null && !window.confirm(t("Override the selected poll winner? The reason will be recorded."))) return;
@@ -35,6 +38,7 @@
   };
   function lock(value) { busy = value; byId("operator-controls").disabled = value; }
   function render(next, force = false) {
+    if (Number.isFinite(next.serverTime)) { clockServer = next.serverTime; clockLocal = performance.now(); }
     window.Level38Twitch?.render(next, mutate);
     window.Level38PartyControl?.render(next, mutate);
     if (!force && state && next.event.revision <= state.event.revision) return;
@@ -54,6 +58,7 @@
       byId("audit-list").replaceChildren(...(audit.length ? audit : [element("li", t("No operator actions yet."))]));
     }
     renderPolls(state, handlers);
+    updateCountdowns();
     renderOwnerTools(state);
     byId("undo").disabled = !state.undo.available;
     setText("control-undo-status", state.undo.available ? "Undo available" : "Undo unavailable");
@@ -140,6 +145,7 @@
     editingId = clone ? null : poll.id;
     editingRevision = clone ? null : state.event.controlRevision;
     byId("poll-title").value = poll.title; byId("poll-type").value = poll.type;
+    byId("poll-duration").value = poll.durationSeconds || 60;
     renderPollQuestContext(); byId("poll-quest").value = poll.contextQuestId || "";
     setText("poll-editor-title", clone ? "New round from poll #{number}" : "Edit draft #{number}", {number:poll.number});
     resetOptions(poll.options);
@@ -148,6 +154,7 @@
   function resetEditor() {
     editingId = null; editingRevision = null;
     byId("poll-title").value = ""; setText("poll-editor-title", "Create voting round");
+    byId("poll-duration").value = 60;
     byId("poll-quest").value = "";
     if (state) renderPollQuestContext();
     resetOptions();
@@ -164,7 +171,7 @@
       return type === "NEXT_QUEST" ? { questId: value } : type === "NEXT_GAME" ? { gameId: value } : { label: value };
     });
     const contextQuestId = type === "NEXT_GAME" ? byId("poll-quest").value || null : null;
-    if (await mutate(editingId ? `control/polls/${editingId}/edit` : "control/polls", { title: byId("poll-title").value, type, options, contextQuestId }, editingRevision)) resetEditor();
+    if (await mutate(editingId ? `control/polls/${editingId}/edit` : "control/polls", { title: byId("poll-title").value, type, options, contextQuestId, durationSeconds:Number(byId("poll-duration").value) }, editingRevision)) resetEditor();
   });
   document.addEventListener("level38:language", () => {
     if (!state) return;
@@ -200,6 +207,17 @@
     event.preventDefault();
     if (await mutate("owner/tools/prepare", {confirmation:byId("reset-confirmation").value})) byId("reset-confirmation").value = "";
   });
+  function updateCountdowns() {
+    const time = clockServer + performance.now() - clockLocal;
+    for (const node of document.querySelectorAll('[data-poll-countdown]')) {
+      const end = Date.parse(node.dataset.endsAt);
+      const seconds = Number.isFinite(end) ? Math.max(0, Math.ceil((end - time) / 1000)) : 0;
+      const value = t('Time remaining: {time}', {time:`${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`});
+      if (node.textContent !== value) node.textContent = value;
+      node.classList.toggle('is-ending', seconds <= 10);
+    }
+  }
+  setInterval(updateCountdowns, 250);
   lock(true);
   const socket = connect(next => { window.Level38Experience?.observe(next); refresh(); }, refresh);
   window.Level38Experience?.attach(socket, {notices:false});

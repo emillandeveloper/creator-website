@@ -81,6 +81,34 @@ export function leadingOptionIds(poll: PollWithOptions): string[] {
 export function pollSnapshot(poll: Poll) {
   return { title: poll.title, number: poll.number, contextQuestId: poll.contextQuestId, status: poll.status,
     openedAt: poll.openedAt?.toISOString() ?? null, closedAt: poll.closedAt?.toISOString() ?? null,
+    durationSeconds: poll.durationSeconds, endsAt: poll.endsAt?.toISOString() ?? null,
+    cancelledAt: poll.cancelledAt?.toISOString() ?? null, closeReason: poll.closeReason,
     voteRevision: poll.voteRevision, winningOptionId: poll.winningOptionId, overrideOptionId: poll.overrideOptionId,
     overrideReason: poll.overrideReason, winnerAcceptedAt: poll.winnerAcceptedAt?.toISOString() ?? null };
+}
+
+// Shared by the operator and timeout paths. Winning a quest poll never activates
+// a quest; a contextual game poll retains its existing eligible-game selection.
+export async function acceptPollWinner(tx: Prisma.TransactionClient, eventId: string, poll: PollWithOptions,
+  optionId: string, overrideReason: string | null) {
+  if (poll.status !== "CLOSED") throw new Level38Error(409, "Close the poll before selecting a winner.");
+  if (poll.cancelledAt) throw new Level38Error(409, "A cancelled poll cannot have a winner.");
+  const option = poll.options.find((item) => item.id === optionId);
+  if (!option) throw new Level38Error(400, "Choose an option from this poll.");
+  if (!overrideReason && (poll.winningOptionId || poll.overrideOptionId)) throw new Level38Error(409, "A result is already selected. Use an explicit override to change it.");
+  if (!overrideReason && !leadingOptionIds(poll).includes(optionId)) throw new Level38Error(409, "Accept a leading option, or supply an override reason. Zero-vote polls require an override.");
+  if ((poll.overrideOptionId ?? poll.winningOptionId) === optionId) throw new Level38Error(409, "That option is already the winner.");
+  let questSelection: Prisma.InputJsonObject = {};
+  if (poll.type === "NEXT_GAME" && poll.contextQuestId) {
+    await assertGamePollEligibility(tx, eventId, poll);
+    if (!option.game || !option.game.enabled) throw new Level38Error(409, "The winning game is no longer enabled.");
+    const quest = await tx.quest.findFirstOrThrow({ where: { id: poll.contextQuestId, eventId, retiredAt: null } });
+    await tx.quest.update({ where: { id: quest.id }, data: { gameId: option.game.id } });
+    questSelection = { questId: quest.id, previousGameId: quest.gameId, selectedGameId: option.game.id };
+  }
+  const updated = await tx.poll.update({ where: { id: poll.id }, data: overrideReason
+    ? { overrideOptionId: optionId, overridePollId: poll.id, overrideReason, winnerAcceptedAt: new Date() }
+    : { winningOptionId: optionId, winningPollId: poll.id, winnerAcceptedAt: new Date() } });
+  const oldLabel = poll.options.find((item) => item.id === (poll.overrideOptionId ?? poll.winningOptionId))?.label ?? null;
+  return { updated, questSelection, winnerLabel: option.label, oldLabel };
 }

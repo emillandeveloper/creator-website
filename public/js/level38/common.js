@@ -182,7 +182,8 @@
     if (byId("vote-nav")) { const open = state.polls.some((poll) => poll.status === "OPEN"); byId("vote-nav").textContent = open ? t("Vote now ·") : t("Vote"); byId("vote-nav").classList.toggle("is-open", open); }
     const root = byId("poll-board");
     const signature = language() + JSON.stringify(state.polls.map((poll) => ({ id: poll.id, title: poll.title, type: poll.type, status: poll.status,
-      options: poll.options.map((option) => ({ id: option.id, label: optionLabel(poll, option) })), winner: poll.effectiveWinnerId, override: poll.overrideOptionId })));
+      options: poll.options.map((option) => ({ id: option.id, label: optionLabel(poll, option) })), winner: poll.effectiveWinnerId, override: poll.overrideOptionId,
+      endsAt:poll.endsAt, durationSeconds:poll.durationSeconds, closeReason:poll.closeReason, cancelledAt:poll.cancelledAt, winnerAcceptedAt:poll.winnerAcceptedAt })));
     if (signature !== pollSignature) {
       const savedInputs = new Map(Array.from(root.querySelectorAll("[data-poll-id]")).map(card => [card.dataset.pollId, { value: card.querySelector("select")?.value, reason: card.querySelector("input")?.value }]));
       const historyOpen = root.querySelector(".l38-poll-history")?.open;
@@ -198,6 +199,15 @@
         card.dataset.status = poll.status;
         const roundLabel = handlers.control ? t("Poll #{number} · {type} · {status}", { number: poll.number, type: t(poll.type), status: t(poll.status) }) : t("ROUND {number} · {status}", { number: String(poll.number).padStart(2, "0"), status: t(poll.status) });
         card.append(element("p", roundLabel, "l38-meta"), element("h3", poll.title));
+        if (handlers.control) {
+          if (poll.status === 'OPEN') { const countdown = element('p', '', 'l38-poll-countdown'); countdown.dataset.pollCountdown = poll.id; countdown.dataset.endsAt = poll.endsAt || ''; card.append(countdown); }
+          else if (poll.status === 'DRAFT') card.append(element('p', t('Duration: {seconds} seconds', {seconds:poll.durationSeconds || 60}), 'l38-small'));
+          else {
+            const reason = poll.cancelledAt || poll.closeReason === 'CANCELLED' ? 'Cancelled · no winner announced.' : poll.closeReason === 'TIMEOUT' ? 'Time expired.' : 'Closed by operator.';
+            card.append(element('p', t(reason), 'l38-poll-finish'));
+            if (!poll.effectiveWinnerId && !poll.cancelledAt && poll.closeReason !== 'CANCELLED') card.append(element('p', t(poll.totalVotes === 0 ? 'No votes · operator decision required.' : poll.leadingOptionIds.length > 1 ? 'Tie · operator decision required.' : 'Choose and confirm the winner.'), 'l38-small'));
+          }
+        }
         const total = element("p", ""); total.dataset.total = "true"; card.append(total);
         for (const option of poll.options) {
           const row = element("div", undefined, "l38-option");
@@ -211,20 +221,24 @@
           }
           card.append(row);
         }
-        if (poll.effectiveWinnerId) {
+        if (poll.effectiveWinnerId && !poll.cancelledAt && poll.closeReason !== 'CANCELLED') {
           card.append(element("p", t("Winner: {label}{override}", { label: optionLabel(poll, poll.options.find(option => option.id === poll.effectiveWinnerId)), override: poll.overrideOptionId ? t(" (moderator override)") : "" }), "l38-result"));
         }
         if (handlers.control) {
           const actions = element("div", undefined, "l38-actions");
-          function actionButton(label, handler) { const button = element("button", label); button.type = "button"; button.addEventListener("click", handler); actions.append(button); return button; }
+          function actionButton(label, handler, action) { const button = element("button", label); button.type = "button"; if (action) button.dataset.pollAction = action; button.addEventListener("click", handler); actions.append(button); return button; }
           if (poll.status === "DRAFT") {
             actionButton(t("Edit draft"), () => handlers.edit(latestPolls.find((item) => item.id === poll.id)));
             actionButton(t("Open poll"), () => handlers.status(poll.id, "open"));
           }
-          if (poll.status === "OPEN") actionButton(t("Close poll"), () => handlers.status(poll.id, "close"));
+          if (poll.status === "OPEN") {
+            actionButton(t("Close poll"), () => handlers.status(poll.id, "close"), 'close');
+            if (handlers.extend) actionButton(t("Extend +30 seconds"), () => handlers.extend(poll.id), 'extend');
+            const cancel = actionButton(t("Cancel poll"), () => handlers.status(poll.id, "cancel"), 'cancel'); cancel.className = 'l38-danger';
+          }
           actionButton(t("New round from this poll"), () => handlers.clone(latestPolls.find((item) => item.id === poll.id)));
           card.append(actions);
-          if (poll.status === "CLOSED") {
+          if (poll.status === "CLOSED" && !poll.cancelledAt && poll.closeReason !== 'CANCELLED') {
             const select = element("select"); select.setAttribute("aria-label", t("Winner for poll #{number}", { number: poll.number }));
             for (const option of poll.options) { const item = element("option", optionLabel(poll, option)); item.value = option.id; select.append(item); }
             select.value = poll.effectiveWinnerId || poll.leadingOptionIds[0] || poll.options[0]?.id || "";
@@ -314,7 +328,7 @@
       };
       return t(metadata.override ? "overrode poll #{number} winner from {before} to {after}" : "accepted poll #{number} winner from {before} to {after}", { number: after.number, before: label(before.winnerLabel), after: label(after.winnerLabel) });
     }
-    if (["poll:created", "poll:edited", "poll:opened", "poll:closed"].includes(entry.action)) return t(`${entry.action.slice(5)} poll #{number} “{title}”`, { number: after.number, title: after.title });
+    if (["poll:created", "poll:edited", "poll:opened", "poll:closed", "poll:extended", "poll:cancelled"].includes(entry.action)) return t(`${entry.action.slice(5)} poll #{number} “{title}”`, { number: after.number, title: after.title });
     return entry.description || t("Legacy activity");
   }
   function message(text) {

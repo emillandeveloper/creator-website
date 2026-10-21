@@ -25,6 +25,23 @@ export async function readState(tx: Prisma.TransactionClient, control: boolean) 
   const audit = control ? await tx.auditLog.findMany({ where: { eventId: event.id }, orderBy: { eventRevision: "desc" }, take: 40 }) : [];
   const archived = control ? await tx.poll.findMany({ where: { eventId: event.id, archivedAt: { not: null } }, orderBy: { number: "desc" }, include: pollInclude }) : [];
   const undo = control ? await undoCandidate(tx, event.id) : null;
+  const publicQuests = visible.map((quest) => {
+    const redact = !control && isHidden(quest);
+    return { id: quest.id, number: quest.number, gameId: redact ? null : quest.gameId,
+      eligibleGameIds: redact ? [] : quest.eligibleGames.map((association) => association.gameId), category: redact ? "SECRET" as const : quest.category,
+      title: redact ? "???" : quest.title, description: redact ? "" : quest.description,
+      translations: { en: { title: redact ? "???" : quest.title, description: redact ? "" : quest.description },
+        es: { title: redact ? "???" : quest.titleEs, description: redact ? "" : quest.descriptionEs } },
+      status: isHidden(quest) ? "SECRET" as const : quest.status, hidden: isHidden(quest),
+      updatedAt: redact ? null : quest.updatedAt.toISOString(), completedAt: redact ? null : quest.completedAt?.toISOString() ?? null,
+      ...(control ? { actions: allowedQuestActions(quest) } : {}) };
+  });
+  // Existing controls allow multiple active quests. Select one deterministically
+  // for OBS without changing quest statuses or revealing hidden content.
+  const active = quests.filter((quest) => quest.status === "ACTIVE" && !isHidden(quest))
+    .sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime() || b.id.localeCompare(a.id))[0];
+  const completion = quests.filter((quest) => quest.status === "COMPLETED" && quest.completedAt && !isHidden(quest))
+    .sort((a, b) => b.completedAt!.getTime() - a.completedAt!.getTime() || b.id.localeCompare(a.id))[0];
   return {
     serverTime: Date.now(),
     party: { enabled: event.partyEnabled, nameMode: event.partyNameMode, maxVisible: event.partyMaxVisible },
@@ -37,20 +54,15 @@ export async function readState(tx: Prisma.TransactionClient, control: boolean) 
       published.some((poll) => poll.options.some((option) => option.gameId === game.id)))
       .map((game) => ({ id: game.id, title: game.title, displayName: game.title, slug: game.slug, enabled: game.enabled, imagePath: game.imagePath, sortOrder: game.sortOrder,
         ...(control ? { twitchCategoryId: game.twitchCategoryId, twitchCategoryName: game.twitchCategoryName } : {}) })),
-    quests: visible.map((quest) => {
-      const redact = !control && isHidden(quest);
-      return { id: quest.id, number: quest.number, gameId: redact ? null : quest.gameId,
-      eligibleGameIds: redact ? [] : quest.eligibleGames.map((association) => association.gameId), category: redact ? "SECRET" as const : quest.category,
-      title: redact ? "???" : quest.title, description: redact ? "" : quest.description,
-      translations: { en: { title: redact ? "???" : quest.title, description: redact ? "" : quest.description },
-        es: { title: redact ? "???" : quest.titleEs, description: redact ? "" : quest.descriptionEs } },
-      status: isHidden(quest) ? "SECRET" as const : quest.status, hidden: isHidden(quest),
-      ...(control ? { actions: allowedQuestActions(quest) } : {}) };
-    }),
+    quests: publicQuests,
+    overlayActiveQuest: active ? publicQuests.find((quest) => quest.id === active.id)! : null,
+    overlayQuestCompletion: completion ? publicQuests.find((quest) => quest.id === completion.id)! : null,
     secretCount: quests.filter(isHidden).length,
     polls: published.map((poll) => ({ id: poll.id, number: poll.number, title: poll.title, type: poll.type, status: poll.status,
       contextQuestId: poll.contextQuestId,
       createdAt: poll.createdAt.toISOString(), openedAt: poll.openedAt?.toISOString() ?? null, closedAt: poll.closedAt?.toISOString() ?? null,
+      durationSeconds: poll.durationSeconds, endsAt: poll.endsAt?.toISOString() ?? null,
+      cancelledAt: poll.cancelledAt?.toISOString() ?? null, closeReason: poll.closeReason, winnerAcceptedAt: poll.winnerAcceptedAt?.toISOString() ?? null,
       options: poll.options.map((option) => ({ id: option.id, label: option.label, questId: option.questId, gameId: option.gameId, votes: option._count.votes,
         ...(option.quest ? { translations: { en: { title: option.quest.title }, es: { title: option.quest.titleEs } } } : {}) })),
       totalVotes: poll.options.reduce((sum, option) => sum + option._count.votes, 0), leadingOptionIds: leadingOptionIds(poll),
