@@ -72,6 +72,12 @@ test('vote targets only the voter, committed quest/finale reactions, audited con
   const reactionCount=overlay.events.filter(e=>e.name==='party:action').length;
   await op('/api/owner/tools/preview',{confirmation:'PREVIEW LEVEL 38'},owner.cookie);await delay(100);
   assert.equal(overlay.events.filter(e=>e.name==='party:action').length,reactionCount);
+  const previews=overlay.events.filter(e=>e.name==='level38:celebration-preview');
+  assert.equal(previews.length,1);
+  assert.equal(previews[0].payload.version,1);
+  assert.equal(typeof previews[0].payload.id,'string');
+  assert.equal(previews[0].payload.target,38);
+  assert.equal(overlay.events.filter(e=>e.name==='level38:unlocked').length,0);
   await f.db.quest.updateMany({where:{id:{in:quests.slice(0,37).map(q=>q.id)}},data:{status:'COMPLETED'}});
   await op(`/api/control/quests/${quests[37].id}`,{action:'activate'});await op(`/api/control/quests/${quests[37].id}`,{action:'complete'});
   await until(()=>overlay.events.some(e=>e.name==='level38:unlocked'));
