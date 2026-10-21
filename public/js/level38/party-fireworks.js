@@ -5,7 +5,7 @@
   const palette = ["#ffd77d", "#77ecda", "#f69acb", "#91bdff", "#fff5cc"];
   function create(canvas, banner) {
     let ctx, active = false, started = 0, lastDraw = -Infinity, reduced = false, quietPainted = false;
-    let width = 1, height = 1, nextLaunch = 450, launches = 0, particles = [], rockets = [];
+    let width = 1, height = 1, nextLaunch = 450, launches = 0, particles = [], rockets = [], numberBursts = 0;
     function resize() {
       if (!active || !ctx) return;
       width = Math.min(960, Math.ceil(scope.innerWidth / 2));
@@ -43,11 +43,34 @@
           trail: type === 3 ? 4 : 2, twinkle: i % 11 === 0 });
       }
     }
+    // Two choreographed shell bursts draw sparkling outlines of 3 and 8.
+    // Each spark expands from the shell, drifts under gravity, and expires naturally.
+    const glyphs = {
+      "3": ["11111","00001","00001","01111","00001","00001","11111"],
+      "8": ["11111","10001","10001","11111","10001","10001","11111"]
+    };
+    function numberBurst(digit, cx, cy, time) {
+      const rows = glyphs[digit], points = [];
+      for (let y = 0; y < rows.length; y++) for (let x = 0; x < rows[y].length; x++) {
+        if (rows[y][x] === "1") points.push({ x, y });
+      }
+      // A fixed budget keeps the existing 18 rockets and radial bursts intact.
+      const color = digit === "3" ? "#ffd77d" : "#77ecda";
+      for (const dot of points) for (let j = 0; j < 3 && particles.length < particleLimit; j++) {
+        const jitterX = (j - 1) * 1.0, jitterY = (j % 2 ? 1 : -1) * .75;
+        particles.push({ x: cx, y: cy,
+          vx: (dot.x - 2) * 11 + jitterX, vy: (dot.y - 3) * 11 + jitterY,
+          born: time, life: 2450 + j * 110, gravity: 2.1,
+          color: j === 1 ? "#fff5cc" : color, trail: 2, twinkle: j === 1,
+          numeral: true });
+      }
+      numberBursts++;
+    }
     function start(now, quiet = false) {
       stop(); ctx = canvas.getContext("2d");
       // The text still auto-finishes if canvas is unavailable.
       active = true; started = now; lastDraw = -Infinity; reduced = quiet; quietPainted = false;
-      nextLaunch = 450; launches = 0; banner.hidden = false;
+      nextLaunch = 450; launches = 0; numberBursts = 0; banner.hidden = false;
       if (ctx) {
         canvas.hidden = false; resize();
         if (!reduced) for (let i = 0; i < 3; i++) burst(.24 + i * .26, .2 + (i % 2) * .06, i, 0, true);
@@ -71,6 +94,12 @@
         return;
       }
       ctx.clearRect(0, 0, width, height);
+      // The number is a firework, not drawn text: two shells expand into 38.
+      // Place the silhouettes above the party banner and beneath other bursts.
+      if (elapsed >= 3500 && numberBursts === 0) {
+        numberBurst("3", .42, .19, elapsed);
+        numberBurst("8", .58, .19, elapsed);
+      }
       // Fixed launch budget, no catch-up storm if a frame is delayed.
       if (elapsed >= nextLaunch && elapsed < 6600 && launches < 18) {
         const index = launches++;
@@ -95,14 +124,15 @@
         const age = (elapsed - p.born) / 1000, alpha = Math.min(1, (p.life / 1000 - age) * 1.6);
         for (let tail = p.trail; tail >= 0; tail--) {
           const a = Math.max(0, age - tail * .05), drift = (1 - Math.exp(-a * .6)) / .6;
-          const x = p.x * width + p.vx * drift * scale, y = p.y * height + (p.vy * drift + p.gravity * a * a) * scale;
+          const shape = p.numeral ? Math.min(1, age / .42) : drift;
+          const x = p.x * width + p.vx * shape * scale, y = p.y * height + (p.vy * shape + p.gravity * a * a) * scale;
           if (!tail && p.twinkle) spark(x, y, p.color, alpha);
           else square(x, y, tail ? 1 : 2, p.color, alpha * (1 - tail / (p.trail + 1)));
         }
       }
       ctx.globalAlpha = 1;
     }
-    return { start, paint, stop, resize, get active() { return active; }, get particleCount() { return particles.length; } };
+    return { start, paint, stop, resize, get active() { return active; }, get particleCount() { return particles.length; }, get numberBursts() { return numberBursts; } };
   }
   const api = { create, duration, particleLimit };
   if (typeof module === "object" && module.exports) module.exports = api;
