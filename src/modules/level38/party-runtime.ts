@@ -9,6 +9,7 @@ export class PartyRuntime {
   readonly presence: MemoryPartyPresence;
   private config: PartyConfig = { enabled: true, nameMode: "ALWAYS", maxVisible: 30 };
   private revision = -1;
+  private questReactions = new Set<number>();
   private epoch = 0;
   private reads = new Map<string, symbol>();
   private timer: ReturnType<typeof setInterval>;
@@ -53,7 +54,7 @@ export class PartyRuntime {
       this.config = { ...state.party }; this.channel.to("overlay").emit("party:config", this.config);
     }
   }
-  snapshot() { return { members: this.presence.members(), config: { ...this.config } }; }
+  snapshot() { return { members: this.presence.members(), config: { ...this.config }, revision: this.revision, serverTime: Date.now() }; }
   counts() {
     const online = this.presence.members().length, rendered = this.config.enabled ? Math.min(online, this.config.maxVisible) : 0;
     return { online, rendered, overflow: this.config.enabled ? Math.max(0, online - rendered) : 0 };
@@ -74,10 +75,22 @@ export class PartyRuntime {
   publish(state: Level38State, change: PublicChange) {
     this.configure(state);
     if (["owner:participants", "owner:prepare"].includes(change.type)) { this.epoch++; this.reads.clear(); this.presence.clear(); }
+    // Revisions identify committed transitions without exposing quest metadata.
+    // Distinct commits may publish out of order, so dedupe IDs rather than
+    // discarding every revision below a high-water mark.
+    const quest = change.type === "quest:completed" && Number.isSafeInteger(change.revision) && change.revision >= 0 &&
+      change.revision === state.event.revision && !this.questReactions.has(change.revision);
+    if (quest) {
+      this.questReactions.add(change.revision);
+      if (this.questReactions.size > 512) this.questReactions.delete(this.questReactions.values().next().value!);
+    }
     if (this.config.enabled) {
       if (change.unlock) this.channel.to("overlay").emit("level38:unlocked", change.unlock);
-      else if (change.type === "quest:completed") this.channel.to("overlay").emit("party:action", { action: "quest" });
+      else if (quest) this.channel.to("overlay").emit("party:action", {
+        action: "quest", version: 1, id: `level38:quest-completed:${change.revision}`, revision: change.revision,
+        occurredAt: new Date(Number.isFinite(state.serverTime) ? state.serverTime : Date.now()).toISOString(), durationMs: 4000,
+      });
     }
   }
-  close() { clearInterval(this.timer); this.epoch++; this.reads.clear(); this.presence.clear(); }
+  close() { clearInterval(this.timer); this.epoch++; this.reads.clear(); this.questReactions.clear(); this.presence.clear(); }
 }

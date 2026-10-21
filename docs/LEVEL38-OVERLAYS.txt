@@ -1,0 +1,57 @@
+LEVEL 38 — Todos los enlaces de overlays para OBS
+Actualizado: 21 de octubre de 2026
+
+PARTY — personajes y celebraciones
+https://leonifelheim.tv/level38/overlay/party
+
+VOTACIONES — idioma predeterminado: español
+https://leonifelheim.tv/level38/overlay/poll
+Español:
+https://leonifelheim.tv/level38/overlay/poll?lang=es
+English:
+https://leonifelheim.tv/level38/overlay/poll?lang=en
+
+MISIÓN ACTIVA — idioma predeterminado: español
+https://leonifelheim.tv/level38/overlay/quest
+Español:
+https://leonifelheim.tv/level38/overlay/quest?lang=es
+English:
+https://leonifelheim.tv/level38/overlay/quest?lang=en
+
+PREVISUALIZACIONES DE PARTY — solo OWNER
+Requieren una sesión OWNER iniciada en el mismo navegador.
+Muestran personajes de ejemplo, sin registrar participantes ni cambiar progreso.
+1 personaje:
+https://leonifelheim.tv/level38/overlay/party?preview=1
+5 personajes:
+https://leonifelheim.tv/level38/overlay/party?preview=5
+15 personajes:
+https://leonifelheim.tv/level38/overlay/party?preview=15
+30 personajes:
+https://leonifelheim.tv/level38/overlay/party?preview=30
+
+PANEL DE CONTROL — requiere una sesión de operador autorizada
+https://leonifelheim.tv/level38/control
+
+CONFIGURACIÓN DE OBS
+Añade cada overlay público como una fuente Navegador independiente.
+Anchura: 1920. Altura: 1080. Archivo local: desactivado.
+El fondo es transparente y no necesita CSS adicional.
+Los overlays públicos no requieren credenciales ni una sesión de operador.
+
+CELEBRACIONES EN EL OVERLAY DE PARTY
+La celebración de cada misión y la gran celebración de las 38 completadas
+utilizan la misma URL de party; no hay una fuente adicional que añadir.
+La corrección local hace que los personajes visibles celebren durante
+4 segundos, una sola vez por transición real a COMPLETED, y vuelvan a su
+animación habitual. La gran celebración especial conserva su prioridad.
+
+ESTADO DE ESTA ENTREGA
+Las URL anteriores corresponden a las rutas del sitio.
+La corrección de las celebraciones está implementada y probada en local;
+necesita un despliegue autorizado para estar disponible en esas URL.
+No se ha realizado push, deploy ni modificación de producción.
+
+PRUEBAS LOCALES
+Con el servidor de desarrollo iniciado, sustituye https://leonifelheim.tv
+por http://localhost:3000 (o por el puerto configurado en tu entorno).
