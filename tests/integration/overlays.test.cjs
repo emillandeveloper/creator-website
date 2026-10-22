@@ -3,6 +3,7 @@ const assert = require('node:assert/strict');
 const { setTimeout: delay } = require('node:timers/promises');
 const { io } = require('socket.io-client');
 const { fixture } = require('./support.cjs');
+const { nativeFixture } = require('./twitch-polls-support.cjs');
 const { startSite } = require('../helpers.cjs');
 const { hashToken, newToken } = require('../../dist/modules/level38/auth');
 const fs = require('node:fs');
@@ -63,7 +64,7 @@ test('OBS timing migration adds deadlines while preserving existing participants
   const openedAt = new Date();
   await f.db.$executeRaw`INSERT INTO "Poll" (id,"eventId",title,type,status,"createdById","openedAt") VALUES ('legacy-open',${event.id},'Keep open round','YES_NO','OPEN',${operator.id},${openedAt})`;
   await f.db.$executeRaw`INSERT INTO "Poll" (id,"eventId",title,type,status,"createdById","closedAt") VALUES ('legacy-closed',${event.id},'Keep closed round','YES_NO','CLOSED',${operator.id},${openedAt})`;
-  await f.db.pollOption.create({ data: { id: 'legacy-option', eventId: event.id, pollId: 'legacy-open', label: 'Keep this vote', position: 0 } });
+  await f.db.$executeRaw`INSERT INTO "PollOption" (id,"eventId","pollId",label,position) VALUES ('legacy-option',${event.id},'legacy-open','Keep this vote',0)`;
   const vote = await f.db.vote.create({ data: { pollId: 'legacy-open', optionId: 'legacy-option', participantId: participant.id } });
   const audit = await f.db.auditLog.create({ data: { eventId: event.id, operatorId: operator.id, operatorName: operator.name, action: 'quest:completed', entityId: quest.id, before: {}, after: {}, eventRevision: 42 } });
   const pollsBefore = await f.db.$queryRaw`SELECT * FROM "Poll" ORDER BY id`;
@@ -73,7 +74,9 @@ test('OBS timing migration adds deadlines while preserving existing participants
   assert.deepEqual(await f.db.participant.findUniqueOrThrow({ where: { id: participant.id } }), participant);
   assert.deepEqual(await f.db.vote.findUniqueOrThrow({ where: { id: vote.id } }), vote);
   assert.deepEqual(await f.db.auditLog.findUniqueOrThrow({ where: { id: audit.id } }), audit);
-  const polls = await f.db.poll.findMany({ orderBy: { id: 'asc' } });
+  // Query the exact Phase 6.0 columns; the current Prisma client also knows
+  // later Twitch fields which intentionally do not exist in this old schema.
+  const polls = await f.db.$queryRaw`SELECT id,"eventId",title,number,type,"contextQuestId",status,"createdById","createdAt","openedAt","closedAt","archivedAt","voteRevision","winningOptionId","winningPollId","overrideOptionId","overridePollId","overrideReason","winnerAcceptedAt","durationSeconds","endsAt","cancelledAt","closeReason" FROM "Poll" ORDER BY id`;
   assert.deepEqual(polls.map(({ durationSeconds, endsAt, cancelledAt, closeReason, ...unchanged }) => unchanged), pollsBefore);
   for (const poll of polls) { assert.equal(poll.durationSeconds, 60); assert.equal(poll.cancelledAt, null); assert.equal(poll.closeReason, null); }
   assert.equal(polls.find(poll => poll.id === 'legacy-open').endsAt.getTime(), pollsBefore.find(poll => poll.id === 'legacy-open').openedAt.getTime() + 60000);
@@ -116,130 +119,134 @@ test('OBS routes are anonymous, read-only, localized and redact every unrevealed
   assert.equal((await f.op('polls', { title: 'Forbidden', type: 'YES_NO', options: [] }, f.viewerCookie)).status, 401);
 });
 
-test('poll duration defaults to a persisted server deadline; custom duration, extension, manual close and cancel retain votes', { timeout: 60000 }, async t => {
-  const f = await setup(t);
-  const initial = await f.draft(); assert.equal(initial.durationSeconds, 60); assert.equal(initial.endsAt, null);
+async function nativeSetup(t) {
+  const f = await nativeFixture(t);
+  const session = await f.call('/api/session');
+  ok(await f.call('/api/join', { nickname: 'Overlay Twitch viewer' }, session.cookie));
+  const state = () => f.service.state();
+  const draft = async (input = {}) => {
+    const before = await state();
+    const options = before.quests.filter(quest => !quest.hidden && quest.status === 'AVAILABLE').slice(0,2).map(quest => ({questId:quest.id}));
+    return f.create({type:'NEXT_QUEST',options,...input});
+  };
+  return Object.assign(f, { state, draft, viewerCookie:session.cookie, row:poll=>f.dbPoll(poll.id),
+    open:poll=>f.op(`polls/${poll.id}/status`,{action:'open'}).then(ok),
+    vote:(poll,index=0)=>f.call(`/api/polls/${poll.id}/vote`,{optionId:poll.options[index].id},session.cookie),
+    remote:async poll=>{const row=await f.dbPoll(poll.id);return f.fake.polls.find(item=>item.id===row.twitchPollId);} });
+}
+
+test('native poll duration follows Twitch deadlines; extension and web votes are blocked while close/cancel preserve external tallies', { timeout: 60000 }, async t => {
+  const f = await nativeSetup(t);
+  const initial = await f.draft(); assert.equal(initial.durationSeconds,60);assert.equal(initial.endsAt,null);
   await f.open(initial);
-  const opened = await f.row(initial);
-  assert.equal(opened.endsAt.getTime() - opened.openedAt.getTime(), 60000);
-  const published = (await f.state()).polls.find(poll => poll.id === initial.id);
-  assert.equal(published.durationSeconds, 60); assert.equal(published.endsAt, opened.endsAt.toISOString());
-  assert.ok(Math.abs((await f.state()).serverTime - Date.now()) < 3000);
-  ok(await f.vote(initial));
-  assert.equal((await f.op(`polls/${initial.id}/extend`, { seconds: 30 }, f.viewerCookie)).status, 401);
-  for (const seconds of [0, -1, 3601, 1.5, '30']) assert.equal((await f.op(`polls/${initial.id}/extend`, { seconds })).status, 400);
-  ok(await f.op(`polls/${initial.id}/extend`, { seconds: 30 }));
-  assert.equal((await f.row(initial)).endsAt.getTime(), opened.endsAt.getTime() + 30000);
-  assert.equal((await f.op(`polls/${initial.id}/extend`, { seconds: 3600 })).status, 409);
-  ok(await f.op(`polls/${initial.id}/status`, { action: 'close' }));
-  let closed = await f.row(initial); assert.equal(closed.closeReason, 'MANUAL'); assert.equal(closed.winnerAcceptedAt, null);
-  assert.equal(closed.winningOptionId, null, 'early close keeps the established explicit acceptance workflow');
-  ok(await f.op(`polls/${initial.id}/winner`, { optionId: initial.options[0].id }));
-  closed = await f.row(initial); assert.equal(closed.winningOptionId, initial.options[0].id); assert.ok(closed.winnerAcceptedAt);
-  assert.equal((await f.vote(initial)).status, 409);
-  assert.equal(await f.db.vote.count({ where: { pollId: initial.id } }), 1);
-  const custom = await f.draft({ durationSeconds: 125 }); await f.open(custom);
-  const customOpen = await f.row(custom); assert.equal(customOpen.endsAt - customOpen.openedAt, 125000);
-  ok(await f.vote(custom)); ok(await f.op(`polls/${custom.id}/status`, { action: 'cancel' }));
-  const cancelled = await f.row(custom);
-  assert.equal(cancelled.status, 'CLOSED'); assert.equal(cancelled.closeReason, 'CANCELLED'); assert.ok(cancelled.cancelledAt);
-  assert.equal(cancelled.winningOptionId, null); assert.equal(cancelled.winnerAcceptedAt, null);
-  assert.equal((await f.op(`polls/${custom.id}/winner`, { optionId: custom.options[0].id })).status, 409);
-  assert.equal((await f.op(`polls/${custom.id}/extend`, { seconds: 10 })).status, 409);
-  assert.equal(await f.db.vote.count({ where: { pollId: custom.id } }), 1, 'cancellation preserves the original votes');
-  for (const durationSeconds of [0, -1, 3601, 1.25, '60', null]) {
-    assert.equal((await f.op('polls', { title: 'Invalid duration', type: 'YES_NO', options: [], durationSeconds })).status, 400);
+  const opened = await f.row(initial), upstream = await f.remote(initial);
+  assert.equal(opened.endsAt-opened.openedAt,60000);
+  const published=(await f.state()).polls.find(poll=>poll.id===initial.id);
+  assert.equal(published.durationSeconds,60);assert.equal(published.endsAt,opened.endsAt.toISOString());
+  assert.ok(Math.abs((await f.state()).serverTime-Date.now())<3000);
+  assert.equal((await f.vote(initial)).status,409);
+  assert.equal((await f.sendPoll('channel.poll.progress',upstream,{votes:[5,1]})).status,204);
+  assert.equal((await f.op(`polls/${initial.id}/extend`,{seconds:30})).status,409);
+  assert.equal((await f.row(initial)).endsAt.getTime(),opened.endsAt.getTime());
+  ok(await f.op(`polls/${initial.id}/status`,{action:'close'}));
+  const closed=await f.row(initial);
+  assert.equal(closed.closeReason,'MANUAL');assert.equal(closed.twitchStatus,'TERMINATED');
+  assert.equal(closed.winningOptionId,initial.options[0].id);assert.ok(closed.winnerAcceptedAt);
+  assert.ok(f.fake.pollCalls.some(call=>call.method==='PATCH'&&call.body.id===upstream.id&&call.body.status==='TERMINATED'));
+  assert.equal((await f.statePoll(initial.id)).totalVotes,6);
+  const custom=await f.draft({durationSeconds:125});await f.open(custom);
+  const customOpen=await f.row(custom);assert.equal(customOpen.endsAt-customOpen.openedAt,125000);
+  assert.equal((await f.sendPoll('channel.poll.progress',await f.remote(custom),{votes:[2,1]})).status,204);
+  ok(await f.op(`polls/${custom.id}/status`,{action:'cancel'}));
+  const cancelled=await f.row(custom);
+  assert.equal(cancelled.status,'CLOSED');assert.equal(cancelled.closeReason,'CANCELLED');assert.ok(cancelled.cancelledAt);
+  assert.equal(cancelled.winningOptionId,null);assert.equal(cancelled.winnerAcceptedAt,null);
+  assert.equal((await f.statePoll(custom.id)).totalVotes,3);
+  assert.equal((await f.op(`polls/${custom.id}/winner`,{optionId:custom.options[0].id})).status,409);
+  assert.equal(await f.db.vote.count(),0,'there is no parallel website vote ledger');
+  for(const durationSeconds of [0,14,-1,1801,1.25,'60',null]) assert.equal((await f.op('polls',{title:'Invalid duration',type:'YES_NO',options:[],durationSeconds})).status,400);
+});
+
+test('only the definitive native result confirms one leader and assigns a contextual NEXT_GAME winner once', { timeout: 60000 }, async t => {
+  const f=await nativeSetup(t),before=await f.state();
+  const quest=before.quests.find(item=>!item.hidden&&item.eligibleGameIds.length>=2),gameIds=quest.eligibleGameIds.slice(0,2);
+  const poll=await f.draft({type:'NEXT_GAME',contextQuestId:quest.id,durationSeconds:15,options:gameIds.map(gameId=>({gameId}))});
+  const socket=io(`${new URL(f.url).origin}/level38`,{path:'/level38/socket.io',transports:['websocket'],autoConnect:false});
+  t.after(()=>socket.disconnect());const connected=next(socket,'level38:state');socket.connect();await connected;
+  await f.open(poll);const upstream=await f.remote(poll);
+  const updated=next(socket,'level38:state');assert.equal((await f.sendPoll('channel.poll.progress',upstream,{votes:[0,1]})).status,204);await updated;
+  let current=await f.row(poll);assert.equal(current.status,'OPEN');assert.equal(current.winningOptionId,null);
+  assert.equal((await f.db.quest.findUniqueOrThrow({where:{id:quest.id}})).gameId,quest.gameId);
+  const ending=await f.sendPoll('channel.poll.end',upstream,{votes:[0,1],status:'completed'});assert.equal(ending.status,204);
+  const closed=await f.row(poll);assert.equal(closed.closeReason,'TIMEOUT');assert.equal(closed.winningOptionId,poll.options[1].id);assert.ok(closed.winnerAcceptedAt);
+  assert.equal((await f.db.quest.findUniqueOrThrow({where:{id:quest.id}})).gameId,gameIds[1]);
+  const publicPoll=(await f.state()).polls.find(item=>item.id===poll.id);
+  assert.equal(publicPoll.resultsFinal,true);assert.equal(publicPoll.totalVotes,1);assert.equal(publicPoll.effectiveWinnerId,poll.options[1].id);
+  assert.equal((await f.webhook(ending.message)).status,204);
+  await f.service.expirePolls();
+  assert.equal(await f.db.auditLog.count({where:{entityId:poll.id,action:'poll:closed'}}),1);
+  assert.equal((await f.row(poll)).winnerAcceptedAt.getTime(),closed.winnerAcceptedAt.getTime());
+  assert.equal((await f.vote(poll)).status,409);
+  assert.equal((await f.state()).event.currentGameId,before.event.currentGameId);assert.equal((await f.state()).event.target,38);
+});
+
+test('definitive Twitch ties and zero-vote rounds require an operator choice; NEXT_QUEST still requires manual activation', { timeout: 60000 }, async t => {
+  const f=await nativeSetup(t);
+  for(const tie of [true,false]) {
+    const poll=await f.draft({durationSeconds:15});await f.open(poll);
+    assert.equal((await f.sendPoll('channel.poll.end',await f.remote(poll),{votes:tie?[1,1]:[0,0],status:'completed'})).status,204);
+    const closed=await f.row(poll);assert.equal(closed.winningOptionId,null);assert.equal(closed.winnerAcceptedAt,null);
+    const result=await f.statePoll(poll.id);assert.equal(result.resultsFinal,true);assert.equal(result.leadingOptionIds.length,tie?2:0);
+    if(!tie) assert.equal((await f.op(`polls/${poll.id}/winner`,{optionId:poll.options[0].id})).status,409);
+    ok(await f.op(`polls/${poll.id}/winner`,{optionId:poll.options[0].id,...(!tie?{overrideReason:'No votes; operator chooses the next challenge'}:{})}));
+    const questId=poll.options[0].questId;
+    assert.equal((await f.db.quest.findUniqueOrThrow({where:{id:questId}})).status,'AVAILABLE');
+    ok(await f.op(`quests/${questId}`,{action:'activate'}));assert.equal((await f.db.quest.findUniqueOrThrow({where:{id:questId}})).status,'ACTIVE');
+    ok(await f.op(`quests/${questId}`,{action:'available'}));
   }
 });
 
-test('server expiry confirms the sole voted leader once, broadcasts results, and applies existing NEXT_GAME quest selection', { timeout: 60000 }, async t => {
-  const f = await setup(t);
-  const state = await f.state(), quest = state.quests.find(item => !item.hidden && item.eligibleGameIds.length >= 2);
-  const gameIds = quest.eligibleGameIds.slice(0, 2);
-  const poll = await f.draft({ type: 'NEXT_GAME', contextQuestId: quest.id, durationSeconds: 2, options: gameIds.map(gameId => ({ gameId })) });
-  const socket = io(`${f.origin}/level38`, { path: '/level38/socket.io', transports: ['websocket'], autoConnect: false });
-  t.after(() => socket.disconnect()); const connected = next(socket, 'level38:state'); socket.connect(); await connected;
-  await f.open(poll);
-  const notification = next(socket, 'poll:vote-updated'); ok(await f.vote(poll, 1)); await notification;
-  const closed = await until(() => f.row(poll), row => row.status === 'CLOSED');
-  assert.equal(closed.closeReason, 'TIMEOUT'); assert.equal(closed.winningOptionId, poll.options[1].id); assert.ok(closed.winnerAcceptedAt);
-  assert.equal((await f.db.quest.findUniqueOrThrow({ where: { id: quest.id } })).gameId, gameIds[1]);
-  const publicPoll = (await f.state()).polls.find(item => item.id === poll.id);
-  assert.equal(publicPoll.totalVotes, 1); assert.equal(publicPoll.effectiveWinnerId, poll.options[1].id);
-  assert.equal(publicPoll.winnerAcceptedAt, closed.winnerAcceptedAt.toISOString());
-  const audits = await f.db.auditLog.findMany({ where: { entityId: poll.id } });
-  const closeAudits = audits.filter(audit => ['poll:closed', 'poll:expired'].includes(audit.action));
-  assert.equal(closeAudits.length, 1);
-  await delay(200); assert.equal((await f.row(poll)).winnerAcceptedAt.getTime(), closed.winnerAcceptedAt.getTime());
-  assert.equal((await f.vote(poll)).status, 409);
-  assert.equal((await f.db.event.findFirstOrThrow()).target, 38);
+test('a local deadline cannot manufacture native results or enable web votes before authoritative Twitch reconciliation', { timeout: 60000 }, async t => {
+  const f=await nativeSetup(t),poll=await f.draft({durationSeconds:15});await f.open(poll);
+  const upstream=await f.remote(poll);assert.equal((await f.sendPoll('channel.poll.progress',upstream,{votes:[2,0]})).status,204);
+  await f.db.poll.update({where:{id:poll.id},data:{endsAt:new Date(Date.now()-1000)}});
+  assert.equal((await f.vote(poll)).status,409);
+  await f.service.expirePolls();
+  const stillOpen=await f.row(poll);assert.equal(stillOpen.status,'OPEN');assert.equal(stillOpen.winningOptionId,null);
+  assert.equal(stillOpen.endsAt.toISOString(),upstream.ends_at,'Twitch remains the deadline authority');
+  assert.equal((await f.statePoll(poll.id)).resultsFinal,false);
+  assert.equal(await f.db.vote.count({where:{pollId:poll.id}}),0);
+  assert.equal((await f.sendPoll('channel.poll.end',upstream,{votes:[2,0],status:'completed'})).status,204);
+  assert.equal((await f.row(poll)).winningOptionId,poll.options[0].id);
 });
 
-test('expiry leaves ties and zero-vote rounds for the operator; next-quest acceptance preserves manual activation', { timeout: 60000 }, async t => {
-  const f = await setup(t), viewer2 = await f.viewer('Second overlay voter');
-  for (const tie of [true, false]) {
-    const poll = await f.draft({ durationSeconds: 2 }); await f.open(poll);
-    if (tie) { ok(await f.vote(poll, 0)); ok(await f.vote(poll, 1, viewer2)); }
-    const closed = await until(() => f.row(poll), row => row.status === 'CLOSED');
-    assert.equal(closed.closeReason, 'TIMEOUT'); assert.equal(closed.winningOptionId, null); assert.equal(closed.winnerAcceptedAt, null);
-    const options = (await f.state()).polls.find(item => item.id === poll.id);
-    assert.equal(options.leadingOptionIds.length, tie ? 2 : 0);
-    if (!tie) assert.equal((await f.op(`polls/${poll.id}/winner`, { optionId: poll.options[0].id })).status, 409);
-    ok(await f.op(`polls/${poll.id}/winner`, { optionId: poll.options[0].id, ...(!tie ? { overrideReason: 'No votes; operator chooses the next challenge' } : {}) }));
-    const questId = poll.options[0].questId;
-    assert.equal((await f.db.quest.findUniqueOrThrow({ where: { id: questId } })).status, 'AVAILABLE');
-    ok(await f.op(`quests/${questId}`, { action: 'activate' }));
-    assert.equal((await f.db.quest.findUniqueOrThrow({ where: { id: questId } })).status, 'ACTIVE');
-    ok(await f.op(`quests/${questId}`, { action: 'available' }));
+test('restarting concurrent runtimes preserves expired historical WEB rounds, their votes, progress and audit history without declaring a winner', { timeout: 90000 }, async t => {
+  const f=await fixture(t);let site,second;
+  t.after(async()=>{if(site)await site.stop();if(second)await second.stop();});
+  const event=await f.db.event.findFirstOrThrow();
+  const owner=await f.db.operator.create({data:{name:'Historical owner',role:'OWNER',keyHash:hashToken(newToken())}});
+  const viewerToken=newToken();
+  const viewer=await f.db.participant.create({data:{nickname:'Historical voter',tokenHash:hashToken(viewerToken),expiresAt:new Date(Date.now()+3600000)}});
+  const openedAt=new Date(Date.now()-120000),endsAt=new Date(Date.now()-60000);
+  const round=await f.db.poll.create({data:{eventId:event.id,createdById:owner.id,title:'Historical expired round',type:'YES_NO',source:'WEB',status:'OPEN',openedAt,endsAt}});
+  await f.db.pollOption.createMany({data:[{pollId:round.id,eventId:event.id,label:'Yes',position:0},{pollId:round.id,eventId:event.id,label:'No',position:1}]});
+  const poll=await f.db.poll.findUniqueOrThrow({where:{id:round.id},include:{options:{orderBy:{position:'asc'}}}});
+  await f.db.vote.create({data:{pollId:poll.id,optionId:poll.options[0].id,participantId:viewer.id}});
+  await f.db.auditLog.create({data:{eventId:event.id,operatorId:owner.id,operatorName:owner.name,action:'poll:opened',entityId:poll.id,before:{},after:{},eventRevision:event.revision}});
+  const snapshot=async()=>({event:await f.db.event.findFirstOrThrow(),polls:await f.db.poll.findMany({include:{options:{orderBy:{position:'asc'}},votes:true},orderBy:{id:'asc'}}),audit:await f.db.auditLog.findMany({orderBy:{id:'asc'}}),participants:await f.db.participant.findMany({orderBy:{id:'asc'}})});
+  const before=await snapshot();
+  const launch=()=>startSite({LEVEL38_ENABLED:'true',DATABASE_URL:f.databaseUrl});
+  site=await launch();await site.stop();site=undefined;
+  site=await launch();second=await launch();
+  for(const running of [site,second]) {
+    const response=await fetch(`${running.origin}/level38/api/state`);assert.equal(response.status,200);
+    const state=await response.json(),historical=state.polls.find(item=>item.id===poll.id);
+    assert.equal(historical.source,'WEB');assert.equal(historical.status,'OPEN');assert.equal(historical.totalVotes,1);assert.equal(historical.effectiveWinnerId,null);
+    const blocked=await fetch(`${running.origin}/level38/api/polls/${poll.id}/vote`,{method:'POST',headers:{'Content-Type':'application/json',Origin:running.origin,'X-Level38-Request':'1',Cookie:`level38_viewer=${viewerToken}`},body:JSON.stringify({optionId:poll.options[1].id})});
+    assert.equal(blocked.status,409);
   }
-});
-
-test('a late vote cannot pass a persisted deadline even before the originally scheduled timer fires', { timeout: 60000 }, async t => {
-  const f = await setup(t), poll = await f.draft(); await f.open(poll);
-  // Move only the persisted deadline: the process was originally scheduled for a minute later.
-  await f.db.poll.update({ where: { id: poll.id }, data: { endsAt: new Date(Date.now() - 1000) } });
-  assert.equal((await f.vote(poll)).status, 409);
-  const closed = await until(() => f.row(poll), row => row.status === 'CLOSED');
-  assert.equal(closed.closeReason, 'TIMEOUT'); assert.equal(closed.winningOptionId, null);
-  assert.equal(await f.db.vote.count({ where: { pollId: poll.id } }), 0);
-});
-
-test('persisted deadlines recover after a process restart and concurrent runtimes cannot close one round twice', { timeout: 90000 }, async t => {
-  const f = await fixture(t); let site, second;
-  t.after(async () => { if (site) await site.stop(); if (second) await second.stop(); });
-  const call = async (path, body, cookie) => {
-    const response = await fetch(`${site.origin}/level38${path}`, { method: body === undefined ? 'GET' : 'POST',
-      headers: { ...(body === undefined ? {} : { 'Content-Type': 'application/json', Origin: site.origin, 'X-Level38-Request': '1' }), ...(cookie ? { Cookie: cookie } : {}) },
-      ...(body === undefined ? {} : { body: JSON.stringify(body) }) });
-    return { status: response.status, data: await response.json(), cookie: response.headers.get('set-cookie')?.split(';')[0] };
-  };
-  const launch = () => startSite({ LEVEL38_ENABLED: 'true', DATABASE_URL: f.databaseUrl });
-  site = await launch();
-  const key = newToken(); await f.db.operator.create({ data: { name: 'Restart owner', role: 'OWNER', keyHash: hashToken(key) } });
-  const login = await call('/api/control/login', { key }); ok(login); const operatorCookie = login.cookie;
-  const op = async (route, body) => ok(await call(`/api/control/${route}`, { ...body, controlRevision: (await f.db.event.findFirstOrThrow()).controlRevision }, operatorCookie));
-  const make = async durationSeconds => {
-    await op('polls', { title: 'Restart-resistant timer', type: 'YES_NO', options: [], durationSeconds });
-    const poll = await f.db.poll.findFirstOrThrow({ orderBy: { number: 'desc' }, include: { options: { orderBy: { position: 'asc' } } } });
-    await op(`polls/${poll.id}/status`, { action: 'open' }); return poll;
-  };
-  const poll = await make(30), before = await f.db.poll.findUniqueOrThrow({ where: { id: poll.id } });
-  await site.stop(); site = undefined;
-  // Expire while every application process is stopped; the durable row is the recovery source.
-  await f.db.poll.update({ where: { id: poll.id }, data: { endsAt: new Date(Date.now() - 1000) } });
-  site = await launch();
-  const recovered = await until(() => f.db.poll.findUniqueOrThrow({ where: { id: poll.id } }), row => row.status === 'CLOSED');
-  assert.equal(recovered.closeReason, 'TIMEOUT'); assert.equal(recovered.winningOptionId, null);
-  assert.equal(recovered.openedAt.getTime(), before.openedAt.getTime());
-  const raced = await make(10);
-  second = await launch();
-  // Both process runtimes now recover the same still-open durable deadline.
-  assert.equal((await f.db.poll.findUniqueOrThrow({ where: { id: raced.id } })).status, 'OPEN');
-  const closed = await until(() => f.db.poll.findUniqueOrThrow({ where: { id: raced.id } }), row => row.status === 'CLOSED', 15000);
-  assert.equal(closed.closeReason, 'TIMEOUT');
-  await delay(250);
-  assert.equal(await f.db.auditLog.count({ where: { entityId: raced.id, action: { in: ['poll:closed', 'poll:expired'] } } }), 1);
-  assert.equal(await f.db.vote.count({ where: { pollId: raced.id } }), 0);
+  await delay(250);assert.deepEqual(await snapshot(),before);
+  assert.equal(await f.db.auditLog.count({where:{entityId:poll.id,action:{in:['poll:closed','poll:expired']}}}),0);
 });
 
 test('active and completed quest snapshots update without revealing secret details or forcing polls or party changes', { timeout: 60000 }, async t => {

@@ -4,15 +4,15 @@ const { PollRuntime } = require("../dist/modules/level38/poll-runtime");
 const { pollInput, pollSeconds, pollAction } = require("../dist/modules/level38/validation");
 
 const state = (revision, endsAt = null) => ({ event: { revision }, polls: endsAt === null ? [] : [
-  { id: "poll", status: "OPEN", cancelledAt: null, endsAt: new Date(endsAt).toISOString() },
+  { id: "poll", source: "TWITCH", status: "OPEN", cancelledAt: null, endsAt: new Date(endsAt).toISOString() },
 ] });
 const settle = async () => { for (let index = 0; index < 8; index++) await Promise.resolve(); };
 
 test("poll duration accepts only bounded whole seconds and defaults to sixty", () => {
-  assert.equal(pollInput({ title: "Next quest", type: "NEXT_QUEST", options: [] }).durationSeconds, 60);
-  assert.equal(pollInput({ title: "Next game", type: "NEXT_GAME", durationSeconds: 125, options: [] }).durationSeconds, 125);
-  for (const value of [0, -1, 1.5, 3601, "60", null, Infinity, NaN]) assert.throws(() => pollSeconds(value));
-  assert.equal(pollSeconds(1), 1); assert.equal(pollSeconds(3600), 3600);
+  assert.equal(pollInput({ title: "Next quest", type: "NEXT_QUEST", options: [{ questId: "q1" }, { questId: "q2" }] }).durationSeconds, 60);
+  assert.equal(pollInput({ title: "Next game", type: "NEXT_GAME", durationSeconds: 125, options: [{ gameId: "g1" }, { gameId: "g2" }] }).durationSeconds, 125);
+  for (const value of [0, 1, 14, -1, 1.5, 1801, "60", null, Infinity, NaN]) assert.throws(() => pollSeconds(value));
+  assert.equal(pollSeconds(15), 15); assert.equal(pollSeconds(1800), 1800);
   assert.equal(pollAction("cancel"), "cancel"); assert.throws(() => pollAction("reset"));
 });
 
@@ -40,7 +40,7 @@ test("a deadline arriving during an in-flight read is reconciled after that read
   t.after(() => runtime.close());
   runtime.start();
   runtime.update(state(2, 100000));
-  t.mock.timers.tick(0); assert.equal(calls, 1);
+  t.mock.timers.tick(15000); assert.equal(calls, 1);
   resolveFirst(state(1)); await settle();
   t.mock.timers.tick(0); await settle();
   assert.equal(calls, 2, "the wake-up cannot be lost when a stale read finishes");

@@ -18,6 +18,7 @@
   let refreshAgain = false;
   let editingId = null;
   let editingRevision = null;
+  let editorReady = false;
   let clockServer = Date.now(), clockLocal = performance.now();
   const eligibleIds = quest => quest.eligibleGameIds || (quest.gameId ? [quest.gameId] : []);
   const handlers = {
@@ -29,7 +30,6 @@
       if (action === "cancel" && !window.confirm(t("Cancel this poll? Votes will remain in history and no winner will be announced."))) return;
       mutate(`control/polls/${pollId}/status`, { action });
     },
-    extend: pollId => mutate(`control/polls/${pollId}/extend`, {seconds:30}),
     winner: (pollId, optionId, overrideReason) => {
       if (overrideReason !== null && overrideReason.trim().length < 2) { message("Enter a reason before overriding the winner."); return; }
       if (overrideReason !== null && !window.confirm(t("Override the selected poll winner? The reason will be recorded."))) return;
@@ -53,7 +53,9 @@
       for (const game of state.games.filter((game) => game.enabled)) { const option = element("option", game.title); option.value = game.id; select.append(option); }
       select.value = state.event.currentGameId || ""; select.disabled = false;
       byId("game-form").querySelector("button").disabled = false;
+      const draftOptions = editorReady ? readOptions() : null;
       renderPollQuestContext();
+      if (editorReady) resetOptions(draftOptions);
       const audit = state.audit.map((entry) => element("li", `${new Date(entry.createdAt).toLocaleTimeString(language())} · ${entry.operatorName} ${auditDescription(entry, state)}${Number.isFinite(entry.before.completed) && Number.isFinite(entry.after.completed) ? " · " + t("Progress {before} → {after}", {before: entry.before.completed, after: entry.after.completed}) : ""}`));
       byId("audit-list").replaceChildren(...(audit.length ? audit : [element("li", t("No operator actions yet."))]));
     }
@@ -97,48 +99,116 @@
   });
   byId("logout").addEventListener("click", async () => { try { await request("control/logout", {}); window.location.reload(); } catch (error) { message(error.message); } });
 
-  function renderPollQuestContext() {
+  function gameCandidates(contextId = byId("poll-quest").value) {
+    const quest = contextId && state?.quests.find(quest => quest.id === contextId);
+    if (contextId && (!quest || quest.hidden || ["COMPLETED", "FAILED", "SKIPPED"].includes(quest.status))) return [];
+    return (state?.games || []).filter(game => game.enabled && (!quest || eligibleIds(quest).includes(game.id)));
+  }
+  function candidatesForType() {
+    return byId("poll-type").value === "NEXT_QUEST"
+      ? (state?.quests || []).filter(quest => !quest.hidden && quest.status === "AVAILABLE" && state.games.some(game => game.id === quest.gameId && game.enabled))
+      : gameCandidates();
+  }
+  function renderPollQuestContext(selected = byId("poll-quest").value) {
     const select = byId("poll-quest");
-    const selected = select.value;
     const option = element("option", t("Any game (no quest context)")); option.value = "";
     select.replaceChildren(option);
-    for (const quest of state.quests.filter(quest => !quest.hidden && !["COMPLETED", "FAILED", "SKIPPED"].includes(quest.status))) {
+    // A Twitch poll needs two distinct choices. A single-game quest cannot
+    // produce a NEXT_GAME vote and previously offered two identical options.
+    for (const quest of state.quests.filter(quest => !quest.hidden && !["COMPLETED", "FAILED", "SKIPPED"].includes(quest.status) && gameCandidates(quest.id).length >= 2)) {
       const item = element("option", `#${String(quest.number).padStart(2, "0")} · ${questText(quest, "title")}`); item.value = quest.id; select.append(item);
     }
-    select.value = Array.from(select.options).some(option => option.value === selected) ? selected : "";
+    if (selected && !Array.from(select.options).some(option => option.value === selected)) {
+      const unavailable = element("option", t("This quest no longer has two enabled eligible games — choose another context.")); unavailable.value = selected; unavailable.disabled = true; select.append(unavailable);
+    }
+    select.value = selected;
     byId("poll-quest-context").hidden = byId("poll-type").value !== "NEXT_GAME";
+  }
+  function nativeLabels(values) {
+    const shortened = values.map(value => value.replace(/Final Fantasy/gi, "FF").replace(/Kingdom Hearts/gi, "KH"));
+    const clipped = shortened.map(value => Array.from(value).length <= 25 ? value : Array.from(value).slice(0,15).join("") + "…" + Array.from(value).slice(-9).join(""));
+    const reserved = new Set(clipped.map(value => value.toLocaleLowerCase("en"))), used = new Set();
+    return clipped.map((value,index) => {
+      let candidate = value, attempt = 0;
+      if (clipped.filter(other => other.toLocaleLowerCase("en") === value.toLocaleLowerCase("en")).length > 1) {
+        do {
+          const suffix = ` #${index + 1}${attempt ? `.${attempt}` : ""}`;
+          candidate = Array.from(value).slice(0,25 - suffix.length).join("") + suffix; attempt++;
+        } while (reserved.has(candidate.toLocaleLowerCase("en")) || used.has(candidate.toLocaleLowerCase("en")));
+      }
+      used.add(candidate.toLocaleLowerCase("en")); return candidate;
+    });
+  }
+  function readOptions() {
+    const type = byId("poll-type").value;
+    return Array.from(byId("poll-options").children).map(row => {
+      const input = row.querySelector("select, input");
+      return type === "NEXT_QUEST" ? {questId:input.value, preserveEmpty:!input.value} : type === "NEXT_GAME" ? {gameId:input.value, preserveEmpty:!input.value} : {label:input.dataset.canonical || input.value};
+    });
+  }
+  function updateOptions() {
+    const root = byId("poll-options"), type = byId("poll-type").value;
+    const rows = Array.from(root.children), values = rows.map(row => row.querySelector("select, input").value);
+    const selectType = type === "NEXT_QUEST" || type === "NEXT_GAME";
+    const candidates = selectType ? candidatesForType() : [];
+    // The saved poll is authoritative. Before saving, mirror the server's
+    // canonical abbreviations so operators can identify the Twitch choices.
+    const previews = nativeLabels(values.map(value => {
+      const candidate = candidates.find(candidate => candidate.id === value);
+      return candidate ? `${type === "NEXT_QUEST" ? `#${candidate.number} ` : ""}${candidate.title}` : "";
+    }));
+    for (const [index, row] of rows.entries()) {
+      const input = row.querySelector("select, input");
+      input.setAttribute("aria-label", t("Poll option {number}", {number:index + 1}));
+      if (selectType) {
+        for (const option of input.options) if (option.value) option.disabled = !candidates.some(candidate => candidate.id === option.value) || (option.value !== input.value && values.includes(option.value));
+        const candidate = candidates.find(candidate => candidate.id === input.value);
+        const valid = !!candidate && values.filter(value => value === input.value).length === 1;
+        input.setCustomValidity(valid ? "" : t("Choose a different available option for every choice."));
+        row.querySelector("[data-native-label]").textContent = candidate ? t("Twitch label: {label}", {label:previews[index]}) : "";
+      } else input.setCustomValidity("");
+      row.querySelector("button")?.toggleAttribute("disabled", rows.length <= 2);
+    }
+    const insufficient = selectType && candidates.length < 2;
+    setText("poll-options-note", insufficient ? "At least two enabled eligible choices are required. Choose another quest or enable more games." : "Twitch accepts 2–5 distinct options. Abbreviated labels keep their original quest or game IDs.");
+    byId("save-poll").disabled = insufficient || rows.length < 2 || rows.length > 5;
+    byId("add-option").disabled = rows.length >= 5 || (selectType && rows.length >= candidates.length);
   }
   function addOption(value = {}) {
     const type = byId("poll-type").value;
     const root = byId("poll-options");
-    if (root.children.length >= 8) return;
+    if (root.children.length >= 5) return;
     const row = element("div", undefined, "l38-option-editor");
     let input;
     if (type === "NEXT_QUEST" || type === "NEXT_GAME") {
       input = element("select");
       const placeholder = element("option", t("Choose an option")); placeholder.value = ""; input.append(placeholder);
-      const contextQuest = state?.quests.find(quest => quest.id === byId("poll-quest").value);
-      const candidates = type === "NEXT_QUEST" ? (state?.quests || []).filter((quest) => !quest.hidden && quest.status === "AVAILABLE" && state.games.some(game => game.enabled && eligibleIds(quest).includes(game.id))) : (state?.games || []).filter((game) => game.enabled && (!contextQuest || eligibleIds(contextQuest).includes(game.id)));
+      const candidates = candidatesForType();
       for (const candidate of candidates) { const item = element("option", type === "NEXT_QUEST" ? `#${candidate.number} · ${questText(candidate, "title")}` : candidate.title); item.value = candidate.id; input.append(item); }
-      const selected = value.questId || value.gameId || "";
+      const selected = value.questId || value.gameId || (!value.preserveEmpty ? candidates.find(candidate => !Array.from(root.querySelectorAll("select"), item => item.value).includes(candidate.id))?.id : "") || "";
       if (selected && !candidates.some((candidate) => candidate.id === selected)) {
         const unavailable = element("option", t("{label} (no longer available — replace)", {label:value.label || selected})); unavailable.value = selected; input.append(unavailable);
       }
       input.value = selected;
     } else {
-      input = element("input"); input.maxLength = 100; input.value = value.label || "";
+      input = element("input"); input.maxLength = 25; input.value = value.label || "";
       if (type === "YES_NO") { input.readOnly = true; input.dataset.canonical = value.label; input.value = t(value.label); }
     }
     input.setAttribute("aria-label", t("Poll option {number}", {number:root.children.length + 1}));
+    input.required = true;
+    input.addEventListener("change", updateOptions);
     row.append(input);
-    if (type !== "YES_NO") { const remove = element("button", t("Remove option")); remove.type = "button"; remove.addEventListener("click", () => row.remove()); row.append(remove); }
+    if (type === "NEXT_QUEST" || type === "NEXT_GAME") { const preview = element("small", "", "l38-native-label"); preview.dataset.nativeLabel = "true"; row.append(preview); }
+    if (type !== "YES_NO") { const remove = element("button", t("Remove option")); remove.type = "button"; remove.addEventListener("click", () => { row.remove(); updateOptions(); }); row.append(remove); }
     root.append(row);
+    updateOptions();
   }
   function resetOptions(options) {
     byId("poll-options").replaceChildren();
     const yesNo = byId("poll-type").value === "YES_NO";
     byId("add-option").hidden = yesNo;
     for (const option of yesNo ? [{ label: "Yes" }, { label: "No" }] : options || [{}, {}]) addOption(option);
+    updateOptions();
   }
   function loadEditor(poll, clone) {
     if (!poll || !state) return;
@@ -146,7 +216,7 @@
     editingRevision = clone ? null : state.event.controlRevision;
     byId("poll-title").value = poll.title; byId("poll-type").value = poll.type;
     byId("poll-duration").value = poll.durationSeconds || 60;
-    renderPollQuestContext(); byId("poll-quest").value = poll.contextQuestId || "";
+    renderPollQuestContext(poll.contextQuestId || "");
     setText("poll-editor-title", clone ? "New round from poll #{number}" : "Edit draft #{number}", {number:poll.number});
     resetOptions(poll.options);
     byId("poll-editor").scrollIntoView({ block: "start" }); byId("poll-title").focus();
@@ -159,28 +229,23 @@
     if (state) renderPollQuestContext();
     resetOptions();
   }
-  byId("poll-type").addEventListener("change", () => { if (state) renderPollQuestContext(); resetOptions(); });
+  byId("poll-type").addEventListener("change", () => { byId("poll-quest").value = ""; if (state) renderPollQuestContext(); resetOptions(); });
   byId("poll-quest").addEventListener("change", () => resetOptions());
   byId("add-option").addEventListener("click", () => addOption());
   byId("cancel-poll-edit").addEventListener("click", resetEditor);
   byId("poll-form").addEventListener("submit", async (event) => {
     event.preventDefault();
     const type = byId("poll-type").value;
-    const options = Array.from(byId("poll-options").children).map((row) => {
-      const input = row.querySelector("select, input"); const value = input.dataset.canonical || input.value;
-      return type === "NEXT_QUEST" ? { questId: value } : type === "NEXT_GAME" ? { gameId: value } : { label: value };
-    });
+    updateOptions();
+    if (!event.currentTarget.reportValidity() || byId("save-poll").disabled) return;
+    const options = readOptions();
     const contextQuestId = type === "NEXT_GAME" ? byId("poll-quest").value || null : null;
     if (await mutate(editingId ? `control/polls/${editingId}/edit` : "control/polls", { title: byId("poll-title").value, type, options, contextQuestId, durationSeconds:Number(byId("poll-duration").value) }, editingRevision)) resetEditor();
   });
   document.addEventListener("level38:language", () => {
     if (!state) return;
     const game = byId("game").value;
-    const type = byId("poll-type").value;
-    const options = Array.from(byId("poll-options").children).map(row => {
-      const input = row.querySelector("select, input");
-      return type === "NEXT_QUEST" ? {questId:input.value, label:input.selectedOptions[0]?.textContent} : type === "NEXT_GAME" ? {gameId:input.value} : {label:input.dataset.canonical || input.value};
-    });
+    const options = readOptions();
     render(state, true); byId("game").value = game; resetOptions(options);
   });
   function renderOwnerTools(next) {
@@ -221,6 +286,6 @@
   lock(true);
   const socket = connect(next => { window.Level38Experience?.observe(next); refresh(); }, refresh);
   window.Level38Experience?.attach(socket, {notices:false});
-  refresh().then(() => { resetOptions(); lock(false); });
+  refresh().then(() => { editorReady = true; resetOptions(); lock(false); });
   setInterval(refresh, 30000);
 })();

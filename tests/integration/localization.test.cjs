@@ -3,7 +3,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const { fixture } = require('./support.cjs');
 
-test('bilingual HTML and semantic APIs preserve secret filtering, votes, identity and authorization', { timeout: 60000 }, async t => {
+test('bilingual HTML and semantic APIs preserve secrets and identity while native voting fails closed without configuration', { timeout: 60000 }, async t => {
   const f = await fixture(t); await f.start();
   const viewer = await f.viewer('Garnet'); const mod = await f.operator('Isma', 'MODERATOR');
   const identity = await f.db.participant.findFirstOrThrow();
@@ -29,9 +29,10 @@ test('bilingual HTML and semantic APIs preserve secret filtering, votes, identit
   assert.equal(draft.status, 200); const poll = await f.db.poll.findFirstOrThrow({include:{options:{orderBy:{position:'asc'}}}});
   assert.deepEqual(poll.options.map(o => o.label), ['Yes','No']);
   const nextRevision = (await f.call('/api/control/state', undefined, mod.cookie)).data.event.controlRevision;
-  assert.equal((await f.call(`/api/control/polls/${poll.id}/status`, {action:'open',controlRevision:nextRevision},mod.cookie)).status,200);
-  for (const lang of ['es','en']) assert.equal((await f.call(`/api/polls/${poll.id}/vote`,{optionId:poll.options[0].id},`${viewer}; level38_lang=${lang}`)).status,200);
-  assert.equal(await f.db.vote.count(),1);
+  assert.equal(poll.source,'TWITCH');
+  assert.equal((await f.call(`/api/control/polls/${poll.id}/status`, {action:'open',controlRevision:nextRevision},mod.cookie)).status,503);
+  for (const lang of ['es','en']) assert.equal((await f.call(`/api/polls/${poll.id}/vote`,{optionId:poll.options[0].id},`${viewer}; level38_lang=${lang}`)).status,409);
+  assert.equal(await f.db.vote.count(),0);
   assert.deepEqual(await f.db.participant.findFirstOrThrow(), identity);
 });
 

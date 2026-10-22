@@ -37,9 +37,13 @@ test("repeated production deploys preserve live state, votes and migration histo
   assert.equal(result.status, 200);
   const poll = await f.db.poll.findFirstOrThrow();
   result = await f.call(`/api/control/polls/${poll.id}/status`, { action: "open", controlRevision: 1 }, operator.cookie);
-  assert.equal(result.status, 200);
+  assert.equal(result.status, 503, 'unconfigured native voting cannot start a parallel web poll');
+  // Exercise deploy preservation against an already-existing pre-native round.
+  await f.db.poll.update({ where: { id: poll.id }, data: { source: 'WEB', status: 'CLOSED', openedAt: new Date(), closedAt: new Date() } });
   const option = await f.db.pollOption.findFirstOrThrow({ where: { pollId: poll.id } });
-  assert.equal((await f.call(`/api/polls/${poll.id}/vote`, { optionId: option.id }, viewer)).status, 200);
+  const participant = await f.db.participant.findFirstOrThrow();
+  await f.db.vote.create({ data: { pollId: poll.id, optionId: option.id, participantId: participant.id } });
+  assert.equal((await f.call(`/api/polls/${poll.id}/vote`, { optionId: option.id }, viewer)).status, 409);
   const snapshot = async () => ({
     event: await f.db.event.findFirstOrThrow(),
     polls: await f.db.poll.findMany(), votes: await f.db.vote.findMany(),

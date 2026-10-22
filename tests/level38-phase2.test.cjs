@@ -15,10 +15,10 @@ test("quest action matrix keeps final states terminal and requires secret reveal
 
 test("poll validation restricts types/options and ignores client-supplied reference labels", () => {
   assert.throws(() => pollInput({ title: "Question", type: "ADMIN", options: [] }));
-  assert.throws(() => pollInput({ title: "Question", type: "CUSTOM", options: Array(9).fill({ label: "Choice" }) }));
+  assert.throws(() => pollInput({ title: "Question", type: "CUSTOM", options: Array(6).fill({ label: "Choice" }) }));
   assert.throws(() => pollInput({ title: "Question", type: "CUSTOM", options: [{ label: "<script>" }] }));
   assert.deepEqual(pollInput({ title: "Go ahead?", type: "YES_NO", options: [] }).options, [{ label: "Yes" }, { label: "No" }]);
-  assert.deepEqual(pollInput({ title: "Next quest?", type: "NEXT_QUEST", options: [{ questId: "quest1", label: "Forged", gameId: "other" }] }).options, [{ questId: "quest1" }]);
+  assert.deepEqual(pollInput({ title: "Next quest?", type: "NEXT_QUEST", options: [{ questId: "quest1", label: "Forged", gameId: "other" }, { questId: "quest2", label: "Also forged" }] }).options, [{ questId: "quest1" }, { questId: "quest2" }]);
 });
 
 test("patched Prisma configuration merger handles cyclic graphs without stack exhaustion", async () => {

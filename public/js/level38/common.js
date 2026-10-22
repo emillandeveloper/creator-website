@@ -5,6 +5,11 @@
   const language = () => window.Level38I18n?.language || "en";
   const questText = (quest, field) => window.Level38I18n?.questText(quest, field) || quest[field] || t(field === "title" ? "Quest" : "No description available.");
   const optionLabel = (poll, option) => !option ? t("Unselected") : poll.type === "YES_NO" ? t(option.label) : poll.type === "NEXT_QUEST" ? questText({ ...option, title: option.label }, "title") : option.label;
+  // Links come from server state, but never accept arbitrary schemes or hosts.
+  function twitchLink(value) {
+    try { const url = new URL(value); return url.protocol === "https:" && url.hostname === "www.twitch.tv" && /^\/[a-z0-9_]{1,25}\/?$/i.test(url.pathname) ? url.href : null; }
+    catch { return null; }
+  }
   function setText(id, key, params = {}) {
     const node = byId(id); if (!node) return;
     node.dataset.i18n = key; node.dataset.i18nParams = JSON.stringify(params); node.textContent = t(key, params);
@@ -183,7 +188,10 @@
     const root = byId("poll-board");
     const signature = language() + JSON.stringify(state.polls.map((poll) => ({ id: poll.id, title: poll.title, type: poll.type, status: poll.status,
       options: poll.options.map((option) => ({ id: option.id, label: optionLabel(poll, option) })), winner: poll.effectiveWinnerId, override: poll.overrideOptionId,
-      endsAt:poll.endsAt, durationSeconds:poll.durationSeconds, closeReason:poll.closeReason, cancelledAt:poll.cancelledAt, winnerAcceptedAt:poll.winnerAcceptedAt })));
+      endsAt:poll.endsAt, durationSeconds:poll.durationSeconds, closeReason:poll.closeReason, cancelledAt:poll.cancelledAt, winnerAcceptedAt:poll.winnerAcceptedAt,
+      source:poll.source, readOnly:poll.readOnly, nativeStatus:poll.nativeStatus, resultsFinal:poll.resultsFinal, twitchUrl:poll.twitchUrl,
+      // Ties/zero-vote notices and winner controls depend on these results too.
+      totalVotes:poll.status === "CLOSED" ? poll.totalVotes : null, leaders:poll.status === "CLOSED" ? poll.leadingOptionIds : null })));
     if (signature !== pollSignature) {
       const savedInputs = new Map(Array.from(root.querySelectorAll("[data-poll-id]")).map(card => [card.dataset.pollId, { value: card.querySelector("select")?.value, reason: card.querySelector("input")?.value }]));
       const historyOpen = root.querySelector(".l38-poll-history")?.open;
@@ -194,18 +202,30 @@
       const history = old.length ? element("details", undefined, "l38-poll-history") : null;
       if (history) { history.open = historyOpen || false; history.append(element("summary", t("Earlier voting rounds ({count})", { count: old.length }))); }
       for (const poll of state.polls) {
+        const native = poll.source === "TWITCH";
+        const readOnly = poll.readOnly === true || poll.source === "WEB";
+        const final = !native || poll.resultsFinal === true;
         const card = element("section", undefined, "l38-panel l38-poll");
         card.dataset.pollId = poll.id;
         card.dataset.status = poll.status;
         const roundLabel = handlers.control ? t("Poll #{number} · {type} · {status}", { number: poll.number, type: t(poll.type), status: t(poll.status) }) : t("ROUND {number} · {status}", { number: String(poll.number).padStart(2, "0"), status: t(poll.status) });
         card.append(element("p", roundLabel, "l38-meta"), element("h3", poll.title));
+        if (readOnly) card.append(element("p", t("Historical web poll · read only"), "l38-small"));
+        if (native && poll.status === "DRAFT" && ["PREPARING", "CREATING", "CLOSING", "CANCELLING"].includes(poll.nativeStatus)) card.append(element("p", t("Twitch request is pending. Synchronize or cancel before starting another round."), "l38-poll-finish"));
+        if (native && poll.status === "OPEN") {
+          const callout = element("p", t("Vote exclusively in the native Twitch poll. Results update here automatically."), "l38-twitch-vote");
+          const url = twitchLink(poll.twitchUrl);
+          if (url) { const link = element("a", t("Vote on Twitch")); link.href = url; link.target = "_blank"; link.rel = "noopener noreferrer"; callout.append(document.createTextNode(" "), link); }
+          card.append(callout);
+          if (["COMPLETED", "TERMINATED", "FINALIZING"].includes(poll.nativeStatus) && !final) card.append(element("p", t("Waiting for final Twitch results…"), "l38-poll-finish"));
+        }
         if (handlers.control) {
           if (poll.status === 'OPEN') { const countdown = element('p', '', 'l38-poll-countdown'); countdown.dataset.pollCountdown = poll.id; countdown.dataset.endsAt = poll.endsAt || ''; card.append(countdown); }
           else if (poll.status === 'DRAFT') card.append(element('p', t('Duration: {seconds} seconds', {seconds:poll.durationSeconds || 60}), 'l38-small'));
           else {
             const reason = poll.cancelledAt || poll.closeReason === 'CANCELLED' ? 'Cancelled · no winner announced.' : poll.closeReason === 'TIMEOUT' ? 'Time expired.' : 'Closed by operator.';
             card.append(element('p', t(reason), 'l38-poll-finish'));
-            if (!poll.effectiveWinnerId && !poll.cancelledAt && poll.closeReason !== 'CANCELLED') card.append(element('p', t(poll.totalVotes === 0 ? 'No votes · operator decision required.' : poll.leadingOptionIds.length > 1 ? 'Tie · operator decision required.' : 'Choose and confirm the winner.'), 'l38-small'));
+            if (final && !poll.effectiveWinnerId && !poll.cancelledAt && poll.closeReason !== 'CANCELLED') card.append(element('p', t(poll.totalVotes === 0 ? 'No votes · operator decision required.' : poll.leadingOptionIds.length > 1 ? 'Tie · operator decision required.' : 'Choose and confirm the winner.'), 'l38-small'));
           }
         }
         const total = element("p", ""); total.dataset.total = "true"; card.append(total);
@@ -213,32 +233,37 @@
           const row = element("div", undefined, "l38-option");
           row.dataset.choiceId = option.id;
           const tally = element("span", ""); tally.dataset.optionId = option.id; row.append(tally);
-          if (!handlers.control) { const percent = element("span", "", "l38-percent"); percent.dataset.percent = option.id; row.append(percent); }
-          if (!handlers.control && poll.status === "OPEN") {
-            const vote = element("button", t("Vote")); vote.type = "button"; vote.dataset.voteId = option.id;
-            vote.setAttribute("aria-label", t("Vote for {label}", { label: optionLabel(poll, option) }));
-            vote.addEventListener("click", () => handlers.vote(poll.id, option.id)); row.append(vote);
+          if (handlers.control && native && option.twitchLabel) {
+            const label = element("small", t("Twitch label: {label}", {label:option.twitchLabel}), "l38-native-label"); row.append(label);
           }
+          if (!handlers.control) { const percent = element("span", "", "l38-percent"); percent.dataset.percent = option.id; row.append(percent); }
           card.append(row);
         }
-        if (poll.effectiveWinnerId && !poll.cancelledAt && poll.closeReason !== 'CANCELLED') {
+        if (final && poll.effectiveWinnerId && !poll.cancelledAt && poll.closeReason !== 'CANCELLED') {
           card.append(element("p", t("Winner: {label}{override}", { label: optionLabel(poll, poll.options.find(option => option.id === poll.effectiveWinnerId)), override: poll.overrideOptionId ? t(" (moderator override)") : "" }), "l38-result"));
         }
-        if (handlers.control) {
+        if (!handlers.control && native && final && poll.status === "CLOSED" && !poll.effectiveWinnerId && !poll.cancelledAt && poll.closeReason !== "CANCELLED") {
+          card.append(element("p", t(poll.totalVotes === 0 ? "No votes" : "Tie"), "l38-poll-finish"), element("p", t("The operator will confirm the final choice."), "l38-small"));
+        }
+        if (handlers.control && !readOnly) {
           const actions = element("div", undefined, "l38-actions");
           function actionButton(label, handler, action) { const button = element("button", label); button.type = "button"; if (action) button.dataset.pollAction = action; button.addEventListener("click", handler); actions.append(button); return button; }
           if (poll.status === "DRAFT") {
-            actionButton(t("Edit draft"), () => handlers.edit(latestPolls.find((item) => item.id === poll.id)));
-            actionButton(t("Open poll"), () => handlers.status(poll.id, "open"));
+            const pending = native && ["PREPARING", "CREATING", "CLOSING", "CANCELLING"].includes(poll.nativeStatus);
+            const edit = actionButton(t("Edit draft"), () => handlers.edit(latestPolls.find((item) => item.id === poll.id)));
+            edit.disabled = pending;
+            const open = actionButton(t(native ? "Start Twitch poll" : "Open poll"), () => handlers.status(poll.id, "open"), "open");
+            open.disabled = native && (pending || state.twitch?.polls?.available === false);
+            if (pending) { const cancel = actionButton(t("Cancel poll"), () => handlers.status(poll.id, "cancel"), "cancel"); cancel.className = "l38-danger"; }
           }
           if (poll.status === "OPEN") {
             actionButton(t("Close poll"), () => handlers.status(poll.id, "close"), 'close');
-            if (handlers.extend) actionButton(t("Extend +30 seconds"), () => handlers.extend(poll.id), 'extend');
+            if (!native && handlers.extend) actionButton(t("Extend +30 seconds"), () => handlers.extend(poll.id), 'extend');
             const cancel = actionButton(t("Cancel poll"), () => handlers.status(poll.id, "cancel"), 'cancel'); cancel.className = 'l38-danger';
           }
           actionButton(t("New round from this poll"), () => handlers.clone(latestPolls.find((item) => item.id === poll.id)));
           card.append(actions);
-          if (poll.status === "CLOSED" && !poll.cancelledAt && poll.closeReason !== 'CANCELLED') {
+          if (poll.status === "CLOSED" && final && !poll.cancelledAt && poll.closeReason !== 'CANCELLED') {
             const select = element("select"); select.setAttribute("aria-label", t("Winner for poll #{number}", { number: poll.number }));
             for (const option of poll.options) { const item = element("option", optionLabel(poll, option)); item.value = option.id; select.append(item); }
             select.value = poll.effectiveWinnerId || poll.leadingOptionIds[0] || poll.options[0]?.id || "";
@@ -258,7 +283,7 @@
         if (history && old.some(item => item.id === poll.id)) history.append(card); else board.append(card);
       }
       if (history) board.append(history);
-      if (!state.polls.length) { const empty = element("div", undefined, "l38-panel l38-empty"); empty.append(element("span", "?", "l38-empty-icon"), element("h3", handlers.control ? t("No polls yet. Create a draft below.") : t("The next choice is just ahead.")), element("p", t("When a vote opens, choose Leo's next move right here."))); board.append(empty); }
+      if (!state.polls.length) { const empty = element("div", undefined, "l38-panel l38-empty"); empty.append(element("span", "?", "l38-empty-icon"), element("h3", handlers.control ? t("No polls yet. Create a draft below.") : t("The next choice is just ahead.")), element("p", t("When a poll opens, vote on Twitch and follow the results here."))); board.append(empty); }
       root.replaceChildren(board);
     }
     updatePollCounts(myVotes, busy);
@@ -276,7 +301,7 @@
         const row = card.querySelector(`[data-choice-id="${option.id}"]`);
         const selected = myVotes.some((entry) => entry.pollId === poll.id && entry.optionId === option.id);
         if (percent) { const amount = poll.totalVotes ? Math.round(option.votes / poll.totalVotes * 100) : 0; percent.textContent = `${amount}%`; row.style.setProperty("--vote-percent", `${amount}%`); }
-        row.classList.toggle("is-selected", selected); row.classList.toggle("is-winner", poll.effectiveWinnerId === option.id);
+        row.classList.toggle("is-selected", selected); row.classList.toggle("is-winner", (poll.source !== "TWITCH" || poll.resultsFinal === true) && poll.effectiveWinnerId === option.id);
         const vote = card.querySelector(`[data-vote-id="${option.id}"]`);
         if (vote) {
           vote.textContent = selected ? t("Your vote") : t("Vote");

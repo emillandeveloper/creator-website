@@ -11,6 +11,9 @@
     const twitch = state.twitch;
     byId("twitch-connection").textContent = t(twitch?.connection || "Disabled");
     byId("twitch-error").textContent = t(twitch?.error || "");
+    if (byId("twitch-polls-status")) byId("twitch-polls-status").textContent = twitch?.polls?.available
+      ? t("Native Twitch polls ready. Viewers vote on Twitch.")
+      : t(twitch?.polls?.error || "Native Twitch polls need broadcaster authorization with channel:manage:polls.");
     byId("twitch-source").textContent = state.event.gameSource === "MANUAL_OVERRIDE"
       ? t("Game source: Manual Override{operator}", {operator: state.event.manualOverrideBy ? t(" by {name}", {name:state.event.manualOverrideBy}) : ""}) : t("Game source: Twitch Auto");
     byId("twitch-channel").textContent = twitch?.broadcasterId ? `${twitch.channel || t("Broadcaster")} (${twitch.broadcasterId})` : twitch?.channel || t("Not configured");

@@ -28,8 +28,11 @@ test('owner tools preserve history, require authorization/confirmation, recover 
   const secret=await f.db.quest.findFirstOrThrow({where:{isSecret:true}});await op(`quests/${secret.id}`,{action:'reveal'});
   await f.db.quest.update({where:{id:quests[38].id},data:{initialStatus:'LOCKED',status:'SKIPPED'}});
   await op('polls',{type:'YES_NO',title:'Test round',options:[]});const poll=await f.db.poll.findFirstOrThrow({include:{options:true}});
-  await op(`polls/${poll.id}/status`,{action:'open'});assert.equal((await f.call(`/api/polls/${poll.id}/vote`,{optionId:poll.options[0].id},cookie)).status,200);
-  const participant=await f.db.participant.findFirstOrThrow(),vote=await f.db.vote.findFirstOrThrow();
+  // Retained pre-native history is a fixture, not a newly available web-voting path.
+  await f.db.poll.update({where:{id:poll.id},data:{source:'WEB',status:'OPEN',openedAt:new Date(),endsAt:new Date(Date.now()+60000)}});
+  const participant=await f.db.participant.findFirstOrThrow();
+  const vote=await f.db.vote.create({data:{pollId:poll.id,optionId:poll.options[0].id,participantId:participant.id}});
+  assert.equal((await f.call(`/api/polls/${poll.id}/vote`,{optionId:poll.options[0].id},cookie)).status,409);
   const defs=(await f.db.quest.findMany({orderBy:{number:'asc'}})).map(({status,completedAt,revealedAt,updatedAt,...q})=>q);
   const rev=await revision();const duplicate=await Promise.all([tool('progress','RESET PROGRESS',owner.cookie,rev),tool('progress','RESET PROGRESS',owner.cookie,rev)]);
   assert.deepEqual(duplicate.map(r=>r.status).sort(),[200,409]);

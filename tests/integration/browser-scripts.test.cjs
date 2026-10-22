@@ -4,7 +4,7 @@ const fs = require("node:fs");
 const { setTimeout: delay } = require("node:timers/promises");
 const { JSDOM } = require("jsdom");
 const { io } = require("socket.io-client");
-const { fixture } = require("./support.cjs");
+const { nativeFixture, ok } = require("./twitch-polls-support.cjs");
 
 async function until(predicate, label) {
   for (let attempt = 0; attempt < 160; attempt++) { if (await predicate()) return; await delay(25); }
@@ -12,7 +12,7 @@ async function until(predicate, label) {
 }
 
 async function page(f, control, cookie = "") {
-  const url = `${f.origin}/level38${control ? "/control" : ""}`;
+  const url = `${f.url}${control ? "/control" : ""}`;
   const html = await (await fetch(url, { headers: cookie ? { Cookie: cookie } : {} })).text();
   const dom = new JSDOM(html, { url, runScripts: "outside-only", pretendToBeVisual: true });
   const { window } = dom;
@@ -23,7 +23,7 @@ async function page(f, control, cookie = "") {
   window.confirm = () => true;
   window.fetch = async (path, options = {}) => {
     const response = await fetch(new URL(path, url), { ...options, headers: { ...options.headers,
-      ...(cookie ? { Cookie: cookie } : {}), ...(options.method === "POST" ? { Origin: f.origin } : {}) } });
+      ...(cookie ? { Cookie: cookie } : {}), ...(options.method === "POST" ? { Origin: new URL(f.cfg.callback).origin } : {}) } });
     const setCookie = response.headers.get("set-cookie");
     if (setCookie) {
       const value = setCookie.split(";")[0]; const name = value.split("=")[0];
@@ -31,17 +31,16 @@ async function page(f, control, cookie = "") {
     }
     return response;
   };
-  window.io = (namespace, options) => { const socket = io(`${f.origin}${namespace}`, { ...options, transports: ["websocket"] }); sockets.push(socket); return socket; };
+  window.io = (namespace, options) => { const socket = io(`${new URL(f.url).origin}${namespace}`, { ...options, transports: ["websocket"] }); sockets.push(socket); return socket; };
   window.eval(fs.readFileSync("public/js/level38/sprites.js", "utf8"));
   window.eval(fs.readFileSync("public/js/level38/common.js", "utf8"));
   window.eval(fs.readFileSync(`public/js/level38/${control ? "control" : "public"}.js`, "utf8"));
   return { window, document: window.document, failures, close() { sockets.forEach((socket) => socket.disconnect()); window.close(); } };
 }
 
-test("EJS and browser scripts support moderator polls, nickname voting, live totals and undo", { timeout: 60000 }, async (t) => {
-  const f = await fixture(t); await f.start();
-  const mod = await f.operator("ISMA", "MODERATOR");
-  const control = await page(f, true, mod.cookie);
+test("EJS and browser scripts operate native Twitch rounds, preserve party joining and show live external totals without web votes or rewind", { timeout: 60000 }, async (t) => {
+  const f = await nativeFixture(t);
+  const control = await page(f, true, f.mod.cookie);
   const viewer = await page(f, false);
   try {
     const doc = control.document; const publicDoc = viewer.document;
@@ -53,32 +52,36 @@ test("EJS and browser scripts support moderator polls, nickname voting, live tot
     doc.getElementById("poll-form").dispatchEvent(new control.window.Event("submit", { bubbles: true, cancelable: true }));
     await until(() => doc.querySelector('[data-poll-id]') && !doc.getElementById("operator-controls").disabled, "draft saved");
     assert.equal(publicDoc.querySelectorAll('[data-poll-id]').length, 0);
-    const openButton = Array.from(doc.querySelectorAll("#poll-board button")).find((button) => button.textContent === "Open poll");
-    openButton.click();
-    await until(() => publicDoc.querySelector('[data-vote-id]'), "public voting buttons");
-    const firstVote = publicDoc.querySelector('[data-vote-id]'); firstVote.click();
-    await until(() => !publicDoc.getElementById("join-form").hidden, "nickname prompt on first vote");
+    const poll = await f.db.poll.findFirstOrThrow({ orderBy: { number: 'desc' }, include: { options: { orderBy: { position: 'asc' } } } });
+    assert.equal(poll.source, 'TWITCH');
+    doc.querySelector('[data-poll-action="open"]').click();
+    await until(() => publicDoc.querySelector('.l38-twitch-vote a') && !doc.getElementById('operator-controls').disabled, "native Twitch voting link");
+    assert.equal(publicDoc.querySelector('[data-vote-id]'), null);
+    assert.equal(publicDoc.querySelector('.l38-twitch-vote a').href, 'https://www.twitch.tv/leonifelheim');
+    // Party identity remains an independent, explicit viewer action.
+    publicDoc.getElementById('join-open').click();
+    await until(() => !publicDoc.getElementById("join-form").hidden, "party nickname form");
     publicDoc.getElementById("nickname").value = "Viewer One";
     publicDoc.getElementById("join-form").dispatchEvent(new viewer.window.Event("submit", { bubbles: true, cancelable: true }));
-    await until(() => publicDoc.querySelector('[aria-pressed="true"]'), "saved viewer vote");
-    await until(() => doc.querySelector('[data-total]')?.textContent === "1 vote", "live moderator total");
+    await until(() => publicDoc.getElementById('viewer-name').textContent === 'Viewer One', "saved party identity");
+    assert.equal(await f.db.participant.count({ where: { nickname: 'Viewer One' } }), 1);
+    const upstream = f.fake.polls[0];
+    assert.equal((await f.sendPoll('channel.poll.progress', upstream, { votes: [3, 7] })).status, 204);
+    await until(() => doc.querySelector('[data-total]')?.textContent === "10 votes", "live native moderator total");
+    assert.equal(publicDoc.querySelector('[data-vote-id]'), null);
     assert.equal(doc.getElementById("undo").disabled, true);
     doc.getElementById("poll-title").value = "Draft text stays while people vote";
-    const choice = publicDoc.querySelectorAll('[data-vote-id]')[1]; choice.click();
-    await until(() => publicDoc.querySelectorAll('[data-vote-id]')[1].textContent === "Your vote", "changed vote selection");
+    assert.equal((await f.sendPoll('channel.poll.progress', upstream, { votes: [4, 8] })).status, 204);
+    await until(() => publicDoc.querySelector('[data-total]')?.textContent === '12 votes', 'updated external vote totals');
     assert.equal(doc.getElementById("poll-title").value, "Draft text stays while people vote");
-    assert.equal(await f.db.vote.count(), 1);
-    Array.from(doc.querySelectorAll("#poll-board button")).find((button) => button.textContent === "Close poll").click();
-    await until(() => !publicDoc.querySelector('[data-vote-id]') && !doc.getElementById("operator-controls").disabled, "closed poll");
-    assert.equal(doc.getElementById("undo").disabled, false);
-    doc.getElementById("undo").click();
-    await until(() => publicDoc.querySelector('[data-vote-id]') && !doc.getElementById("operator-controls").disabled, "undo poll close");
-    assert.equal(await f.db.vote.count(), 1);
-    Array.from(doc.querySelectorAll("#poll-board button")).find((button) => button.textContent === "Close poll").click();
-    await until(() => doc.querySelector('[data-accept]') && !doc.getElementById("operator-controls").disabled, "winner controls");
-    doc.querySelector('[data-accept]').click();
-    await until(() => publicDoc.querySelector(".l38-result") && !doc.getElementById("operator-controls").disabled, "accepted public winner");
+    assert.equal(await f.db.vote.count(), 0, 'Twitch votes never become a second local vote ledger');
+    doc.querySelector('[data-poll-action="close"]').click();
+    await until(() => publicDoc.querySelector(".l38-result") && !doc.getElementById("operator-controls").disabled, "definitive native winner");
     assert.match(publicDoc.querySelector(".l38-result").textContent, /No/);
+    assert.ok(f.fake.pollCalls.some(call => call.method === 'PATCH' && call.body.status === 'TERMINATED'));
+    assert.equal(doc.getElementById("undo").disabled, true, 'native results cannot be reopened by local undo');
+    const latestAudit = (await f.service.state(true)).audit[0];
+    assert.equal((await f.op('undo', { auditId: latestAudit.id })).status, 409);
     Array.from(doc.querySelectorAll("#poll-board button")).find((button) => button.textContent === "New round from this poll").click();
     doc.getElementById("poll-type").value = "CUSTOM";
     doc.getElementById("poll-type").dispatchEvent(new control.window.Event("change"));
@@ -89,7 +92,8 @@ test("EJS and browser scripts support moderator polls, nickname voting, live tot
     doc.getElementById("poll-form").dispatchEvent(new control.window.Event("submit", { bubbles: true, cancelable: true }));
     await until(() => doc.querySelectorAll('[data-poll-id]').length === 2 && !doc.getElementById("operator-controls").disabled, "new draft round");
     assert.equal(publicDoc.querySelectorAll('[data-poll-id]').length, 1);
-    assert.equal(await f.db.vote.count(), 1);
+    assert.equal((await f.statePoll(poll.id)).totalVotes, 12);
+    assert.equal(await f.db.vote.count(), 0);
     assert.deepEqual(control.failures, []); assert.deepEqual(viewer.failures, []);
   } finally { control.close(); viewer.close(); }
 });

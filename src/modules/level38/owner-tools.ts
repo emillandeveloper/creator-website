@@ -11,6 +11,9 @@ export type OwnerAction = keyof typeof ownerConfirmations;
 export async function applyOwnerTool(tx: Prisma.TransactionClient, eventId: string, action: OwnerAction, confirmation: unknown) {
   if (confirmation !== ownerConfirmations[action]) throw new Level38Error(400, "The confirmation does not match this action.");
   if (action === "preview") return { action: "owner:preview", entityId: eventId, before: {}, after: {}, metadata: { audience: "all-connected-clients" } };
+  if (await tx.poll.count({ where: { eventId, source: "TWITCH", archivedAt: null, OR: [{ status: "OPEN" }, { twitchStatus: { in: ["PREPARING", "CREATING", "CLOSING", "CANCELLING"] } }] } })) {
+    throw new Level38Error(409, "End or cancel the current Twitch poll before resetting event data.");
+  }
   const now = new Date();
   const event = await tx.event.findUniqueOrThrow({ where: { id: eventId } });
   // Archive every current round, retaining questions, options, totals, winners and vote rows.

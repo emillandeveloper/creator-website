@@ -1,10 +1,10 @@
 # LEVEL 38 Twitch setup and operation
 
-Phase 4 is optional. Keep `TWITCH_ENABLED=false` to operate LEVEL 38 manually without Twitch credentials or network access. Twitch does not participate in `/healthz`. This work was implemented and tested locally; no developer app, real subscription, Render environment, production database, push or deployment was changed.
+Twitch category synchronization is optional. Keep `TWITCH_ENABLED=false` to operate quests and games manually without Twitch credentials or network access. New polls use native Twitch voting exclusively and require the native-poll configuration below; there is no website-voting fallback. Twitch does not participate in `/healthz`. Real poll creation is an operator action, not part of automated tests.
 
 ## Architecture and protocol
 
-The server uses **EventSub webhook transport**, `channel.update` **version 2**, with an app access token. This subscription requires no broadcaster user authorization. No user OAuth or Twitch WebSocket connection is implemented. [Twitch channel.update reference](https://dev.twitch.tv/docs/eventsub/eventsub-subscription-types/#channelupdate)
+The server reuses **EventSub webhook transport**: `channel.update` **version 2** for categories and `channel.poll.begin`, `channel.poll.progress`, `channel.poll.end` **version 1** for native polls. Subscription management uses an app access token. Poll API calls use a separately validated broadcaster user token with `channel:manage:polls`; a bot grant cannot substitute for it. No second Twitch WebSocket transport is needed. [Twitch subscription types](https://dev.twitch.tv/docs/eventsub/eventsub-subscription-types/)
 
 Client Credentials runs entirely on the server. Concurrent token requests share one promise; cached tokens have a 60-second expiry margin. Fresh tokens are validated, then revalidated hourly when used. A Helix 401 invalidates the cache and retries once with a new token. Every HTTP request, including response body consumption, has a five-second deadline. Raw upstream errors and credentials are excluded from control errors and logs. [Client Credentials](https://dev.twitch.tv/docs/authentication/getting-tokens-oauth/#client-credentials-grant-flow), [token validation](https://dev.twitch.tv/docs/authentication/validate-tokens/)
 
@@ -15,8 +15,8 @@ Initialization starts after HTTP listening and runs in the background. It resolv
 These are actions for the owner during a separately authorized release.
 
 1. Review the release, back up the existing database, build, and apply pending migrations with **`npm run db:migrate` (`prisma migrate deploy`)**. Keep Render's existing pre-deploy migration command. Include migrations 004 and 005 if either is pending. Do not run `db push`, reset migrations, reseed the event, or recreate existing operator keys. First verify the event with `TWITCH_ENABLED=false`.
-2. Register a dedicated app in the [Twitch developer console](https://dev.twitch.tv/console/apps). The registering Twitch account needs verified email and 2FA. Use a unique app name, an appropriate website application category, and a confidential/server application type if that choice is offered. Create the Client Secret and store it privately. [App registration](https://dev.twitch.tv/docs/authentication/register-app/)
-3. **OAuth Redirect URL:** this phase never performs a redirect flow. If the registration form requires a value, use the application homepage, `https://leonifelheim.tv` (or the actual canonical homepage). It is an unused registration value; no OAuth callback route is implemented. **EventSub callback:** `https://leonifelheim.tv/level38/twitch/eventsub`. The application supplies this separate value when creating its subscription.
+2. Reuse the existing Twitch application configured for Hebe. Obtain that application's Client Secret securely from its owner; do not create another application or rotate a shared secret merely for this release. Never change Hebe's files. The broadcaster grant and application Client ID must match. [Twitch application configuration](https://dev.twitch.tv/docs/authentication/register-app/)
+3. **OAuth Redirect URL:** LEVEL 38 does not add a browser OAuth callback. If a replacement authorization is needed, use the existing application's authorization-code flow and its registered redirect URL, authorizing as the broadcaster with `channel:manage:polls`. Keep the resulting access/refresh tokens private. **EventSub callback:** `https://leonifelheim.tv/level38/twitch/eventsub`; this is a signed notification endpoint, not an OAuth redirect. [Authorization code flow](https://dev.twitch.tv/docs/authentication/getting-tokens-oauth/#authorization-code-grant-flow)
 4. Verify the canonical public domain resolves to the running service and accepts HTTPS on port 443, without redirects, login walls or request-body rewriting at the callback. `LEVEL38_ORIGIN` must be `https://leonifelheim.tv` for that example callback. Do not use the example domain if the actual service uses another origin. Twitch requires an HTTPS callback on port 443. [Webhook requirements](https://dev.twitch.tv/docs/eventsub/handling-webhook-events/)
 5. Generate a separate webhook signing secret on a trusted local machine:
 
@@ -33,17 +33,21 @@ These are actions for the owner during a separately authorized release.
 
 ## Environment variables
 
-All seven belong to the server environment. No new package dependencies are required.
+These category-integration variables belong to the server environment. Native polls additionally require the variables described below. No new package dependencies are required.
 
 | Variable | Default / requirement |
 | --- | --- |
 | `TWITCH_ENABLED` | `false`; only exact `true` enables initialization and callback processing. LEVEL 38 must also be enabled. |
-| `TWITCH_CLIENT_ID` | Required when enabled; dedicated developer application Client ID. |
+| `TWITCH_CLIENT_ID` | Required when enabled; existing Hebe developer application Client ID, matching the broadcaster grant. |
 | `TWITCH_CLIENT_SECRET` | Required when enabled; secret, never returned to any client. |
 | `TWITCH_BROADCASTER_LOGIN` | Defaults to `leonifelheim`; resolved with Helix Get Users if no ID is configured. |
 | `TWITCH_BROADCASTER_ID` | Optional numeric ID, authoritative when supplied. A wrong explicit ID is not silently replaced by the login. |
 | `TWITCH_EVENTSUB_SECRET` | Required when enabled; 10–100 printable ASCII characters, preferably 64 random hex characters. Separate from Client Secret. |
 | `TWITCH_EVENTSUB_CALLBACK_URL` | Required when enabled; exact `LEVEL38_ORIGIN` + `/level38/twitch/eventsub`, HTTPS port 443, no credentials, query or fragment. |
+
+Native polls additionally use `TWITCH_POLLS_ENABLED=true`, `TWITCH_USER_ACCESS_TOKEN` (the broadcaster grant with `channel:manage:polls`), optional `TWITCH_USER_REFRESH_TOKEN`, and a separate stable `TWITCH_POLL_TOKEN_KEY` containing 64 hexadecimal characters. The token must validate against both the configured broadcaster and the same application Client ID. Rotated tokens are stored in PostgreSQL using AES-256-GCM authenticated encryption and reloaded after restart. The seed grant remains in secret environment configuration; replacing it explicitly supersedes the saved authorization. No token, Client Secret or encrypted envelope is returned in public/control JSON.
+
+The read-only Hebe configuration audit for the 22 October 2026 release found a working broadcaster token with the required scope, an unrelated bot token, and no Client Secret or Refresh Token. Get Users and Get Polls succeeded without creating a real poll. Complete the server's Render configuration with the existing application's owner; a new OAuth grant is only needed if the current one becomes invalid and cannot be refreshed. Full variable mapping, history handling and operation: [native Twitch polls](level38-native-twitch-polls.txt).
 
 Missing/invalid enabled configuration produces a private control error and makes no Twitch calls. It does not throw during LEVEL 38 startup. The resolved broadcaster ID is cached for this process and saved with integration state; login resolution is repeated on the next process initialization so a changed login is respected. Changing broadcaster clears old channel diagnostics/category/subscription references; current game and manual mode remain intact. If an explicit ID is configured, the displayed ID is authoritative even if the configured login label is stale.
 
@@ -71,7 +75,7 @@ An empty list means the exact name did not match. After mapping changes, use **S
 
 1. Choose the actual current game in the existing game control and press **Change game**. Selecting the already-current game also enters manual mode when the source was auto.
 2. Confirm **Game source: Manual Override by Isma**. This immediately prevents Twitch from changing the game and persists across restarts. Twitch category observations continue to appear privately.
-3. Keep operating quests, polls, voting and celebrations normally through Twitch outages or unmapped categories.
+3. Keep operating quests, games and celebrations normally through Twitch outages or unmapped categories. Native polls require Twitch availability and do not revert to local website votes.
 4. Once ready, press **Return to Twitch Auto**. It immediately applies the latest known category if mapped and enabled. An unmapped/empty category preserves the current game while enabling future auto updates. This action uses persisted state and does not wait for a fresh channel fetch; OWNER can use Sync now first if the known category is old.
 
 Undoing a manual game change restores the previous game while retaining manual mode. Twitch-origin and return-to-auto changes cannot be undone into an ambiguous source state; use manual selection instead. Other undo behavior is preserved.

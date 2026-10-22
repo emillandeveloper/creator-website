@@ -58,6 +58,13 @@ export interface PollInput {
   options: { label?: string; questId?: string; gameId?: string }[];
 }
 
+function nativePollText(value: unknown, label: string, max: number): string {
+  if (typeof value !== "string") throw new Level38Error(400, `${label} is required.`);
+  const text = value.normalize("NFKC").trim();
+  if ([...text].length < 1 || [...text].length > max || /[\p{C}<>]/u.test(text)) throw new Level38Error(400, `${label} must be 1–${max} characters without control characters or angle brackets.`);
+  return text;
+}
+
 export function pollInput(value: unknown): PollInput {
   const body = bodyObject(value);
   if (typeof body.type !== "string" || !Object.values(PollType).includes(body.type as PollType)) {
@@ -66,21 +73,21 @@ export function pollInput(value: unknown): PollInput {
   const type = body.type as PollType;
   const contextQuestId = body.contextQuestId === undefined || body.contextQuestId === null ? null : identifier(body.contextQuestId);
   if (contextQuestId && type !== "NEXT_GAME") throw new Level38Error(400, "Only a next-game poll can target a quest.");
-  if (!Array.isArray(body.options) || body.options.length > 8) throw new Level38Error(400, "Use up to 8 poll options.");
+  if (!Array.isArray(body.options) || (type !== "YES_NO" && (body.options.length < 2 || body.options.length > 5))) throw new Level38Error(400, "Use 2–5 Twitch poll options.");
   const options = body.options.map((value: unknown) => {
     const option = bodyObject(value);
     if (type === "NEXT_QUEST") return { questId: identifier(option.questId) };
     if (type === "NEXT_GAME") return { gameId: identifier(option.gameId) };
-    return { label: textInput(option.label, "Option", 100) };
+    return { label: nativePollText(option.label, "Option", 25) };
   });
-  return { title: textInput(body.title, "Poll question"), type, contextQuestId,
+  return { title: nativePollText(body.title, "Poll question", 60), type, contextQuestId,
     durationSeconds: body.durationSeconds === undefined ? 60 : pollSeconds(body.durationSeconds),
     options: type === "YES_NO" ? [{ label: "Yes" }, { label: "No" }] : options };
 }
 
 export function pollSeconds(value: unknown): number {
-  if (typeof value !== "number" || !Number.isSafeInteger(value) || value < 1 || value > 3600) {
-    throw new Level38Error(400, "Choose a duration from 1 to 3600 whole seconds.");
+  if (typeof value !== "number" || !Number.isSafeInteger(value) || value < 15 || value > 1800) {
+    throw new Level38Error(400, "Choose a duration from 15 to 1800 whole seconds.");
   }
   return value;
 }

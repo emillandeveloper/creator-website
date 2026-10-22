@@ -42,6 +42,11 @@ enum PollStatus {
   CLOSED
 }
 
+enum PollSource {
+  WEB
+  TWITCH
+}
+
 enum GameSource {
   AUTO_TWITCH
   MANUAL_OVERRIDE
@@ -182,6 +187,12 @@ model Poll {
   type             PollType     @default(NEXT_QUEST)
   contextQuestId   String?
   status           PollStatus   @default(DRAFT)
+  source           PollSource   @default(WEB)
+  twitchPollId     String?      @unique
+  twitchStatus     String?
+  twitchRequestedAt DateTime?
+  twitchUpdatedAt  DateTime?
+  twitchSyncError  String?
   createdById      String
   createdBy        Operator     @relation("PollCreator", fields: [createdById], references: [id], onDelete: Restrict)
   createdAt        DateTime     @default(now())
@@ -220,6 +231,9 @@ model PollOption {
   game            Game?   @relation(fields: [gameId, eventId], references: [id, eventId], onDelete: Restrict)
   label           String // Snapshot of the quest title when the round is created.
   position        Int
+  twitchChoiceId  String?
+  twitchLabel     String?
+  twitchVotes     Int     @default(0)
   votes           Vote[]
   wonPolls        Poll[]  @relation("PollWinner")
   overriddenPolls Poll[]  @relation("PollOverride")
@@ -228,6 +242,7 @@ model PollOption {
   @@unique([pollId, questId])
   @@unique([pollId, gameId])
   @@unique([pollId, position])
+  @@unique([pollId, twitchChoiceId])
 }
 
 model Vote {
@@ -287,4 +302,11 @@ model TwitchMessage {
   receivedAt DateTime @default(now())
 
   @@index([receivedAt])
+}
+
+// AES-256-GCM envelope only. The encryption key is provided separately by Render.
+model TwitchPollCredential {
+  broadcasterId String @id
+  envelope String
+  updatedAt DateTime @updatedAt
 }

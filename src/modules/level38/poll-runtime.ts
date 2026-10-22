@@ -19,9 +19,9 @@ export class PollRuntime {
     this.revision = state.event.revision;
     if (this.timer) clearTimeout(this.timer);
     this.timer = null;
-    const deadlines = state.polls.filter((poll) => poll.status === "OPEN" && !poll.cancelledAt && poll.endsAt)
+    const deadlines = state.polls.filter((poll) => poll.source === "TWITCH" && poll.status === "OPEN" && !poll.cancelledAt && poll.endsAt)
       .map((poll) => Date.parse(poll.endsAt!)).filter(Number.isFinite);
-    if (deadlines.length) this.schedule(Math.max(0, Math.min(...deadlines) - Date.now()));
+    if (deadlines.length) this.schedule(Math.max(15000, Math.min(...deadlines) - Date.now()));
   }
 
   private schedule(delayMs: number): void {

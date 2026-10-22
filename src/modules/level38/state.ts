@@ -1,7 +1,7 @@
 import { Prisma } from "@prisma/client";
 import { warnMissingQuestTranslations } from "./quest-content";
 import { Level38Error } from "./errors";
-import { leadingOptionIds, pollInclude } from "./poll-domain";
+import { leadingOptionIds, pollInclude, voteCount } from "./poll-domain";
 import { allowedQuestActions, isHidden } from "./quest-domain";
 import { jsonObject, undoCandidate } from "./undo";
 
@@ -59,19 +59,22 @@ export async function readState(tx: Prisma.TransactionClient, control: boolean) 
     overlayQuestCompletion: completion ? publicQuests.find((quest) => quest.id === completion.id)! : null,
     secretCount: quests.filter(isHidden).length,
     polls: published.map((poll) => ({ id: poll.id, number: poll.number, title: poll.title, type: poll.type, status: poll.status,
+      source: poll.source, readOnly: poll.source === "WEB", nativeStatus: poll.twitchStatus, resultsFinal: poll.source === "TWITCH" && poll.status === "CLOSED" && !poll.cancelledAt && ["COMPLETED", "TERMINATED", "ARCHIVED"].includes(poll.twitchStatus ?? ""),
+      twitchUrl: `https://www.twitch.tv/${encodeURIComponent(process.env.TWITCH_BROADCASTER_LOGIN || "leonifelheim")}`,
+      ...(control ? { nativeError: poll.twitchSyncError } : {}),
       contextQuestId: poll.contextQuestId,
       createdAt: poll.createdAt.toISOString(), openedAt: poll.openedAt?.toISOString() ?? null, closedAt: poll.closedAt?.toISOString() ?? null,
       durationSeconds: poll.durationSeconds, endsAt: poll.endsAt?.toISOString() ?? null,
       cancelledAt: poll.cancelledAt?.toISOString() ?? null, closeReason: poll.closeReason, winnerAcceptedAt: poll.winnerAcceptedAt?.toISOString() ?? null,
-      options: poll.options.map((option) => ({ id: option.id, label: option.label, questId: option.questId, gameId: option.gameId, votes: option._count.votes,
+      options: poll.options.map((option) => ({ id: option.id, label: option.label, twitchLabel: option.twitchLabel, questId: option.questId, gameId: option.gameId, votes: voteCount(poll, option),
         ...(option.quest ? { translations: { en: { title: option.quest.title }, es: { title: option.quest.titleEs } } } : {}) })),
-      totalVotes: poll.options.reduce((sum, option) => sum + option._count.votes, 0), leadingOptionIds: leadingOptionIds(poll),
+      totalVotes: poll.options.reduce((sum, option) => sum + voteCount(poll, option), 0), leadingOptionIds: leadingOptionIds(poll),
       winningOptionId: poll.winningOptionId, overrideOptionId: poll.overrideOptionId, effectiveWinnerId: poll.overrideOptionId ?? poll.winningOptionId,
       ...(control ? { overrideReason: poll.overrideReason } : {}),
     })),
     ...(control ? {
       archivedPolls: archived.map(poll => ({ id: poll.id, number: poll.number, title: poll.title, type: poll.type, archivedAt: poll.archivedAt!.toISOString(),
-        options: poll.options.map(option => ({ id: option.id, label: option.label, votes: option._count.votes,
+        source: poll.source, options: poll.options.map(option => ({ id: option.id, label: option.label, votes: voteCount(poll, option),
           ...(option.quest ? { translations: { en: { title: option.quest.title }, es: { title: option.quest.titleEs } } } : {}) })),
         winner: poll.overrideOptionId ?? poll.winningOptionId })),
       audit: audit.map((log) => ({ id: log.id, operatorName: log.operatorName, action: log.action, entityId: log.entityId,

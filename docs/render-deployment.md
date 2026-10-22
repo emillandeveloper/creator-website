@@ -64,16 +64,20 @@ Optional Twitch variables, added manually to the existing service's environment 
 | Variable | Required / secret | Value or behavior |
 | --- | --- | --- |
 | `TWITCH_ENABLED` | Optional switch; not secret | `false` initially; exactly `true` enables background initialization and the signed callback. |
-| `TWITCH_CLIENT_ID` | Required when enabled; identifier | Client ID of the dedicated Twitch developer app. |
+| `TWITCH_CLIENT_ID` | Required when enabled; identifier | Reuse the existing Hebe Twitch application's Client ID. The broadcaster user token must belong to this application. |
 | `TWITCH_CLIENT_SECRET` | Required when enabled; **secret** | App Client Secret, stored only in Render environment settings. |
 | `TWITCH_BROADCASTER_LOGIN` | Default `leonifelheim`; not secret | Used to resolve the ID when no explicit ID is supplied. |
 | `TWITCH_BROADCASTER_ID` | Optional numeric identifier | Takes precedence over login; leave empty to resolve with Get Users. |
 | `TWITCH_EVENTSUB_SECRET` | Required when enabled; **secret** | Separate random 64-character hex string. Rotation replaces the matching subscription. |
 | `TWITCH_EVENTSUB_CALLBACK_URL` | Required when enabled; not secret | `https://leonifelheim.tv/level38/twitch/eventsub` if that is the canonical production domain. Must exactly match `LEVEL38_ORIGIN` plus this path, HTTPS port 443. |
+| `TWITCH_POLLS_ENABLED` | Optional switch; not secret | Exactly `true` enables native polls after the broadcaster authorization is configured. New LEVEL 38 polls never fall back to website voting. |
+| `TWITCH_USER_ACCESS_TOKEN` | Required for native polls; **secret** | Broadcaster user token with `channel:manage:polls`, matching both Client ID and broadcaster ID. Use Hebe's broadcaster token, not its bot token. |
+| `TWITCH_USER_REFRESH_TOKEN` | Optional; **secret** | Refresh token from that same application/user authorization, if issued. Rotated credentials are encrypted and persisted before use. |
+| `TWITCH_POLL_TOKEN_KEY` | Required for native polls; **secret** | Separate stable 64-hex-character AES-256-GCM key. Keep with database backup recovery secrets; do not reuse the EventSub secret. |
 
-See [Twitch setup, verification and fallback](level38-twitch.md) for secret generation, app registration, callback details and owner/moderator instructions. App tokens are obtained by the server and are never configured as an environment variable. Invalid Twitch configuration affects only Twitch status, not LEVEL 38 readiness or manual operation.
+See [Twitch setup, verification and fallback](level38-twitch.md) for secure configuration, existing-app reuse, callback details and owner/moderator instructions. App tokens are obtained by the server and are never configured as an environment variable. Invalid Twitch configuration affects Twitch actions, not LEVEL 38 readiness or manual quest/game operation. Native poll start/end requires valid configuration and fails without opening a second voting system.
 
-There is no `SESSION_SECRET`, owner password environment variable, manually supplied Twitch access token, OBS variable, separate `DIRECT_URL`, or shadow database URL in this implementation. Anonymous/operator cookies contain random tokens; PostgreSQL stores their hashes and expiry. Operator access keys are provisioned explicitly, not placed in the repository, Blueprint, or build logs.
+There is no `SESSION_SECRET`, owner password environment variable, OBS variable, separate `DIRECT_URL`, or shadow database URL in this implementation. Anonymous/operator cookies contain random tokens; PostgreSQL stores their hashes and expiry. Operator access keys are provisioned explicitly, not placed in the repository, Blueprint, or build logs. Native Twitch user credentials belong only in secret server configuration and the encrypted credential vault, never browser state or build logs.
 
 The Node file prevents an unexpected major-version change; it does not freeze patch releases. Review the resolved version in each build log. [Render Node version selection](https://render.com/docs/node-version)
 

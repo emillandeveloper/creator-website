@@ -71,13 +71,14 @@
     <section class="l38-panel" id="poll-editor">
       <h2 id="poll-editor-title" data-i18n="Create voting round"><%= t("Create voting round") %></h2>
       <form id="poll-form">
-        <label for="poll-title" data-i18n="Question"><%= t("Question") %></label><input id="poll-title" maxlength="160" required>
+        <p class="l38-small" data-i18n="Prepare the choices here. Starting a poll publishes it on Twitch; voting takes place only on Twitch."><%= t('Prepare the choices here. Starting a poll publishes it on Twitch; voting takes place only on Twitch.') %></p>
+        <label for="poll-title" data-i18n="Question (60 characters maximum)"><%= t("Question (60 characters maximum)") %></label><input id="poll-title" maxlength="60" required>
         <label for="poll-type" data-i18n="Poll type"><%= t("Poll type") %></label>
         <select id="poll-type"><option value="NEXT_QUEST" data-i18n="Next quest"><%= t("Next quest") %></option><option value="NEXT_GAME" data-i18n="Next game"><%= t("Next game") %></option><option value="YES_NO" data-i18n="Yes / No"><%= t("Yes / No") %></option><option value="CUSTOM" data-i18n="Custom choices"><%= t("Custom choices") %></option></select>
-        <label for="poll-duration" data-i18n="Duration (seconds)"><%= t('Duration (seconds)') %></label><input id="poll-duration" name="durationSeconds" type="number" min="1" max="3600" step="1" value="60" required aria-describedby="poll-duration-note">
-        <p id="poll-duration-note" class="l38-small" data-i18n="The server closes the vote when time runs out. Default: 60 seconds."><%= t('The server closes the vote when time runs out. Default: 60 seconds.') %></p>
+        <label for="poll-duration" data-i18n="Duration (seconds)"><%= t('Duration (seconds)') %></label><input id="poll-duration" name="durationSeconds" type="number" min="15" max="1800" step="1" value="60" required aria-describedby="poll-duration-note">
+        <p id="poll-duration-note" class="l38-small" data-i18n="Twitch duration: 15–1800 seconds. Wait for the definitive Twitch result before confirming a winner."><%= t('Twitch duration: 15–1800 seconds. Wait for the definitive Twitch result before confirming a winner.') %></p>
         <div id="poll-quest-context" hidden><label for="poll-quest" data-i18n="Quest for this game vote (optional)"><%= t("Quest for this game vote (optional)") %></label><select id="poll-quest"><option value="" data-i18n="Any game (no quest context)"><%= t("Any game (no quest context)") %></option></select><p class="l38-small" data-i18n="Choose a quest to offer only its eligible games. Manual game selection is always available."><%= t("Choose a quest to offer only its eligible games. Manual game selection is always available.") %></p></div>
-        <fieldset class="l38-options-editor"><legend data-i18n="Options (2–8 before opening)"><%= t("Options (2–8 before opening)") %></legend><div id="poll-options"></div><button id="add-option" type="button" data-i18n="Add option"><%= t("Add option") %></button></fieldset>
+        <fieldset class="l38-options-editor"><legend data-i18n="Twitch options (2–5, up to 25 characters each)"><%= t("Twitch options (2–5, up to 25 characters each)") %></legend><div id="poll-options"></div><p id="poll-options-note" class="l38-small" role="status"></p><button id="add-option" type="button" data-i18n="Add option"><%= t("Add option") %></button></fieldset>
         <button id="save-poll" type="submit" data-i18n="Save draft"><%= t("Save draft") %></button><button class="l38-secondary" id="cancel-poll-edit" type="button" data-i18n="Start fresh"><%= t("Start fresh") %></button>
       </form>
       <p id="poll-editor-note" data-i18n="A new round keeps previous votes and results in history."><%= t("A new round keeps previous votes and results in history.") %></p>
@@ -94,6 +95,7 @@
       <h2 id="twitch-heading">Twitch <span id="twitch-connection" data-i18n="Loading…"><%= t("Loading…") %></span></h2>
       <p id="twitch-source" role="status"></p>
       <p id="twitch-error" role="status"></p>
+      <p id="twitch-polls-status" role="status"></p>
       <dl class="l38-twitch-status">
         <dt data-i18n="Channel"><%= t("Channel") %></dt><dd id="twitch-channel">—</dd>
         <dt data-i18n="Latest category"><%= t("Latest category") %></dt><dd id="twitch-category">—</dd>

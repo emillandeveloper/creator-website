@@ -317,6 +317,45 @@
   "prepared a clean event": "preparó un evento limpio",
   "previewed the finale for connected clients": "mostró una vista previa del final a los clientes conectados"
 });
+  Object.assign(es, {
+    "Historical web poll · read only": "Encuesta web histórica · solo lectura",
+    "Vote exclusively in the native Twitch poll. Results update here automatically.": "Vota exclusivamente en la encuesta nativa de Twitch. Los resultados se actualizan aquí automáticamente.",
+    "Vote on Twitch": "Vota en Twitch",
+    "Waiting for final Twitch results…": "Esperando el resultado definitivo de Twitch…",
+    "Start Twitch poll": "Iniciar encuesta en Twitch",
+    "Twitch request is pending. Synchronize or cancel before starting another round.": "Twitch aún no ha confirmado la solicitud. Sincroniza o cancela antes de iniciar otra ronda.",
+    "When a poll opens, vote on Twitch and follow the results here.": "Cuando se abra una encuesta, vota en Twitch y sigue los resultados aquí.",
+    "TWITCH POLL FINISHED": "ENCUESTA DE TWITCH FINALIZADA",
+    "No votes": "Sin votos",
+    "Tie": "Empate",
+    "The operator will confirm the final choice.": "El operador confirmará la decisión final.",
+    "This quest no longer has two enabled eligible games — choose another context.": "Esta misión ya no tiene dos juegos habilitados y elegibles; elige otra misión.",
+    "Choose a different available option for every choice.": "Elige una opción disponible distinta para cada alternativa.",
+    "Twitch label: {label}": "Etiqueta en Twitch: {label}",
+    "At least two enabled eligible choices are required. Choose another quest or enable more games.": "Se necesitan al menos dos opciones habilitadas y elegibles. Elige otra misión o habilita más juegos.",
+    "Twitch accepts 2–5 distinct options. Abbreviated labels keep their original quest or game IDs.": "Twitch admite entre 2 y 5 opciones distintas. Las etiquetas abreviadas mantienen la vinculación con la misión o el juego original.",
+    "Prepare the choices here. Starting a poll publishes it on Twitch; voting takes place only on Twitch.": "Prepara las opciones aquí. Al iniciar la encuesta se publica en Twitch; los votos se emiten exclusivamente en Twitch.",
+    "Question (60 characters maximum)": "Pregunta (máximo 60 caracteres)",
+    "Twitch duration: 15–1800 seconds. Wait for the definitive Twitch result before confirming a winner.": "Duración en Twitch: de 15 a 1800 segundos. Espera el resultado definitivo de Twitch antes de confirmar un ganador.",
+    "Twitch options (2–5, up to 25 characters each)": "Opciones de Twitch (de 2 a 5, máximo 25 caracteres cada una)",
+    "Native Twitch polls ready. Viewers vote on Twitch.": "Encuestas nativas de Twitch preparadas. Los espectadores votan en Twitch.",
+    "Native Twitch polls need broadcaster authorization with channel:manage:polls.": "Las encuestas nativas de Twitch necesitan autorización del broadcaster con channel:manage:polls.",
+    "Native Twitch polls are not enabled.": "Las encuestas nativas de Twitch están desactivadas.",
+    "Native Twitch polls are not configured.": "Las encuestas nativas de Twitch aún no están configuradas.",
+    "Use 2–5 Twitch poll options.": "Utiliza entre 2 y 5 opciones en la encuesta de Twitch.",
+    "Choose a duration from 15 to 1800 whole seconds.": "Elige una duración entera de entre 15 y 1800 segundos.",
+    "Historical web polls are read-only. Create a native Twitch round.": "Las encuestas web históricas son de solo lectura. Crea una nueva ronda nativa de Twitch.",
+    "Historical web poll results are read-only.": "Los resultados de las encuestas web históricas son de solo lectura.",
+    "Vote using the native poll on Twitch. Web voting is disabled.": "Vota en la encuesta nativa de Twitch. La votación desde la web está desactivada.",
+    "Twitch does not support extending native polls. Create a new round.": "Twitch no permite ampliar la duración de una encuesta nativa. Crea una nueva ronda.",
+    "Wait for Twitch's definitive poll result.": "Espera el resultado definitivo de la encuesta de Twitch.",
+    "Resolve the current Twitch poll before starting another round.": "Resuelve la encuesta actual de Twitch antes de iniciar otra ronda.",
+    "Twitch poll synchronization is pending. Review the broadcaster authorization and retry synchronization; no duplicate poll will be created.": "La sincronización de la encuesta de Twitch está pendiente. Revisa la autorización del broadcaster y vuelve a sincronizar; no se creará una encuesta duplicada.",
+    "Twitch already has an active poll. End it on Twitch or synchronize the existing round first.": "Ya hay una encuesta activa en Twitch. Finalízala en Twitch o sincroniza la ronda existente primero.",
+    "Joining is temporarily unavailable. Please try again.": "No se puede entrar al grupo en este momento. Inténtalo de nuevo.",
+    "One random class. Yours for this adventure. Join the party here and vote on Twitch.": "Una clase al azar para esta aventura. Únete al grupo aquí y vota en Twitch.",
+    "Read the quest journal above. Vote on Twitch. Enable JavaScript to join the party and follow live results.": "Consulta las misiones arriba. Vota en Twitch. Activa JavaScript para unirte al grupo y seguir los resultados en directo."
+  });
   const en = Object.fromEntries(Object.keys(es).map(key => [key, key]));
   Object.assign(en, { MULTI_GAME: "Multi-game", GAME_SPECIFIC: "Game-specific", COOPERATIVE: "Cooperative", AVAILABLE: "Available", ACTIVE: "Active", COMPLETED: "Completed", FAILED: "Failed", SKIPPED: "Skipped", LOCKED: "Locked", SECRET: "Secret", OPEN: "Open", CLOSED: "Closed", DRAFT: "Draft", NEXT_QUEST: "Next quest", NEXT_GAME: "Next game", YES_NO: "Yes / No", CUSTOM: "Custom choices", OWNER: "Owner", MODERATOR: "Moderator", VIEWER: "Viewer", MANUAL_OVERRIDE: "Manual selection", AUTO_TWITCH: "Twitch Auto" });
   const catalogs = { en, es };

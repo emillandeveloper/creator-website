@@ -1,5 +1,5 @@
 LEVEL 38 — Todos los enlaces de overlays para OBS
-Actualizado: 21 de octubre de 2026
+Actualizado: 22 de octubre de 2026
 
 PARTY — personajes y celebraciones
 https://leonifelheim.tv/level38/overlay/party
@@ -10,6 +10,9 @@ Español:
 https://leonifelheim.tv/level38/overlay/poll?lang=es
 English:
 https://leonifelheim.tv/level38/overlay/poll?lang=en
+Esta fuente muestra los cuatro tipos de encuesta nativa de Twitch, sus votos,
+cuenta atrás y resultado definitivo. Los espectadores votan desde Twitch.
+Configuración y OAuth: level38-native-twitch-polls.txt.
 
 MISIÓN ACTIVA — idioma predeterminado: español
 https://leonifelheim.tv/level38/overlay/quest

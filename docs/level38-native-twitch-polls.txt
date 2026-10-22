@@ -1,0 +1,133 @@
+LEVEL 38 — Encuestas nativas de Twitch
+Entrega: 22 de octubre de 2026
+
+FUNCIONAMIENTO
+El panel /level38/control prepara los borradores. Iniciar crea la encuesta
+real mediante Helix; los espectadores votan en Twitch. La web y OBS muestran
+las cifras de Twitch y no reciben votos independientes.
+
+Tipos: NEXT_QUEST, NEXT_GAME global, NEXT_GAME para una misión, YES_NO, CUSTOM.
+Límites: 2–5 opciones, pregunta de hasta 60 caracteres, opciones de hasta
+25 caracteres y duración de 15–1800 segundos. Las etiquetas abreviadas de
+misiones/juegos conservan la asociación con sus identificadores originales.
+
+El contador utiliza el plazo de Twitch. Llegar a cero no proclama ganador:
+se espera el resultado definitivo de EventSub o una lectura de Helix.
+Cerrar desde el panel finaliza la encuesta en Twitch. Cancelar una encuesta
+activa la archiva; cancelar un intento incierto comprueba antes su estado.
+Una respuesta perdida al crear nunca provoca otro POST automático a ciegas.
+La recuperación lee Twitch y actualiza los totales; no suma paquetes de votos.
+
+Un ganador único con votos queda registrado al recibirse el resultado final.
+Un empate requiere decisión del operador entre los líderes. Una encuesta sin
+votos requiere una resolución explícita con motivo si se quiere fijar ganador.
+NEXT_QUEST no activa la misión. NEXT_GAME global no cambia el juego activo.
+NEXT_GAME con misión asigna el juego ganador a esa misión, como antes.
+YES_NO y CUSTOM solo registran y muestran el resultado.
+
+DIAGNÓSTICO DE NEXT_GAME
+La reproducción en Chromium detectó que el editor anterior ofrecía misiones
+con un solo juego elegible habilitado. Al generar dos opciones, ambas quedaban
+asociadas al mismo juego y el servidor respondía «Poll options must be distinct».
+Los casos global y de una misión con varios juegos sí se guardaron en esa prueba.
+Ahora se ofrecen únicamente contextos con al menos dos juegos elegibles
+habilitados, se preseleccionan opciones distintas y se validan las combinaciones
+al cambiar tipo, editar o volver a abrir un borrador.
+
+OAUTH DE HEBE — INSPECCIÓN EN SOLO LECTURA
+Archivo revisado: Documents/Hebe/hebe-ui/backend/.env.
+Contiene TWITCH_CLIENT_ID, TWITCH_BROADCASTER_ID, TWITCH_OAUTH_TOKEN (bot)
+y TWITCH_BROADCASTER_OAUTH_TOKEN (broadcaster).
+No contiene Client Secret ni Refresh Token.
+
+El token del broadcaster se validó con Twitch: corresponde a leonifelheim,
+coincide con el broadcaster ID y el Client ID configurados y tiene
+channel:manage:polls. Las consultas de solo lectura Get Users y Get Polls
+respondieron 200; la cuenta es afiliada. El token del bot pertenece a otra
+cuenta y no se debe utilizar para estas encuestas.
+
+La validación devolvió expires_in:0 para estos grants. No se interpreta como
+una garantía de vigencia permanente: se vuelve a validar al arrancar y cada
+hora, y se trata un 401 como una autorización no válida.
+No se han copiado secretos al repositorio ni modificado archivos de Hebe.
+No se ha creado ni finalizado ninguna encuesta en el canal real para las pruebas.
+
+CONFIGURACIÓN SEGURA EN RENDER
+En el servicio existente, configurar estas variables del servidor:
+
+TWITCH_ENABLED=true
+TWITCH_POLLS_ENABLED=true
+TWITCH_CLIENT_ID=Client ID de la aplicación existente de Hebe
+TWITCH_CLIENT_SECRET=Client Secret de ESA misma aplicación
+TWITCH_BROADCASTER_LOGIN=leonifelheim
+TWITCH_BROADCASTER_ID=el ID que ya utiliza Hebe
+TWITCH_USER_ACCESS_TOKEN=valor de TWITCH_BROADCASTER_OAUTH_TOKEN de Hebe
+TWITCH_USER_REFRESH_TOKEN=refresh token de ese grant, solo si existe
+TWITCH_POLL_TOKEN_KEY=clave aleatoria independiente de 64 caracteres hexadecimales
+TWITCH_EVENTSUB_SECRET=secreto de firma independiente
+TWITCH_EVENTSUB_CALLBACK_URL=https://leonifelheim.tv/level38/twitch/eventsub
+LEVEL38_ORIGIN=https://leonifelheim.tv
+
+Los valores secretos deben introducirse en los ajustes secretos de Render,
+nunca en chat, commits, capturas, argumentos de comandos o logs.
+No reutilizar el token del bot ni el secreto EventSub como clave de cifrado.
+No rotar el Client Secret de una aplicación compartida sin coordinarlo con
+sus integraciones existentes. Este archivo no contiene los valores reales.
+
+La intervención manual pendiente es comprobar y completar esa configuración
+en Render. Si el Client Secret de la misma aplicación ya está configurado allí,
+conservarlo; si no, obtenerlo de su propietario. El grant actual del
+broadcaster ya incluye el permiso necesario; no hace falta volver a autorizarlo
+solo para añadir ese scope. Si se revoca o caduca y no hay Refresh Token, usar
+el flujo OAuth de la misma aplicación, como broadcaster, solicitando
+channel:manage:polls; guardar el nuevo access token y refresh token de forma segura.
+LEVEL 38 no añade una ruta de retorno OAuth. El callback EventSub no sustituye
+al redirect OAuth registrado en la aplicación existente.
+
+Los refresh tokens que roten se guardan cifrados con AES-256-GCM en PostgreSQL
+antes de usar el nuevo grant. Conservar TWITCH_POLL_TOKEN_KEY estable entre
+reinicios y junto a los secretos de recuperación de las copias de seguridad.
+Una nueva autorización configurada sustituye el grant guardado; el token del bot
+o un token de otro broadcaster/aplicación se rechazan antes de gestionar encuestas.
+
+DESPLIEGUE Y DATOS EXISTENTES
+La migración 202610220013_level38_native_twitch_polls es aditiva. Añade los
+identificadores de Twitch, sus totales y el almacén cifrado. Las encuestas y
+votos históricos permanecen como WEB, de solo lectura. No se convierten en
+encuestas nuevas de Twitch ni se eliminan. Los borradores nuevos son TWITCH.
+Sin configuración válida se impide iniciar encuestas; no hay fallback de votos web.
+El pre-deploy existente de Render ejecuta npm run db:migrate. No ejecutar
+prisma reset, db push, seed ni un reinicio de los datos del evento.
+
+OVERLAYS
+Encuestas ES: https://leonifelheim.tv/level38/overlay/poll?lang=es
+Encuestas EN: https://leonifelheim.tv/level38/overlay/poll?lang=en
+Misión ES: https://leonifelheim.tv/level38/overlay/quest?lang=es
+Misión EN: https://leonifelheim.tv/level38/overlay/quest?lang=en
+Party: https://leonifelheim.tv/level38/overlay/party
+La fuente de encuestas muestra los cuatro tipos, resultados finales, empates
+y encuestas sin votos. Se mantiene separada de la fuente de misión activa.
+Todos los enlaces: LEVEL38-OVERLAYS.txt.
+
+VALIDACIÓN DE LA ENTREGA
+npm test: compilación, validación del catálogo y 81 pruebas unitarias correctas.
+node --test --test-concurrency=3 tests/integration/*.test.cjs:
+80 pruebas correctas contra PostgreSQL local aislado, incluidas migraciones,
+históricos, OAuth, EventSub y conservación del resto del evento.
+node --test tests/visual/level38-native-polls.cjs:
+Playwright con Chromium completó los cinco flujos (los cuatro tipos, con
+NEXT_GAME global y con misión), desde el editor hasta el ganador en el overlay.
+Se revisaron también el editor móvil y las capturas de votos y resultados.
+Twitch se simuló para estas pruebas; no se utilizó el canal real ni OBS real.
+Evidencias locales ignoradas por Git: dist/level38-native-polls-qa/.
+La activación en producción requiere completar la configuración de Render
+descrita arriba; las pruebas locales no acreditan que ya esté configurada allí.
+
+FUENTES OFICIALES
+https://dev.twitch.tv/docs/api/reference/#create-poll
+https://dev.twitch.tv/docs/api/reference/#end-poll
+https://dev.twitch.tv/docs/eventsub/eventsub-subscription-types/#channelpollbegin
+https://dev.twitch.tv/docs/eventsub/eventsub-subscription-types/#channelpollprogress
+https://dev.twitch.tv/docs/eventsub/eventsub-subscription-types/#channelpollend
+https://dev.twitch.tv/docs/authentication/validate-tokens/
+https://dev.twitch.tv/docs/authentication/refresh-tokens/

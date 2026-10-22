@@ -15,6 +15,7 @@ import { TwitchIntegration } from "./twitch/integration";
 import { localization } from "./localization";
 import { PartyRuntime } from "./party-runtime";
 import { PollRuntime } from "./poll-runtime";
+import { NativeTwitchPolls } from "./twitch/polls";
 
 const domainEvents = ["quest:activated", "quest:completed", "quest:failed", "quest:skipped", "quest:revealed", "quest:available", "quest:game", "quest:games", "poll:created", "poll:edited", "poll:opened", "poll:vote-updated", "poll:closed", "poll:cancelled", "poll:extended", "poll:winner", "game:changed", "game:configured", "action:undone"] as const;
 type DomainEvent = typeof domainEvents[number];
@@ -58,7 +59,10 @@ export function mountLevel38(app: Application, server: HttpServer, config: Level
   const auth = new Level38Auth(db, config);
   party = new PartyRuntime(io.of("/level38-party"), db, auth, () => service.state(), config.origin);
   const twitchConfig = readTwitchConfig();
-  const twitch = new TwitchIntegration(twitchConfig, new TwitchApi(twitchConfig), new TwitchStore(db, publish));
+  const twitchApi = new TwitchApi(twitchConfig);
+  const nativePolls = new NativeTwitchPolls(db, twitchApi, twitchConfig, publish);
+  service.setNativePolls(nativePolls);
+  const twitch = new TwitchIntegration(twitchConfig, twitchApi, new TwitchStore(db, publish), nativePolls);
   channel.on("connection", (socket) => {
     service.state().then((state) => socket.emit("level38:state", state)).catch(() => socket.emit("level38:unavailable"));
   });
@@ -74,7 +78,7 @@ export function mountLevel38(app: Application, server: HttpServer, config: Level
     if (!event) return false;
     await db.participant.findFirst({ select: { variantId: true, streamVisible: true } });
     await db.quest.findFirst({ select: { catalogKey: true, category: true, retiredAt: true, eligibleGames: { select: { gameId: true } } } });
-    await db.poll.findFirst({ select: { contextQuestId: true, durationSeconds: true, endsAt: true, cancelledAt: true, closeReason: true } });
+    await db.poll.findFirst({ select: { source: true, twitchPollId: true, contextQuestId: true, durationSeconds: true, endsAt: true, cancelledAt: true, closeReason: true } });
     return true;
   }, close: async (): Promise<void> => {
     await polls.close();

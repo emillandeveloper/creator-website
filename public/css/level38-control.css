@@ -56,6 +56,9 @@
 .l38-control .l38-options-editor legend { font-size: 12px; padding: 0 4px; }
 .l38-control .l38-option-editor { align-items: start; }
 .l38-control .l38-option-editor input, .l38-control .l38-option-editor select { min-width: 0; flex-basis: 100%; }
+.l38-control .l38-option-editor { flex-wrap: wrap; }
+.l38-control .l38-native-label { display: block; flex: 1 1 100%; color: #b7cce0; overflow-wrap: anywhere; }
+.l38-control #poll-options-note { line-height: 1.6; }
 .l38-control .l38-poll { border-color: #7ba0c1; }
 .l38-control .l38-poll h3 { font-size: 18px; }
 .l38-control .l38-poll .l38-meta { border-bottom: 2px solid #405770; padding-bottom: 12px; }

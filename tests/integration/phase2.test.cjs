@@ -1,14 +1,16 @@
 const { test } = require("node:test");
 const assert = require("node:assert/strict");
 const { io } = require("socket.io-client");
-const { fixture } = require("./support.cjs");
+const { nativeFixture } = require("./twitch-polls-support.cjs");
 
 const ok = (response) => { assert.equal(response.status, 200, JSON.stringify(response.data)); return response.data; };
 
-test("Phase 2 moderator, voting, undo and concurrency workflows", { timeout: 120000 }, async (t) => {
-  const f = await fixture(t); await f.start();
-  const mod = await f.operator("ISMA", "MODERATOR");
-  const owner = await f.operator("LEO", "OWNER");
+test("Phase 2 moderator, native poll, undo and concurrency workflows", { timeout: 120000 }, async (t) => {
+  const f = await nativeFixture(t);
+  f.origin = f.url.replace(/\/level38$/, "");
+  f.viewer = async (nickname) => { const session = await f.call("/api/session"); if (nickname) ok(await f.call("/api/join", { nickname }, session.cookie)); return session.cookie; };
+  const mod = f.mod;
+  const owner = f.owner;
   const viewer = await f.viewer("Viewer One");
   const viewer2 = await f.viewer("Viewer Two");
   const unnamed = await f.viewer();
@@ -24,6 +26,7 @@ test("Phase 2 moderator, voting, undo and concurrency workflows", { timeout: 120
   const open = async (poll) => ok(await op(`polls/${poll.id}/status`, { action: "open" }));
   const close = async (poll) => ok(await op(`polls/${poll.id}/status`, { action: "close" }));
   const vote = (poll, index, cookie = viewer) => f.call(`/api/polls/${poll.id}/vote`, { optionId: poll.options[index].id }, cookie);
+  const nativeVotes = async (poll, votes) => { const saved = await f.dbPoll(poll.id); const remote = f.fake.polls.find(item => item.id === saved.twitchPollId); assert.equal((await f.sendPoll("channel.poll.progress", remote, { votes })).status, 204); };
   const initial = await control(); const quests = initial.quests.filter((q) => !q.hidden);
 
   await t.test("viewers cannot run controls; moderators cannot configure owner-only games", async () => {
@@ -124,13 +127,12 @@ test("Phase 2 moderator, voting, undo and concurrency workflows", { timeout: 120
     const games = await draft("NEXT_GAME", initial.games.slice(0, 2).map((game) => ({ gameId: game.id })));
     assert.ok(games.options.every((option) => option.gameId)); await open(games); await close(games);
     assert.equal((await op("polls", { title: "Duplicate", type: "CUSTOM", options: [{ label: "One" }, { label: "one" }] })).status, 400);
-    const empty = await draft("CUSTOM", []);
-    assert.equal((await op(`polls/${empty.id}/status`, { action: "open" })).status, 409);
+    assert.equal((await op("polls", { title: "Empty native round", type: "CUSTOM", options: [] })).status, 400);
   });
 
-  await t.test("vote identity is session-based, rapid changes upsert once, totals broadcast, controls stay usable", async () => {
+  await t.test("web voting stays disabled while signed native totals broadcast and controls stay usable", async () => {
     const poll = await draft(); await open(poll);
-    assert.equal((await vote(poll, 0, unnamed)).status, 403);
+    assert.equal((await vote(poll, 0, unnamed)).status, 409);
     assert.equal((await f.call(`/api/polls/${poll.id}/vote`, { optionId: poll.options[0].id })).status, 401);
     const initialControl = (await control()).event.controlRevision;
     const socket = io(`${f.origin}/level38`, { path: "/level38/socket.io", transports: ["websocket"] });
@@ -138,39 +140,37 @@ test("Phase 2 moderator, voting, undo and concurrency workflows", { timeout: 120
     await new Promise((resolve) => socket.once("connect", resolve));
     const notification = new Promise((resolve, reject) => { const timer = setTimeout(() => reject(new Error("No vote event")), 8000); socket.once("poll:vote-updated", (payload) => { clearTimeout(timer); resolve(payload); }); });
     const concurrent = await Promise.all([vote(poll, 0), vote(poll, 1, viewer2)]);
-    concurrent.forEach(ok); assert.deepEqual(Object.keys(await notification), ["revision"]);
-    const rapid = await Promise.all(Array.from({ length: 8 }, (_, index) => vote(poll, index % 2)));
-    rapid.forEach(ok);
-    assert.equal(await f.db.vote.count({ where: { pollId: poll.id } }), 2);
-    assert.equal((await publicState()).polls.find((p) => p.id === poll.id).totalVotes, 2);
+    concurrent.forEach(response => assert.equal(response.status, 409));
+    await nativeVotes(poll, [2, 3]); assert.deepEqual(Object.keys(await notification), ["revision"]);
+    for (let index = 0; index < 3; index++) await nativeVotes(poll, [2, 3]);
+    assert.equal(await f.db.vote.count({ where: { pollId: poll.id } }), 0);
+    assert.equal((await publicState()).polls.find((p) => p.id === poll.id).totalVotes, 5);
     assert.equal((await control()).event.controlRevision, initialControl);
-    ok(await vote(poll, 1));
     const session = ok(await f.call("/api/session", undefined, viewer));
-    assert.equal(session.votes.find((v) => v.pollId === poll.id).optionId, poll.options[1].id);
+    assert.deepEqual(session.votes, []);
     const undoState = await control(); assert.equal(undoState.undo.available, false);
     assert.equal((await op("undo", { auditId: undoState.undo.auditId })).status, 409);
     ok(await op(`polls/${poll.id}/status`, { action: "close" }, initialControl));
     assert.equal((await vote(poll, 0)).status, 409);
-    await undo(); assert.equal((await publicState()).polls.find((p) => p.id === poll.id).totalVotes, 2);
-    await close(poll);
+    assert.equal((await publicState()).polls.find((p) => p.id === poll.id).totalVotes, 5);
+    assert.equal((await control()).undo.available, false);
   });
 
-  await t.test("closing during in-flight votes yields a closed poll with exact persisted totals", async () => {
+  await t.test("closing while web votes are attempted preserves exact authoritative native totals", async () => {
     const poll = await draft("YES_NO", []); await open(poll);
+    await nativeVotes(poll, [4, 2]);
     const rev = (await control()).event.controlRevision;
     const results = await Promise.all([vote(poll, 0), op(`polls/${poll.id}/status`, { action: "close" }, rev), vote(poll, 1, viewer2)]);
-    assert.equal(results[1].status, 200);
-    assert.ok([200, 409].includes(results[0].status)); assert.ok([200, 409].includes(results[2].status));
+    assert.equal(results[1].status, 200); assert.equal(results[0].status, 409); assert.equal(results[2].status, 409);
     const published = (await publicState()).polls.find((p) => p.id === poll.id);
-    assert.equal(published.status, "CLOSED");
-    assert.equal(published.totalVotes, [results[0], results[2]].filter((r) => r.status === 200).length);
+    assert.equal(published.status, "CLOSED"); assert.equal(published.totalVotes, 6);
     assert.equal((await vote(poll, 1)).status, 409);
-    assert.equal(await f.db.vote.count({ where: { pollId: poll.id } }), published.totalVotes);
+    assert.equal(await f.db.vote.count({ where: { pollId: poll.id } }), 0);
   });
 
   await t.test("winner acceptance, ties, overrides and next rounds preserve previous votes", async () => {
     const poll = await draft(); await open(poll);
-    ok(await vote(poll, 0)); ok(await vote(poll, 1, viewer2)); await close(poll);
+    await nativeVotes(poll, [1, 1]); await close(poll);
     assert.deepEqual(new Set((await publicState()).polls.find((p) => p.id === poll.id).leadingOptionIds), new Set(poll.options.map((o) => o.id)));
     ok(await op(`polls/${poll.id}/winner`, { optionId: poll.options[0].id }));
     assert.equal((await control()).undo.available, false);
@@ -180,16 +180,16 @@ test("Phase 2 moderator, voting, undo and concurrency workflows", { timeout: 120
     assert.equal("overrideReason" in result, false);
     assert.match((await control()).audit[0].description, /overrode poll.*from Alpha to Beta/);
     const next = await draft(); assert.notEqual(next.id, poll.id); await open(next);
-    ok(await vote(next, 0)); assert.equal(await f.db.vote.count({ where: { pollId: poll.id } }), 2);
-    assert.equal(await f.db.vote.count({ where: { pollId: next.id } }), 1); await close(next);
+    await nativeVotes(next, [1, 0]); assert.equal((await publicState()).polls.find(p => p.id === poll.id).totalVotes, 2);
+    assert.equal(await f.db.vote.count({ where: { pollId: next.id } }), 0); await close(next);
     assert.equal((await op(`polls/${next.id}/winner`, { optionId: next.options[1].id })).status, 409);
-    ok(await op(`polls/${next.id}/winner`, { optionId: next.options[0].id }));
+    assert.equal((await publicState()).polls.find(p => p.id === next.id).effectiveWinnerId, next.options[0].id);
   });
 
-  await t.test("undo open is allowed only before voting; database enforces open and winner scope", async () => {
-    const poll = await draft(); await open(poll); await undo();
-    assert.equal((await control()).polls.find((p) => p.id === poll.id).status, "DRAFT");
-    await open(poll);
+  await t.test("native polls cannot be rewound; database enforces one open round and scoped winners", async () => {
+    const poll = await draft(); await open(poll);
+    const opened = await control(); assert.equal(opened.undo.available, false);
+    assert.equal((await op("undo", { auditId: opened.undo.auditId })).status, 409);
     const other = await draft();
     assert.equal((await op(`polls/${other.id}/status`, { action: "open" })).status, 409);
     await assert.rejects(f.db.poll.update({ where: { id: other.id }, data: { status: "OPEN" } }), { code: "P2002" });

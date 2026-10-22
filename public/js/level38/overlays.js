@@ -38,25 +38,31 @@
   }
   function drawPoll() {
     const root = byId('poll-overlay'), time = now();
-    const relevant = state.polls.filter(poll => ['NEXT_QUEST', 'NEXT_GAME'].includes(poll.type) && !poll.cancelledAt && poll.closeReason !== 'CANCELLED');
-    const open = relevant.filter(poll => poll.status === 'OPEN' && stamp(poll.endsAt) > time).sort((a, b) => b.number - a.number)[0];
-    const winner = relevant.filter(poll => poll.status === 'CLOSED' && poll.effectiveWinnerId && time >= stamp(poll.winnerAcceptedAt) && time - stamp(poll.winnerAcceptedAt) < 10000)
-      .sort((a, b) => stamp(b.winnerAcceptedAt) - stamp(a.winnerAcceptedAt) || b.number - a.number)[0];
-    const poll = open || winner, currentMode = open ? 'open' : winner ? 'winner' : '';
+    const relevant = state.polls.filter(poll => ['NEXT_QUEST', 'NEXT_GAME', 'YES_NO', 'CUSTOM'].includes(poll.type) && poll.source !== 'WEB' && !poll.cancelledAt && poll.closeReason !== 'CANCELLED');
+    // A native poll stays on screen at 00:00 until Twitch supplies its definitive
+    // result. Local countdowns and provisional leaders never declare a winner.
+    const open = relevant.filter(poll => poll.status === 'OPEN' && (poll.source === 'TWITCH' || stamp(poll.endsAt) > time)).sort((a, b) => b.number - a.number)[0];
+    const resultTime = poll => stamp(poll.winnerAcceptedAt || poll.closedAt);
+    const result = relevant.filter(poll => poll.status === 'CLOSED' && (poll.source !== 'TWITCH' || poll.resultsFinal === true) &&
+      (poll.effectiveWinnerId || poll.source === 'TWITCH') && time >= resultTime(poll) && time - resultTime(poll) < 10000)
+      .sort((a, b) => resultTime(b) - resultTime(a) || b.number - a.number)[0];
+    const poll = open || result, currentMode = open ? 'open' : result?.effectiveWinnerId ? 'winner' : result ? 'result' : '';
     const options = poll ? safeOptions(poll) : [];
-    if (!poll || options.length !== poll.options.length || (winner && !open && !options.some(option => option.id === poll.effectiveWinnerId))) { mode(root, '', '', ''); return; }
-    mode(root, `${poll.id}:${currentMode}:${poll.winnerAcceptedAt || ''}`, currentMode, poll.id);
+    if (!poll || options.length !== poll.options.length || (result?.effectiveWinnerId && !open && !options.some(option => option.id === poll.effectiveWinnerId))) { mode(root, '', '', ''); return; }
+    mode(root, `${poll.id}:${currentMode}:${poll.winnerAcceptedAt || poll.closedAt || ''}`, currentMode, poll.id);
     const dense = currentMode === 'open' && options.length >= 6;
     if (root.classList.contains('is-dense') !== dense) root.classList.toggle('is-dense', dense);
-    byId('poll-live').hidden = currentMode !== 'open'; byId('poll-result').hidden = currentMode !== 'winner'; byId('poll-countdown').hidden = currentMode !== 'open';
+    byId('poll-live').hidden = currentMode !== 'open'; byId('poll-result').hidden = !['winner', 'result'].includes(currentMode); byId('poll-countdown').hidden = currentMode !== 'open';
     text('poll-type', t(poll.type));
     if (open) {
       const seconds = Math.max(0, Math.ceil((stamp(poll.endsAt) - time) / 1000));
       text('poll-countdown', `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`);
       byId('poll-countdown').classList.toggle('is-ending', seconds <= 10);
+      text('poll-cta', t(seconds === 0 ? 'Waiting for final Twitch results…' : 'Vote on Twitch'));
+      text('poll-channel', twitchChannel(poll.twitchUrl));
       const signature = String(receiveSequence);
       if (signature !== contentKey) {
-        contentKey = signature; text('poll-title', poll.title); text('poll-cta', t('Cast your vote')); text('poll-total', t(poll.totalVotes === 1 ? '{count} vote' : '{count} votes', {count:poll.totalVotes}));
+        contentKey = signature; text('poll-title', poll.title); text('poll-total', t(poll.totalVotes === 1 ? '{count} vote' : '{count} votes', {count:poll.totalVotes}));
         const nodes = options.map((option, index) => {
           const node = document.createElement('li'); node.className = 'obs-option'; node.dataset.optionId = option.id;
           node.style.setProperty('--vote-percent', `${poll.totalVotes ? Math.round(option.votes / poll.totalVotes * 100) : 0}%`);
@@ -66,8 +72,15 @@
         byId('poll-options').replaceChildren(...nodes);
       }
     } else {
-      text('poll-winner-label', t('WINNER CONFIRMED!')); text('poll-winner', optionLabel(poll, options.find(option => option.id === poll.effectiveWinnerId))); text('poll-result-note', t('The party has chosen. Adventure awaits!'));
+      const hasWinner = !!poll.effectiveWinnerId;
+      text('poll-winner-label', t(hasWinner ? 'WINNER CONFIRMED!' : 'TWITCH POLL FINISHED'));
+      text('poll-winner', hasWinner ? optionLabel(poll, options.find(option => option.id === poll.effectiveWinnerId)) : t(poll.totalVotes === 0 ? 'No votes' : 'Tie'));
+      text('poll-result-note', t(hasWinner ? 'The party has chosen. Adventure awaits!' : 'The operator will confirm the final choice.'));
     }
+  }
+  function twitchChannel(value) {
+    try { const url = new URL(value); return url.protocol === 'https:' && url.hostname === 'www.twitch.tv' && /^\/[a-z0-9_]{1,25}\/?$/i.test(url.pathname) ? `twitch.tv${url.pathname}` : 'Twitch'; }
+    catch { return 'Twitch'; }
   }
   function drawQuest() {
     const root = byId('quest-overlay'), time = now();

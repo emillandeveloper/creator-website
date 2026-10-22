@@ -1,7 +1,7 @@
 const { test } = require("node:test");
 const assert = require("node:assert/strict");
 const { io } = require("socket.io-client");
-const { fixture } = require("./support.cjs");
+const { nativeFixture } = require("./twitch-polls-support.cjs");
 
 const ok = (response) => { assert.equal(response.status, 200, JSON.stringify(response.data)); return response.data; };
 function next(socket, name) {
@@ -13,7 +13,7 @@ function next(socket, name) {
 }
 
 test("final catalog runtime preserves secret privacy, eligible choices, single completion and the 38-quest finale", { timeout: 120000 }, async (t) => {
-  const f = await fixture(t); await f.start();
+  const f = await nativeFixture(t);
   const owner = await f.operator("Leo catalog", "OWNER"), mod = await f.operator("Catalog moderator", "MODERATOR");
   const viewer = await f.viewer("Catalog viewer");
   const control = async (cookie = mod.cookie) => ok(await f.call("/api/control/state", undefined, cookie));
@@ -95,9 +95,11 @@ test("final catalog runtime preserves secret privacy, eligible choices, single c
   ok(await op(`quests/${pollQuest.id}/games`, { gameIds: [gameA.id, gameB.id] }));
   ok(await op(`polls/${poll.id}/status`, { action: "open" }));
   assert.equal((await op(`quests/${pollQuest.id}/games`, { gameIds: [gameA.id] })).status, 409);
-  ok(await f.call(`/api/polls/${poll.id}/vote`, { optionId: poll.options[1].id }, viewer));
+  assert.equal((await f.call(`/api/polls/${poll.id}/vote`, { optionId: poll.options[1].id }, viewer)).status,409);
+  const remote = f.fake.polls.at(-1);
+  assert.equal((await f.sendPoll('channel.poll.progress',remote,{votes:[0,1]})).status,204);
   ok(await op(`polls/${poll.id}/status`, { action: "close" }));
-  ok(await op(`polls/${poll.id}/winner`, { optionId: poll.options[1].id }));
+  assert.equal((await control()).polls.find(item=>item.id===poll.id).effectiveWinnerId,poll.options[1].id);
   assert.equal((await control()).quests.find((quest) => quest.id === pollQuest.id).gameId, gameB.id);
   assert.equal((await publicState()).event.completed, 1, "Selecting a game never awards completion");
   ok(await op("polls", { ...pollBody, contextQuestId: null }));

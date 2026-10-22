@@ -47,7 +47,7 @@ test('cookie identity, multi-tab presence, visibility, rename, reconnect and rea
   const second=await watch(t,f);assert.deepEqual([...second.members.values()],[...overlay.members.values()]);
 });
 
-test('vote targets only the voter, committed quest/finale reactions, audited configuration and reset integration', {timeout:90000},async t=>{
+test('native-only votes do not fabricate party reactions; quest/finale, audited configuration and reset remain intact', {timeout:90000},async t=>{
   const f=await fixture(t);await f.start();const owner=await f.operator('Leo','OWNER'),mod=await f.operator('Isma','MODERATOR');
   const overlay=await watch(t,f),cookies=[await f.viewer('One'),await f.viewer('Two')];
   for(const cookie of cookies)await register(client(t,f,'viewer',cookie));await until(()=>overlay.members.size===2);
@@ -61,11 +61,10 @@ test('vote targets only the voter, committed quest/finale reactions, audited con
   assert.equal((await op('/api/control/party',{enabled:true,nameMode:'BAD',maxVisible:30})).status,400);
   assert.equal((await op('/api/control/party',{enabled:false,nameMode:'OFF',maxVisible:30},cookies[0])).status,401);
   await op('/api/control/polls',{type:'CUSTOM',title:'Choose',options:[{label:'Yes'},{label:'No'}]});
-  const poll=await f.db.poll.findFirstOrThrow({include:{options:true}});await op(`/api/control/polls/${poll.id}/status`,{action:'open'});
-  const before=overlay.events.length;assert.equal((await f.call(`/api/polls/${poll.id}/vote`,{optionId:poll.options[0].id},cookies[0])).status,200);
-  await until(()=>overlay.events.slice(before).some(e=>e.name==='party:action'));
-  const action=overlay.events.slice(before).find(e=>e.name==='party:action').payload;
-  assert.deepEqual(action,{action:'vote',presenceId:[...overlay.members.values()].find(m=>m.nickname==='One').presenceId});
+  const poll=await f.db.poll.findFirstOrThrow({include:{options:true}});
+  assert.equal((await op(`/api/control/polls/${poll.id}/status`,{action:'open'})).status,503);
+  const before=overlay.events.length;assert.equal((await f.call(`/api/polls/${poll.id}/vote`,{optionId:poll.options[0].id},cookies[0])).status,409);
+  await delay(100);assert.equal(overlay.events.slice(before).some(e=>e.name==='party:action'),false);
   const quests=await f.db.quest.findMany({where:{isSecret:false},orderBy:{number:'asc'}});
   await op(`/api/control/quests/${quests[0].id}`,{action:'activate'});await op(`/api/control/quests/${quests[0].id}`,{action:'complete'});
   await until(()=>overlay.events.some(e=>e.name==='party:action'&&e.payload.action==='quest'));
