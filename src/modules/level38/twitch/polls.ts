@@ -18,9 +18,20 @@ export class NativeTwitchPolls {
   private operation: Promise<unknown> = Promise.resolve();
   private stopped = false;
   private error: string | null = null;
+  private authorizationError: string | null = null;
   private validated = false;
-  private subscriptions = new Map<string, { id: string; status: string }>();
-  private subscriptionError: string | null = null;
+  private reconciliation?: Promise<void>;
+  private activePollId: string | null = null;
+  private nextAttemptAt = 0;
+  private rateLimitedUntil = 0;
+  private lastAttemptAt: Date | null = null;
+  private lastSuccessAt: Date | null = null;
+  private failures = 0;
+  private lastEventAt: Date | null = null;
+  private lastReceiptAt: Date | null = null;
+  private lastHelixAt: Date | null = null;
+  private lastUpdateAt: Date | null = null;
+  private source: "eventsub" | "helix" | null = null;
   constructor(private readonly db: PrismaClient, private readonly api: TwitchApi, readonly config: TwitchConfig, private readonly publish?: Publisher) {
     api.setUserTokenStore({
       load: async () => (await db.twitchPollCredential.findUnique({ where: { broadcasterId: config.broadcasterId } }))?.envelope ?? null,
@@ -32,27 +43,27 @@ export class NativeTwitchPolls {
       throw new Level38Error(503, this.config.pollError || this.config.error || "Native Twitch polls are not configured. Configure the broadcaster authorization; web voting is disabled.");
     }
   }
-  async status() { return { available: this.validated && !!this.config.enabled && !this.config.error && !!this.config.pollsEnabled && !this.config.pollError && !this.error && !this.subscriptionError,
-    error: this.config.pollError || this.error || this.subscriptionError || (!this.config.pollsEnabled ? "Native Twitch polls are not enabled." : null),
-    channelUrl: `https://www.twitch.tv/${encodeURIComponent(this.config.broadcasterLogin)}`, scopesValid: this.validated && !this.error }; }
-  subscription(type: string, id: string, status: string) {
-    this.subscriptions.set(type, { id, status });
-    this.subscriptionError = [...this.subscriptions.values()].some((sub) => !["enabled", "webhook_callback_verification_pending"].includes(sub.status))
-      ? "A Twitch poll EventSub subscription was revoked. Synchronize Twitch to restore live updates." : null;
-  }
-  revoke(subscriptionId: string, status: string) {
-    // Delayed revocations must not invalidate a replacement subscription.
-    for (const [type, current] of this.subscriptions) if (current.id === subscriptionId) this.subscription(type, subscriptionId, status);
+  async status() {
+    const enabled = !!this.config.enabled && !this.config.error && !!this.config.pollsEnabled && !this.config.pollError && !this.stopped;
+    return { available: enabled && this.validated && !this.authorizationError,
+      error: this.config.pollError || this.authorizationError || (!this.config.pollsEnabled ? "Native Twitch polls are not enabled." : null),
+      channelUrl: `https://www.twitch.tv/${encodeURIComponent(this.config.broadcasterLogin)}`, scopesValid: this.validated && !this.authorizationError,
+      live: { source: this.source, lastEventAt: this.lastEventAt?.toISOString() ?? null, lastReceiptAt: this.lastReceiptAt?.toISOString() ?? null,
+        lastHelixAt: this.lastHelixAt?.toISOString() ?? null, lastUpdateAt: this.lastUpdateAt?.toISOString() ?? null },
+      backup: { status: !enabled ? "disabled" : this.failures ? "retrying" : !this.activePollId ? "idle" : this.lastSuccessAt ? "healthy" : "scheduled",
+        intervalSeconds: 5, activePollId: this.activePollId, lastAttemptAt: this.lastAttemptAt?.toISOString() ?? null,
+        lastSuccessAt: this.lastSuccessAt?.toISOString() ?? null, nextAttemptAt: this.activePollId && this.nextAttemptAt ? new Date(this.nextAttemptAt).toISOString() : null,
+        error: this.error, failures: this.failures } };
   }
   async close() { this.stopped = true; await this.operation.catch(() => {}); }
   private serial<T>(work: () => Promise<T>): Promise<T> {
     const next = this.operation.catch(() => {}).then(work); this.operation = next; return next;
   }
   private async authorize() {
-    try { await this.api.userToken(); this.validated = true; }
+    try { await this.api.userToken(); this.validated = true; this.authorizationError = null; }
     catch (error) {
-      this.validated = false; this.error = error instanceof TwitchApiError ? error.message : safeError;
-      throw new Level38Error(503, this.error);
+      this.validated = false; this.authorizationError = error instanceof TwitchApiError ? error.message : safeError;
+      throw new Level38Error(503, this.authorizationError);
     }
   }
   private async intent(operatorId: string, pollId: string, action: "open" | "close" | "cancel", expectedRevision: number) {
@@ -167,24 +178,46 @@ export class NativeTwitchPolls {
     });
     this.publish?.(state, { type: "poll:cancelled", revision: state.event.revision });
   }
-  async reconcile(): Promise<void> {
+  async reconcile(force = true): Promise<void> {
     if (!this.config.pollsEnabled || this.config.pollError || this.stopped) return;
-    return this.serial(async () => {
+    if (this.reconciliation) return this.reconciliation;
+    const reconciliation = this.serial(async () => {
       this.requireEnabled();
-      await this.authorize();
       const rows = await this.db.poll.findMany({ where: { source: "TWITCH", archivedAt: null, OR: [{ status: "OPEN" }, { twitchStatus: { in: pendingStatuses } }] }, include: pollInclude });
-      if (!rows.length) this.error = null;
-      for (const poll of rows) {
-        try {
+      this.activePollId = rows.find((poll) => poll.status === "OPEN")?.id ?? null;
+      if (!rows.length) { this.error = null; this.failures = 0; this.nextAttemptAt = 0; if (!this.validated) await this.authorize(); return; }
+      // Background/owner/deadline calls share one request and one rate budget.
+      // Never let App Access Token failures disable this broadcaster-token path.
+      if (Date.now() < this.rateLimitedUntil || !force && Date.now() < this.nextAttemptAt) return;
+      this.lastAttemptAt = new Date(); this.nextAttemptAt = Date.now() + 5000;
+      let pollId = rows[0].id;
+      try {
+        await this.authorize();
+        for (const poll of rows) {
+          pollId = poll.id;
           if (poll.twitchStatus === "PREPARING") await this.create(poll);
           else if (poll.twitchStatus === "CANCELLING" && !poll.twitchPollId) await this.cancelPending(poll);
           else if (!poll.twitchPollId) await this.recover(poll);
           else if (["CLOSING", "CANCELLING"].includes(poll.twitchStatus ?? "")) await this.end(poll);
           else { const at = new Date(); const remote = (await this.api.polls(poll.twitchPollId))[0]; if (!remote) throw new TwitchApiError(404, "poll recovery"); await this.receive(remote, at); }
-          this.error = null;
-        } catch (error) { await this.fail(poll.id, error); }
+        }
+        this.activePollId = (await this.db.poll.findFirst({ where: { source: "TWITCH", archivedAt: null, status: "OPEN" }, select: { id: true } }))?.id ?? null;
+        this.lastSuccessAt = new Date(); this.lastHelixAt = this.lastSuccessAt; this.failures = 0; this.error = null;
+      } catch (error) {
+        // An EventSub end may commit while the recovery GET is in flight. An
+        // obsolete request failure must not mark that completed round as broken.
+        if ((await this.db.poll.findUnique({ where: { id: pollId }, select: { status: true } }))?.status === "CLOSED") {
+          this.activePollId = null; this.failures = 0; this.error = null; this.nextAttemptAt = 0; return;
+        }
+        this.failures++;
+        const rateDelay = error instanceof TwitchApiError ? error.retryAfterMs ?? 0 : 0;
+        if (rateDelay) this.rateLimitedUntil = Date.now() + rateDelay;
+        this.nextAttemptAt = Date.now() + Math.max(rateDelay, Math.min(60000, 5000 * 2 ** Math.min(this.failures - 1, 4)));
+        await this.fail(pollId, error);
       }
     });
+    this.reconciliation = reconciliation;
+    try { await reconciliation; } finally { if (this.reconciliation === reconciliation) this.reconciliation = undefined; }
   }
   async receive(remote: NativePoll, at: Date, messageId?: string, localId?: string): Promise<void> {
     this.requireEnabled();
@@ -211,7 +244,10 @@ export class NativeTwitchPolls {
       if (!Number.isFinite(endsAt.getTime())) throw new Level38Error(400, "Invalid Twitch poll deadline.");
       const cancelled = poll.twitchStatus === "CANCELLING" || ["MODERATED", "INVALID"].includes(remote.status);
       const changed = !poll.twitchPollId || final || pairs.some(({ option, choice }) => option.twitchVotes !== Math.max(option.twitchVotes, choice!.votes ?? 0)) || poll.endsAt?.getTime() !== endsAt.getTime();
-      if (!changed) return null;
+      if (!changed) {
+        if (poll.twitchSyncError) await tx.poll.update({ where: { id: poll.id }, data: { twitchSyncError: null } });
+        return { state: null, type: null, pollId: poll.id };
+      }
       for (const { option, choice } of pairs) await tx.pollOption.update({ where: { id: option.id }, data: { twitchChoiceId: choice!.id, twitchVotes: final ? choice!.votes ?? 0 : Math.max(option.twitchVotes, choice!.votes ?? 0) } });
       await tx.poll.update({ where: { id: poll.id }, data: { twitchPollId: remote.id, twitchStatus: !final && ["CLOSING", "CANCELLING"].includes(poll.twitchStatus ?? "") ? poll.twitchStatus : remote.status, twitchUpdatedAt: at, twitchSyncError: null, status: final ? "CLOSED" : "OPEN", openedAt, endsAt,
         ...(final ? { closedAt: remote.ended_at && Number.isFinite(Date.parse(remote.ended_at)) ? new Date(remote.ended_at) : at,
@@ -228,8 +264,23 @@ export class NativeTwitchPolls {
       const type = final ? cancelled ? "poll:cancelled" : "poll:closed" : !poll.twitchPollId ? "poll:opened" : "poll:vote-updated";
       if (type !== "poll:vote-updated") await tx.auditLog.create({ data: { eventId: initial.id, operatorName: "TWITCH", action: type, entityId: poll.id, before: { status: poll.status }, after: { number: poll.number, title: poll.title, nativeStatus: remote.status, ...winner },
         metadata: { version: 2, source: "TWITCH_POLL", ...(messageId ? { messageId } : { synchronization: true }) }, eventRevision: event.revision } });
-      return { state: await readState(tx, false), type };
+      return { state: await readState(tx, false), type, pollId: poll.id };
     });
-    if (result) this.publish?.(result.state, { type: result.type, revision: result.state.event.revision });
+    if (result) {
+      const receivedAt = new Date();
+      if (messageId) { this.lastEventAt = at; this.lastReceiptAt = receivedAt; }
+      else this.lastHelixAt = receivedAt;
+      // A successful backup read of identical totals proves health; it does
+      // not mean the previous live EventSub update was supplied by the backup.
+      if (result.state || !this.source) this.source = messageId ? "eventsub" : "helix";
+      if (!finalStatuses.has(remote.status) && this.activePollId !== result.pollId) {
+        this.lastSuccessAt = null; this.lastAttemptAt = null; this.nextAttemptAt = 0; this.failures = 0; this.error = null;
+      }
+      this.activePollId = finalStatuses.has(remote.status) ? null : result.pollId;
+      if (result.state && result.type) {
+        this.lastUpdateAt = receivedAt;
+        this.publish?.(result.state, { type: result.type, revision: result.state.event.revision });
+      }
+    }
   }
 }

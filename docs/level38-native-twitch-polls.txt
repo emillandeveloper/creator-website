@@ -18,6 +18,77 @@ activa la archiva; cancelar un intento incierto comprueba antes su estado.
 Una respuesta perdida al crear nunca provoca otro POST automático a ciegas.
 La recuperación lee Twitch y actualiza los totales; no suma paquetes de votos.
 
+SINCRONIZACIÓN DURANTE LA VOTACIÓN
+EventSub sigue siendo la vía principal para begin, progress y end. El mismo
+temporizador de encuestas consulta Get Polls con el token del broadcaster cada
+cinco segundos mientras hay una encuesta nativa abierta. Arranca leyendo el
+estado persistido, por lo que recupera una votación tras reiniciar el servidor.
+No depende de conseguir un App Access Token ni de la sincronización de categorías.
+No mantiene consultas Helix de votos cuando no hay una encuesta que recuperar.
+
+Las llamadas concurrentes comparten una reconciliación. Los cambios de estado
+no posponen el siguiente vencimiento del temporizador. Los fallos temporales
+se reintentan con espera creciente y los HTTP 429 respetan Retry-After y
+Ratelimit-Reset. Una lectura antigua nunca reduce los votos de una encuesta
+abierta; los resultados definitivos de Twitch siguen siendo autoritativos.
+El cierre y la cancelación paran el respaldo. Los votos se persisten y se
+publican mediante el Socket.IO existente, incluidos totales y porcentajes.
+
+CAUSA DEL FALLO DE ACTUALIZACIÓN EN DIRECTO
+El respaldo anterior estaba dentro del ciclo de integración general: un
+fallo al obtener el App Access Token impedía registrar EventSub y después
+la consulta de categoría fallaba antes de reconciliar la encuesta. El otro
+temporizador esperaba al final de la encuesta (con un mínimo de 15 segundos),
+por lo que no cubría la votación en directo cuando EventSub fallaba.
+El nuevo ciclo de cinco segundos funciona de forma independiente con la
+autorización del broadcaster, que ya permite crear encuestas.
+
+El panel separa autorización del broadcaster, autorización de aplicación,
+estado de cada una de las tres suscripciones, recepción de actualizaciones
+y salud del respaldo. Una suscripción channel.update habilitada no acredita
+que channel.poll.progress funcione. Si faltan eventos pero Helix recupera los
+votos, indica modo de respaldo, no que EventSub esté sano.
+
+DIAGNÓSTICO DEL HTTP 403 DE CLIENT CREDENTIALS
+La petición es POST https://id.twitch.tv/oauth2/token con formulario
+client_id, client_secret y grant_type=client_credentials, según Twitch.
+La versión anterior ya utilizaba URLSearchParams correctamente. Añadir el
+Content-Type explícito no demuestra que el formato fuera la causa del 403.
+El nuevo diagnóstico conserva el HTTP real y solo clasifica mensajes conocidos
+(por ejemplo invalid_client_secret), sin publicar la respuesta ni credenciales.
+Un 403 desconocido se informa como rechazo de Client Credentials; por sí solo
+no identifica qué variable está mal. Los reintentos se comparten y limitan.
+
+No se han inspeccionado las variables secretas actuales de Render. Si el error
+persiste tras desplegar, comprobar allí que TWITCH_CLIENT_ID y
+TWITCH_CLIENT_SECRET pertenecen a la misma aplicación existente. Corregir
+únicamente el valor incorrecto si se confirma; no regenerar secretos, modificar
+Hebe ni reemplazar el token del broadcaster que ya está funcionando.
+Si ambos valores son correctos, revisar el código HTTP y la categoría segura
+del diagnóstico, la respuesta de Twitch desde Render y posibles rechazos de
+red/proxy, sin imprimir el cuerpo OAuth ni las credenciales.
+
+COMPROBACIÓN MANUAL EN EL CANAL REAL
+Esta comprobación la realiza el operador cuando decida abrir una encuesta real:
+1. Tras el despliegue, entrar en /level38/control y comprobar la autorización
+   del broadcaster. Revisar por separado App Auth y begin/progress/end.
+2. Crear CUSTOM de 60 segundos con dos opciones y pulsar Iniciar encuesta.
+3. Abrir /level38/overlay/poll?lang=es en OBS o Chromium y votar desde Twitch
+   a los diez segundos de comenzar. El voto debe aparecer con la encuesta
+   todavía abierta, normalmente dentro de cinco a siete segundos con Helix.
+4. Comprobar el total y cada opción en el panel y el overlay; añadir votos
+   desde otras cuentas y comprobar porcentajes, barras y cuenta atrás.
+5. En las herramientas de red del navegador, la respuesta autenticada de
+   /level38/api/control/state debe incluir totalVotes y opciones actualizados.
+   twitch.eventSub muestra cada suscripción y su última recepción;
+   twitch.polls.live y twitch.polls.backup distinguen origen, éxitos y reintentos.
+6. Si EventSub está averiado, verificar que el panel indica modo de respaldo
+   y que lastSuccessAt avanza mientras los votos llegan. No modificar secretos
+   ni romper el callback para forzar una prueba en producción.
+7. Al terminar, comprobar el ganador definitivo y que el respaldo queda inactivo.
+   No debe cambiar la misión activa ni el juego global por sí solo.
+No hace falta activar ni completar misiones para esta comprobación.
+
 Un ganador único con votos queda registrado al recibirse el resultado final.
 Un empate requiere decisión del operador entre los líderes. Una encuesta sin
 votos requiere una resolución explícita con motivo si se quiere fijar ganador.
@@ -110,18 +181,23 @@ y encuestas sin votos. Se mantiene separada de la fuente de misión activa.
 Todos los enlaces: LEVEL38-OVERLAYS.txt.
 
 VALIDACIÓN DE LA ENTREGA
-npm test: compilación, validación del catálogo y 81 pruebas unitarias correctas.
+npm test: compilación, validación del catálogo y 94 pruebas unitarias correctas.
 node --test --test-concurrency=3 tests/integration/*.test.cjs:
-80 pruebas correctas contra PostgreSQL local aislado, incluidas migraciones,
-históricos, OAuth, EventSub y conservación del resto del evento.
-node --test tests/visual/level38-native-polls.cjs:
-Playwright con Chromium completó los cinco flujos (los cuatro tipos, con
-NEXT_GAME global y con misión), desde el editor hasta el ganador en el overlay.
-Se revisaron también el editor móvil y las capturas de votos y resultados.
+83 pruebas correctas contra PostgreSQL local aislado, incluidas migraciones,
+históricos, los cuatro tipos de encuesta, OAuth, EventSub, respaldo con HTTP 403,
+reinicio en otro proceso y conservación del resto del evento.
+node --test tests/visual/level38-native-realtime.cjs:
+Playwright con Chromium completó dos encuestas de 60 segundos reales: una
+con eventos firmados y otra sin EventSub. Voto a los 10 segundos visible en
+el overlay abierto antes de siete segundos, actualización a 75 % / 25 % a
+mitad de la encuesta, recarga y ganador definitivo al final de los 60 segundos.
+También se comprobaron los votos en el panel y la web y el modo de respaldo.
+Las seis capturas muestran el primer voto, la mitad y el final en ambos modos.
 Twitch se simuló para estas pruebas; no se utilizó el canal real ni OBS real.
-Evidencias locales ignoradas por Git: dist/level38-native-polls-qa/.
-La activación en producción requiere completar la configuración de Render
-descrita arriba; las pruebas locales no acreditan que ya esté configurada allí.
+Evidencias locales ignoradas por Git: dist/level38-native-realtime-qa/.
+Conservar la configuración de Render que ya crea encuestas y comprobar el
+App Access Token como se describe arriba. Las pruebas locales no acreditan
+que el HTTP 403 de producción esté resuelto ni que el Client Secret sea incorrecto.
 
 FUENTES OFICIALES
 https://dev.twitch.tv/docs/api/reference/#create-poll
@@ -131,3 +207,5 @@ https://dev.twitch.tv/docs/eventsub/eventsub-subscription-types/#channelpollprog
 https://dev.twitch.tv/docs/eventsub/eventsub-subscription-types/#channelpollend
 https://dev.twitch.tv/docs/authentication/validate-tokens/
 https://dev.twitch.tv/docs/authentication/refresh-tokens/
+https://dev.twitch.tv/docs/authentication/getting-tokens-oauth/#client-credentials-grant-flow
+https://dev.twitch.tv/docs/eventsub/manage-subscriptions/#authorization

@@ -186,7 +186,7 @@
     latestPolls = state.polls;
     if (byId("vote-nav")) { const open = state.polls.some((poll) => poll.status === "OPEN"); byId("vote-nav").textContent = open ? t("Vote now ·") : t("Vote"); byId("vote-nav").classList.toggle("is-open", open); }
     const root = byId("poll-board");
-    const signature = language() + JSON.stringify(state.polls.map((poll) => ({ id: poll.id, title: poll.title, type: poll.type, status: poll.status,
+    const signature = language() + String(state.twitch?.polls?.available) + JSON.stringify(state.polls.map((poll) => ({ id: poll.id, title: poll.title, type: poll.type, status: poll.status,
       options: poll.options.map((option) => ({ id: option.id, label: optionLabel(poll, option) })), winner: poll.effectiveWinnerId, override: poll.overrideOptionId,
       endsAt:poll.endsAt, durationSeconds:poll.durationSeconds, closeReason:poll.closeReason, cancelledAt:poll.cancelledAt, winnerAcceptedAt:poll.winnerAcceptedAt,
       source:poll.source, readOnly:poll.readOnly, nativeStatus:poll.nativeStatus, resultsFinal:poll.resultsFinal, twitchUrl:poll.twitchUrl,
@@ -236,7 +236,7 @@
           if (handlers.control && native && option.twitchLabel) {
             const label = element("small", t("Twitch label: {label}", {label:option.twitchLabel}), "l38-native-label"); row.append(label);
           }
-          if (!handlers.control) { const percent = element("span", "", "l38-percent"); percent.dataset.percent = option.id; row.append(percent); }
+          const percent = element("span", "", "l38-percent"); percent.dataset.percent = option.id; row.append(percent);
           card.append(row);
         }
         if (final && poll.effectiveWinnerId && !poll.cancelledAt && poll.closeReason !== 'CANCELLED') {

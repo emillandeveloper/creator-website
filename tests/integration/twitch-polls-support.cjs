@@ -4,8 +4,9 @@ const { signed } = require('../twitch-fake.cjs');
 
 const ok = response => { assert.equal(response.status, 200, JSON.stringify(response.data)); return response.data; };
 async function nativeFixture(t, overrides = {}) {
-  const f = await setup(t, { nativePolls: true, ...overrides });
-  await f.twitch.run('ensure');
+  const {skipEnsure, ...options} = overrides;
+  const f = await setup(t, { nativePolls: true, ...options });
+  if (!skipEnsure) await f.twitch.run('ensure');
   f.op = async (route, body) => f.call(`/api/control/${route}`, { ...body, controlRevision: await f.revision() }, f.owner.cookie);
   f.statePoll = async id => (await f.service.state(true)).polls.find(poll => poll.id === id);
   f.dbPoll = id => f.db.poll.findUniqueOrThrow({ where: { id }, include: { options: { orderBy: { position: 'asc' } } } });

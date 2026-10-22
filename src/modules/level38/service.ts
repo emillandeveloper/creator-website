@@ -20,7 +20,7 @@ export interface Change {
 export type PublicChange = { type: string; revision: number; unlock?: UnlockEvent; preview?: PreviewEvent };
 
 export class Level38Service {
-  private nativePolls?: { changePoll(operatorId: string, pollId: string, action: "open" | "close" | "cancel", expectedRevision: number): Promise<Level38State>; reconcile(): Promise<void> };
+  private nativePolls?: { changePoll(operatorId: string, pollId: string, action: "open" | "close" | "cancel", expectedRevision: number): Promise<Level38State>; reconcile(force?: boolean): Promise<void> };
   constructor(private readonly db: PrismaClient, private readonly publish?: (state: Level38State, change: PublicChange) => void) {}
   setNativePolls(native: NonNullable<Level38Service["nativePolls"]>) { this.nativePolls = native; }
 
@@ -192,10 +192,10 @@ export class Level38Service {
     return Promise.reject(new Level38Error(409, "Twitch does not support extending native polls. Create a new round."));
   }
 
-  // A deadline only requests reconciliation with Twitch. It cannot manufacture
+  // The runtime only requests reconciliation with Twitch. It cannot manufacture
   // final votes/winners or change a historical web round.
   async expirePolls(): Promise<Level38State> {
-    await this.nativePolls?.reconcile();
+    await this.nativePolls?.reconcile(false);
     return this.state();
   }
 

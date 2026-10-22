@@ -1,10 +1,12 @@
 import { Level38Service, Level38State } from "./service";
 
-// One deadline timer, no per-second database polling. Every local state change
-// replaces it; persisted deadlines are re-read on startup and after a wake-up.
+// One active-poll timer, independent of App Access Token / EventSub health.
+// State broadcasts must not postpone an already scheduled Helix recovery read.
 export class PollRuntime {
   private timer: ReturnType<typeof setTimeout> | null = null;
+  private wakeAt = 0;
   private stopped = false;
+  private started = false;
   private revision = -1;
   private failures = 0;
   private pending: Promise<void> | null = null;
@@ -12,21 +14,24 @@ export class PollRuntime {
 
   constructor(private readonly service: Level38Service) {}
 
-  start(): void { this.wake(); }
+  start(): void { if (this.started || this.stopped) return; this.started = true; this.wake(); }
 
   update(state: Level38State): void {
     if (this.stopped || state.event.revision < this.revision) return;
     this.revision = state.event.revision;
-    if (this.timer) clearTimeout(this.timer);
-    this.timer = null;
-    const deadlines = state.polls.filter((poll) => poll.source === "TWITCH" && poll.status === "OPEN" && !poll.cancelledAt && poll.endsAt)
-      .map((poll) => Date.parse(poll.endsAt!)).filter(Number.isFinite);
-    if (deadlines.length) this.schedule(Math.max(15000, Math.min(...deadlines) - Date.now()));
+    const active = state.polls.some((poll) => poll.source === "TWITCH" && !poll.cancelledAt &&
+      (poll.status === "OPEN" || ["PREPARING", "CREATING", "CLOSING", "CANCELLING"].includes(poll.nativeStatus ?? "")));
+    if (active) this.schedule(5000);
+    else { if (this.timer) clearTimeout(this.timer); this.timer = null; this.wakeAt = 0; }
   }
 
   private schedule(delayMs: number): void {
     if (this.stopped) return;
-    this.timer = setTimeout(() => { this.timer = null; this.wake(); }, Math.min(delayMs, 2147483647));
+    const wakeAt = Date.now() + Math.min(delayMs, 2147483647);
+    if (this.timer && this.wakeAt <= wakeAt) return;
+    if (this.timer) clearTimeout(this.timer);
+    this.wakeAt = wakeAt;
+    this.timer = setTimeout(() => { this.timer = null; this.wakeAt = 0; this.wake(); }, Math.min(delayMs, 2147483647));
     this.timer.unref?.();
   }
 

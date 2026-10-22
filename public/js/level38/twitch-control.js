@@ -5,15 +5,55 @@
   let bound = false;
   let mappingSignature = "";
   let revision = 0;
+  const statusText = (id, value) => { const node = byId(id); if (node) node.textContent = value; };
+  function received(at) {
+    const time = Date.parse(at);
+    return Number.isFinite(time) ? t("Last received: {time}", {time:new Date(time).toLocaleString(window.Level38I18n?.language || "en")}) : t("No update received yet.");
+  }
+  function renderPollDiagnostics(state) {
+    const twitch = state.twitch, polls = twitch?.polls, app = twitch?.appAuth;
+    statusText("twitch-polls-status", polls?.available
+      ? t("Broadcaster authorization verified. Native polls can be created.")
+      : t(polls?.error || "Native Twitch polls need broadcaster authorization with channel:manage:polls."));
+    statusText("twitch-app-auth", app?.status === "ready" ? t("App authorization verified.")
+      : app?.status === "error" ? [t(app.httpStatus ? "App authorization failed (HTTP {status})." : "App authorization failed.", {status:app.httpStatus}), t(app.error || "Check the Client ID and Client Secret of the existing Twitch application in Render.")].join(" ")
+      : t("App authorization has not succeeded yet."));
+    const subscriptions = byId("twitch-poll-subscriptions");
+    if (subscriptions) {
+      const list = element("ul");
+      for (const type of ["channel.poll.begin", "channel.poll.progress", "channel.poll.end"]) {
+        const sub = twitch?.eventSub?.subscriptions?.find(item => item.type === type);
+        const status = sub?.status === "enabled" ? t("Enabled") : sub?.status === "webhook_callback_verification_pending" ? t("Pending verification") : sub?.status || t("Unknown");
+        list.append(element("li", `${type}: ${status}. ${received(sub?.lastReceiptAt)}`));
+      }
+      subscriptions.replaceChildren(list);
+      if (twitch?.eventSub?.error) subscriptions.append(element("p", t(twitch.eventSub.error)));
+    }
+    const backup = polls?.backup, live = polls?.live;
+    const active = state.polls?.find(poll => poll.id === backup?.activePollId && poll.status === "OPEN");
+    const progress = twitch?.eventSub?.subscriptions?.find(item => item.type === "channel.poll.progress");
+    const progressForActive = active && Date.parse(progress?.lastReceiptAt) >= Date.parse(active.openedAt);
+    const eventSubReady = twitch?.eventSub?.available === true;
+    let liveStatus = t("No native poll is open.");
+    if (active) {
+      if (backup?.status === "retrying" && !eventSubReady) liveStatus = t("Live synchronization is degraded. Helix backup is retrying.");
+      else if (backup?.status === "healthy" && (!eventSubReady || !progressForActive || live?.source === "helix")) liveStatus = t("Backup mode: live results are synchronized through Helix.");
+      else if (live?.source === "eventsub" && progressForActive) liveStatus = t("Live results received through EventSub.");
+      else liveStatus = t("Waiting for the first live update for this poll.");
+      liveStatus += ` ${received(live?.lastUpdateAt)}`;
+    }
+    statusText("twitch-poll-live", liveStatus);
+    const backupLabels = { idle:"Idle. No open native poll to synchronize.", scheduled:"Helix backup is scheduled every {seconds} seconds.", healthy:"Helix backup is working every {seconds} seconds.", retrying:"Helix backup is retrying after a temporary error.", disabled:"Helix backup is disabled or unavailable." };
+    const backupText = t(backupLabels[backup?.status] || "Helix backup has not reported its status yet.", {seconds:backup?.intervalSeconds || 5});
+    statusText("twitch-poll-backup", [backupText, backup?.lastSuccessAt ? received(backup.lastSuccessAt) : "", backup?.error ? t(backup.error) : ""].filter(Boolean).join(" "));
+  }
   function render(state, mutate) {
     if (!byId("twitch-connection")) return;
     revision = state.event.controlRevision;
     const twitch = state.twitch;
     byId("twitch-connection").textContent = t(twitch?.connection || "Disabled");
     byId("twitch-error").textContent = t(twitch?.error || "");
-    if (byId("twitch-polls-status")) byId("twitch-polls-status").textContent = twitch?.polls?.available
-      ? t("Native Twitch polls ready. Viewers vote on Twitch.")
-      : t(twitch?.polls?.error || "Native Twitch polls need broadcaster authorization with channel:manage:polls.");
+    renderPollDiagnostics(state);
     byId("twitch-source").textContent = state.event.gameSource === "MANUAL_OVERRIDE"
       ? t("Game source: Manual Override{operator}", {operator: state.event.manualOverrideBy ? t(" by {name}", {name:state.event.manualOverrideBy}) : ""}) : t("Game source: Twitch Auto");
     byId("twitch-channel").textContent = twitch?.broadcasterId ? `${twitch.channel || t("Broadcaster")} (${twitch.broadcasterId})` : twitch?.channel || t("Not configured");
@@ -21,7 +61,7 @@
     const mapped = state.games.find((game) => game.enabled && game.twitchCategoryId && game.twitchCategoryId === twitch?.categoryId);
     byId("twitch-mapped").textContent = mapped?.title || (twitch?.categoryId ? t("Unmapped Twitch category — current game preserved") : t("No mapped category"));
     byId("twitch-updated").textContent = twitch?.lastEventAt ? new Date(twitch.lastEventAt).toLocaleString(window.Level38I18n?.language || "en") : t("No EventSub update yet");
-    byId("twitch-subscription").textContent = twitch?.enabled ? t(twitch.subscriptionStatus.replaceAll("_", " ")) : t("Disabled");
+    byId("twitch-subscription").textContent = twitch?.enabled ? t((twitch.subscriptionStatus || "unknown").replaceAll("_", " ")) : t("Disabled");
     byId("twitch-auto").disabled = !twitch?.available || state.event.gameSource === "AUTO_TWITCH";
     for (const action of ["sync", "ensure", "recreate"]) if (byId(`twitch-${action}`)) byId(`twitch-${action}`).disabled = !twitch?.available;
     if (!bound) {

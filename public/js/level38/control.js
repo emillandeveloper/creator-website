@@ -41,7 +41,11 @@
     if (Number.isFinite(next.serverTime)) { clockServer = next.serverTime; clockLocal = performance.now(); }
     window.Level38Twitch?.render(next, mutate);
     window.Level38PartyControl?.render(next, mutate);
-    if (!force && state && next.event.revision <= state.event.revision) return;
+    if (!force && state && next.event.revision <= state.event.revision) {
+      // Authorization/transport health can change without mutating event data.
+      if (next.event.revision === state.event.revision) renderPolls(next, handlers);
+      return;
+    }
     const controlsChanged = force || !state || next.event.controlRevision !== state.event.controlRevision;
     state = next;
     if (controlsChanged) {

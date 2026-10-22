@@ -21,10 +21,12 @@ test("all owned EventSub subscriptions rotate together and revoked native stream
   pollEnd.status = "notification_failures_exceeded";
   const revoke = signed({ subscription: pollEnd }, { type: "revocation", secret: f.cfg.secret });
   assert.equal((await f.webhook(revoke)).status, 204);
-  assert.equal((await f.native.status()).available, false);
-  assert.match((await f.native.status()).error, /revoked/);
+  assert.equal((await f.native.status()).available, true, 'revocation must not invalidate the independent broadcaster authorization');
+  assert.equal((await f.twitch.status()).eventSub.available, false);
+  assert.match((await f.twitch.status()).eventSub.error, /revoked/);
   await f.twitch.run("ensure");
   assert.equal((await f.native.status()).available, true);
+  assert.equal((await f.twitch.status()).eventSub.available, true);
   assert.notEqual(f.fake.subscriptions.find(sub => sub.type === "channel.poll.end").id, pollEnd.id);
   assert.deepEqual(f.fake.subscriptions.find(sub => sub.id === hebe.id), hebe);
   // A delayed revocation for the retired subscription cannot revoke its replacement.

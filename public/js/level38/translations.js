@@ -356,6 +356,35 @@
     "One random class. Yours for this adventure. Join the party here and vote on Twitch.": "Una clase al azar para esta aventura. Únete al grupo aquí y vota en Twitch.",
     "Read the quest journal above. Vote on Twitch. Enable JavaScript to join the party and follow live results.": "Consulta las misiones arriba. Vota en Twitch. Activa JavaScript para unirte al grupo y seguir los resultados en directo."
   });
+  Object.assign(es, {
+    "Broadcaster authorization verified. Native polls can be created.": "Autorización del broadcaster verificada. Se pueden crear encuestas nativas.",
+    "App authorization": "Autorización de la aplicación",
+    "App authorization verified.": "Autorización de la aplicación verificada.",
+    "App authorization failed (HTTP {status}).": "Ha fallado la autorización de la aplicación (HTTP {status}).",
+    "App authorization failed.": "Ha fallado la autorización de la aplicación.",
+    "App authorization has not succeeded yet.": "La autorización de la aplicación aún no se ha completado.",
+    "Check the Client ID and Client Secret of the existing Twitch application in Render.": "Comprueba el Client ID y el Client Secret de la aplicación de Twitch existente en Render.",
+    "Poll EventSub subscriptions": "Suscripciones EventSub de encuestas",
+    "Live poll updates": "Actualizaciones de votos en directo",
+    "Helix backup synchronization": "Sincronización de respaldo con Helix",
+    "Category subscription": "Suscripción de categoría",
+    "Last received: {time}": "Última recepción: {time}",
+    "No update received yet.": "Aún no se ha recibido ninguna actualización.",
+    "Enabled": "Habilitada",
+    "Pending verification": "Verificación pendiente",
+    "Unknown": "Desconocido",
+    "No native poll is open.": "No hay ninguna encuesta nativa abierta.",
+    "Backup mode: live results are synchronized through Helix.": "Modo de respaldo: los votos se sincronizan en directo mediante Helix.",
+    "Live synchronization is degraded. Helix backup is retrying.": "La sincronización en directo tiene problemas. El respaldo con Helix está reintentando la consulta.",
+    "Live results received through EventSub.": "Se reciben los votos en directo mediante EventSub.",
+    "Waiting for the first live update for this poll.": "Esperando la primera actualización de votos de esta encuesta.",
+    "Idle. No open native poll to synchronize.": "En espera. No hay ninguna encuesta nativa abierta que sincronizar.",
+    "Helix backup is scheduled every {seconds} seconds.": "El respaldo con Helix está programado cada {seconds} segundos.",
+    "Helix backup is working every {seconds} seconds.": "El respaldo con Helix funciona cada {seconds} segundos.",
+    "Helix backup is retrying after a temporary error.": "El respaldo con Helix está reintentando la consulta tras un error temporal.",
+    "Helix backup is disabled or unavailable.": "El respaldo con Helix está desactivado o no está disponible.",
+    "Helix backup has not reported its status yet.": "El respaldo con Helix aún no ha comunicado su estado."
+  });
   const en = Object.fromEntries(Object.keys(es).map(key => [key, key]));
   Object.assign(en, { MULTI_GAME: "Multi-game", GAME_SPECIFIC: "Game-specific", COOPERATIVE: "Cooperative", AVAILABLE: "Available", ACTIVE: "Active", COMPLETED: "Completed", FAILED: "Failed", SKIPPED: "Skipped", LOCKED: "Locked", SECRET: "Secret", OPEN: "Open", CLOSED: "Closed", DRAFT: "Draft", NEXT_QUEST: "Next quest", NEXT_GAME: "Next game", YES_NO: "Yes / No", CUSTOM: "Custom choices", OWNER: "Owner", MODERATOR: "Moderator", VIEWER: "Viewer", MANUAL_OVERRIDE: "Manual selection", AUTO_TWITCH: "Twitch Auto" });
   const catalogs = { en, es };

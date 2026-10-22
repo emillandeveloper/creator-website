@@ -65,8 +65,12 @@
         contentKey = signature; text('poll-title', poll.title); text('poll-total', t(poll.totalVotes === 1 ? '{count} vote' : '{count} votes', {count:poll.totalVotes}));
         const nodes = options.map((option, index) => {
           const node = document.createElement('li'); node.className = 'obs-option'; node.dataset.optionId = option.id;
-          node.style.setProperty('--vote-percent', `${poll.totalVotes ? Math.round(option.votes / poll.totalVotes * 100) : 0}%`);
-          for (const [className, value] of [['obs-option-index', String(index + 1).padStart(2, '0')], ['obs-option-label', optionLabel(poll, option)], ['obs-option-votes', String(option.votes)]]) { const label = document.createElement('span'); label.className = className; label.textContent = value; node.append(label); }
+          const percent = `${poll.totalVotes ? Math.round(option.votes / poll.totalVotes * 100) : 0}%`;
+          node.style.setProperty('--vote-percent', percent);
+          for (const [className, value] of [['obs-option-index', String(index + 1).padStart(2, '0')], ['obs-option-label', optionLabel(poll, option)]]) { const label = document.createElement('span'); label.className = className; label.textContent = value; node.append(label); }
+          const tally = document.createElement('span'); tally.className = 'obs-option-tally';
+          for (const [className, value] of [['obs-option-votes', String(option.votes)], ['obs-option-percent', percent]]) { const label = document.createElement('span'); label.className = className; label.textContent = value; tally.append(label); }
+          node.append(tally);
           return node;
         });
         byId('poll-options').replaceChildren(...nodes);

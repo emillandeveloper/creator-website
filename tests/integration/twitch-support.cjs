@@ -15,20 +15,22 @@ const { createLevel38Routes } = require("../../dist/modules/level38/routes");
 async function setup(t, options = {}) {
   const f = await fixture(t); const fake = fakeTwitch(); const published = [];
   let channel;
+  let pollRuntime;
   const domainEvents = new Set(['quest:activated', 'quest:completed', 'quest:failed', 'quest:skipped', 'quest:revealed', 'quest:available', 'quest:game', 'quest:games', 'poll:created', 'poll:edited', 'poll:opened', 'poll:vote-updated', 'poll:closed', 'poll:cancelled', 'poll:extended', 'poll:winner', 'game:changed', 'game:configured', 'action:undone']);
   const publish = (state, change) => {
-    published.push({ state, change }); channel?.emit('level38:state', state);
+    published.push({ state, change }); pollRuntime?.update(state); channel?.emit('level38:state', state);
     if (domainEvents.has(change.type)) channel?.emit(change.type, { revision: change.revision });
     if (change.preview) channel?.emit('level38:celebration-preview', change.preview);
     if (change.unlock) channel?.emit('level38:unlocked', change.unlock);
   };
-  const { nativePolls: nativeEnabled, ...overrides } = options;
+  const { nativePolls: nativeEnabled, pollRuntime: runtimeEnabled, ...overrides } = options;
   const cfg = { ...config(), ...(nativeEnabled ? { pollsEnabled: true, broadcasterId: '1234', userAccessToken: 'private-user-token', userRefreshToken: 'private-user-refresh', pollTokenKey: 'b'.repeat(64) } : {}), ...overrides }; const store = new TwitchStore(f.db, publish);
   const api = new TwitchApi(cfg, fake.fetch);
   const native = nativeEnabled ? new (require('../../dist/modules/level38/twitch/polls').NativeTwitchPolls)(f.db, api, cfg, publish) : undefined;
   const twitch = new TwitchIntegration(cfg, api, store, native);
   const service = new Level38Service(f.db, publish); const local = { enabled: true, origin, secureCookies: false, trustProxyHops: 0 };
   if (native) service.setNativePolls(native);
+  if (runtimeEnabled) pollRuntime = new (require('../../dist/modules/level38/poll-runtime').PollRuntime)(service);
   const app = express(); app.set("view engine", "ejs"); app.set("views", "src/views");
   app.use(express.static("public"));
   const controller = new Level38Controller(f.db, new Level38Auth(f.db, local), service, twitch);
@@ -37,7 +39,7 @@ async function setup(t, options = {}) {
   channel.on("connection", (socket) => { service.state().then((state) => socket.emit("level38:state", state)).catch(() => {}); });
   server.listen(0, "127.0.0.1"); await once(server, "listening");
   const url = `http://127.0.0.1:${server.address().port}/level38`;
-  t.after(async () => { await twitch.close(); await new Promise((resolve) => io.close(resolve)); });
+  t.after(async () => { await pollRuntime?.close(); await twitch.close(); await new Promise((resolve) => io.close(resolve)); });
   async function call(path, body, cookie, browserOrigin = origin) {
     const response = await fetch(url + path, { method: body === undefined ? "GET" : "POST", headers: { "Content-Type": "application/json", Origin: browserOrigin, "X-Level38-Request": "1", ...(cookie ? { Cookie: cookie } : {}) }, ...(body === undefined ? {} : { body: JSON.stringify(body) }) });
     return { status: response.status, data: response.headers.get("content-type")?.includes("application/json") ? await response.json() : await response.text(), cookie: response.headers.get("set-cookie")?.split(";")[0] };
@@ -56,7 +58,10 @@ async function setup(t, options = {}) {
   const games = await f.db.game.findMany({ orderBy: { sortOrder: "asc" } });
   async function map(game, id) { return call(`/api/owner/games/${game.id}/twitch`, { twitchCategoryId: id, twitchCategoryName: "Reference name", controlRevision: await revision() }, owner.cookie); }
   async function webhook(msg) { return fetch(url + "/twitch/eventsub", { method: "POST", headers: msg.headers, body: msg.raw }); }
-  return { db: f.db, fake, cfg, store, twitch, service, native, published, call, owner, mod, operator, viewer, revision, games, map, webhook, url, origin: new URL(url).origin };
+  pollRuntime?.start();
+  return { db: f.db, databaseUrl:f.databaseUrl, fake, cfg, store, twitch, service, native, published, call, owner, mod, operator, viewer, revision, games, map, webhook, url, origin: new URL(url).origin,
+    get pollRuntime() { return pollRuntime; },
+    async restartPollRuntime() { await pollRuntime?.close(); pollRuntime = new (require('../../dist/modules/level38/poll-runtime').PollRuntime)(service); pollRuntime.start(); } };
 }
 
 module.exports = { setup };

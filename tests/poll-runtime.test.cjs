@@ -16,21 +16,20 @@ test("poll duration accepts only bounded whole seconds and defaults to sixty", (
   assert.equal(pollAction("cancel"), "cancel"); assert.throws(() => pollAction("reset"));
 });
 
-test("the runtime recovers persisted deadlines, reschedules extensions, and stays idle after closure", async (t) => {
+test("one five-second backup timer recovers an open poll and state broadcasts never postpone it", async (t) => {
   t.mock.timers.enable({ apis: ["setTimeout", "Date"], now: 100000 });
   let calls = 0;
   const runtime = new PollRuntime({ expirePolls: async () => { calls++; return calls === 1 ? state(1, 160000) : state(3); } });
   t.after(() => runtime.close());
-  runtime.start(); await settle(); assert.equal(calls, 1);
-  t.mock.timers.tick(30000);
+  runtime.start(); runtime.start(); await settle(); assert.equal(calls, 1, "starting twice cannot create another worker");
+  t.mock.timers.tick(2500);
   runtime.update(state(2, 190000));
-  t.mock.timers.tick(30000); await settle(); assert.equal(calls, 1, "the original timer was cancelled");
-  t.mock.timers.tick(29999); await settle(); assert.equal(calls, 1);
+  t.mock.timers.tick(2499); await settle(); assert.equal(calls, 1);
   t.mock.timers.tick(1); await settle(); assert.equal(calls, 2);
   t.mock.timers.tick(3600000); await settle(); assert.equal(calls, 2, "no database interval remains after closure");
 });
 
-test("a deadline arriving during an in-flight read is reconciled after that read", async (t) => {
+test("a backup tick arriving during an in-flight read is coalesced after that read", async (t) => {
   t.mock.timers.enable({ apis: ["setTimeout", "Date"], now: 100000 });
   let resolveFirst, calls = 0;
   const runtime = new PollRuntime({ expirePolls: () => {
@@ -40,7 +39,7 @@ test("a deadline arriving during an in-flight read is reconciled after that read
   t.after(() => runtime.close());
   runtime.start();
   runtime.update(state(2, 100000));
-  t.mock.timers.tick(15000); assert.equal(calls, 1);
+  t.mock.timers.tick(5000); assert.equal(calls, 1);
   resolveFirst(state(1)); await settle();
   t.mock.timers.tick(0); await settle();
   assert.equal(calls, 2, "the wake-up cannot be lost when a stale read finishes");

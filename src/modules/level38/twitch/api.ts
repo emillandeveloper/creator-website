@@ -2,7 +2,13 @@ import { TwitchConfig } from "./config";
 import { createCipheriv, createDecipheriv, createHash, randomBytes } from "crypto";
 
 export class TwitchApiError extends Error {
-  constructor(public readonly status: number, operation: string) { super(`Twitch ${operation} failed${status ? ` (HTTP ${status})` : " or timed out"}. Check configuration and retry.`); }
+  constructor(public readonly status: number, operation: string, public readonly reason?: string, public readonly retryAfterMs?: number) {
+    super(`Twitch ${operation} failed${status ? ` (HTTP ${status})` : " or timed out"}. ${reason === "invalid_client_secret" || reason === "invalid_client_id" || reason === "invalid_client_credentials"
+      ? "Check that Render's Client ID and Client Secret belong to the same existing Twitch application. Keep the broadcaster token unchanged."
+      : operation === "app token acquisition" && status === 403
+        ? "Twitch rejected the Client Credentials request. Verify the existing application's Client ID/Secret in Render; HTTP 403 alone does not prove which value is wrong. Keep the broadcaster token unchanged."
+        : "Check configuration and retry."}`);
+  }
 }
 export interface Subscription {
   id: string; type: string; version: string; status: string; created_at: string;
@@ -19,6 +25,10 @@ export interface NativePoll {
 export class TwitchApi {
   private cached?: { value: string; expiresAt: number; validatedAt: number };
   private tokenFlight?: Promise<string>;
+  private appFailure?: { error: TwitchApiError; retryAt: number };
+  private appFailures = 0;
+  private appLastAttemptAt: number | null = null;
+  private appLastSuccessAt: number | null = null;
   private stopped = false;
   private readonly shutdown = new AbortController();
   private user?: { access: string; refresh: string; validatedAt: number; expiresAt: number };
@@ -26,6 +36,14 @@ export class TwitchApi {
   private userStore?: UserTokenStore;
   private userLoaded = false;
   constructor(private readonly config: TwitchConfig, private readonly fetcher: typeof fetch = fetch, private readonly now = Date.now) {}
+  appAuthStatus() {
+    return { status: this.appFailure ? "error" : this.cached && this.cached.expiresAt > this.now() ? "ready" : "unknown",
+      httpStatus: this.appFailure?.error.status ?? null, reason: this.appFailure?.error.reason ?? null,
+      error: this.appFailure?.error.message ?? null,
+      lastAttemptAt: this.appLastAttemptAt === null ? null : new Date(this.appLastAttemptAt).toISOString(),
+      lastSuccessAt: this.appLastSuccessAt === null ? null : new Date(this.appLastSuccessAt).toISOString(),
+      retryAt: this.appFailure ? new Date(this.appFailure.retryAt).toISOString() : null };
+  }
   setUserTokenStore(store: UserTokenStore) { this.userStore = store; }
   close() { this.stopped = true; this.shutdown.abort(); this.cached = undefined; this.user = undefined; }
   private async send(url: string, init: RequestInit, operation: string): Promise<Response> {
@@ -46,7 +64,18 @@ export class TwitchApi {
   async token(): Promise<string> {
     if (this.cached && this.cached.expiresAt > this.now() + 60000 && this.cached.validatedAt > this.now() - 3600000) return this.cached.value;
     if (this.tokenFlight) return this.tokenFlight;
-    this.tokenFlight = this.acquire();
+    // A failing app grant must not be retried by every EventSub type, owner
+    // refresh and background cycle. It is independent of the broadcaster grant.
+    if (this.appFailure && this.appFailure.retryAt > this.now()) throw this.appFailure.error;
+    this.appLastAttemptAt = this.now();
+    this.tokenFlight = this.acquire().then(value => {
+      this.appFailure = undefined; this.appFailures = 0; this.appLastSuccessAt = this.now(); return value;
+    }).catch(error => {
+      const safe = error instanceof TwitchApiError ? error : new TwitchApiError(0, "app token response", "invalid_response");
+      const base = [400, 401, 403].includes(safe.status) ? 60000 : 15000;
+      const delay = Math.max(safe.retryAfterMs ?? 0, Math.min(300000, base * 2 ** Math.min(this.appFailures++, 5)));
+      this.appFailure = { error: safe, retryAt: this.now() + delay }; throw safe;
+    });
     try { return await this.tokenFlight; } finally { this.tokenFlight = undefined; }
   }
   private async acquire(): Promise<string> {
@@ -60,10 +89,20 @@ export class TwitchApi {
       } else if (response.status !== 401) throw new TwitchApiError(response.status, "token validation");
       this.cached = undefined;
     }
-    const response = await this.send("https://id.twitch.tv/oauth2/token", { method: "POST", body: new URLSearchParams({
+    const response = await this.send("https://id.twitch.tv/oauth2/token", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: new URLSearchParams({
       client_id: this.config.clientId, client_secret: this.config.clientSecret, grant_type: "client_credentials",
     }) }, "app token acquisition");
-    if (!response.ok) throw new TwitchApiError(response.status, "app token acquisition");
+    if (!response.ok) {
+      // Only fixed, known categories leave this method. Never persist/echo an
+      // upstream message: gateways and OAuth errors may contain credentials.
+      let message = "";
+      try { const body = await response.json() as { message?: unknown; error?: unknown }; message = typeof body.message === "string" ? body.message : typeof body.error === "string" ? body.error : ""; } catch {}
+      const known: Record<string, string> = { "invalid client secret": "invalid_client_secret", "invalid client": "invalid_client_id", "invalid client id": "invalid_client_id", "invalid client credentials": "invalid_client_credentials", "invalid_client": "invalid_client_credentials", "invalid_client_secret": "invalid_client_secret" };
+      const key = message.trim().toLowerCase();
+      const reason = Object.prototype.hasOwnProperty.call(known, key) ? known[key] : response.status === 403 ? "forbidden" : response.status === 429 ? "rate_limited" : "oauth_rejected";
+      const retry = Number(response.headers.get("retry-after"));
+      throw new TwitchApiError(response.status, "app token acquisition", reason, Number.isFinite(retry) && retry > 0 ? Math.min(retry * 1000, 3600000) : undefined);
+    }
     const data = await response.json() as { access_token: string; expires_in: number };
     if (!data.access_token || !Number.isFinite(data.expires_in) || data.expires_in <= 0) throw new TwitchApiError(0, "app token response");
     const validation = await this.send("https://id.twitch.tv/oauth2/validate", { headers: { Authorization: `OAuth ${data.access_token}` } }, "token validation");
@@ -153,7 +192,11 @@ export class TwitchApi {
         if (method === "POST") throw new TwitchApiError(401, "poll creation authentication refreshed; reconcile before creating again");
         continue;
       }
-      if (!response.ok) throw new TwitchApiError(response.status, "poll API request");
+      if (!response.ok) {
+        const retry = Number(response.headers.get("retry-after")), reset = Number(response.headers.get("ratelimit-reset"));
+        const retryAfterMs = response.status === 429 ? Math.min(300000, Math.max(1000, Number.isFinite(retry) && retry > 0 ? retry * 1000 : 0, Number.isFinite(reset) && reset > 0 ? reset * 1000 - this.now() : 0)) : undefined;
+        throw new TwitchApiError(response.status, "poll API request", response.status === 429 ? "rate_limited" : undefined, retryAfterMs);
+      }
       return await response.json() as T;
     }
     throw new TwitchApiError(401, "broadcaster authentication");

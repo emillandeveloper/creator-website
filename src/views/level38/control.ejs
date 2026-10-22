@@ -96,12 +96,18 @@
       <p id="twitch-source" role="status"></p>
       <p id="twitch-error" role="status"></p>
       <p id="twitch-polls-status" role="status"></p>
+      <dl class="l38-twitch-status" aria-live="polite">
+        <dt data-i18n="App authorization"><%= t('App authorization') %></dt><dd id="twitch-app-auth">—</dd>
+        <dt data-i18n="Poll EventSub subscriptions"><%= t('Poll EventSub subscriptions') %></dt><dd id="twitch-poll-subscriptions">—</dd>
+        <dt data-i18n="Live poll updates"><%= t('Live poll updates') %></dt><dd id="twitch-poll-live">—</dd>
+        <dt data-i18n="Helix backup synchronization"><%= t('Helix backup synchronization') %></dt><dd id="twitch-poll-backup">—</dd>
+      </dl>
       <dl class="l38-twitch-status">
         <dt data-i18n="Channel"><%= t("Channel") %></dt><dd id="twitch-channel">—</dd>
         <dt data-i18n="Latest category"><%= t("Latest category") %></dt><dd id="twitch-category">—</dd>
         <dt data-i18n="Mapped game"><%= t("Mapped game") %></dt><dd id="twitch-mapped">—</dd>
         <dt data-i18n="Last EventSub update"><%= t("Last EventSub update") %></dt><dd id="twitch-updated">—</dd>
-        <dt data-i18n="Subscription"><%= t("Subscription") %></dt><dd id="twitch-subscription">—</dd>
+        <dt data-i18n="Category subscription"><%= t("Category subscription") %></dt><dd id="twitch-subscription">—</dd>
       </dl>
       <button id="twitch-auto" type="button" data-i18n="Return to Twitch Auto"><%= t("Return to Twitch Auto") %></button>
       <p data-i18n="Changing the current game above activates a manual override. Twitch cannot replace it until you return to auto."><%= t("Changing the current game above activates a manual override. Twitch cannot replace it until you return to auto.") %></p>

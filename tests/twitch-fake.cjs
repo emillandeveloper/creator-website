@@ -5,13 +5,13 @@ const config = () => readTwitchConfig({ TWITCH_ENABLED: "true", TWITCH_CLIENT_ID
   TWITCH_EVENTSUB_SECRET: "a".repeat(64), TWITCH_BROADCASTER_LOGIN: "leonifelheim", TWITCH_EVENTSUB_CALLBACK_URL: `${origin}/level38/twitch/eventsub`, LEVEL38_ORIGIN: origin });
 function fakeTwitch() {
   const fake = { calls: [], tokens: 0, subscriptions: [], channel: { broadcaster_id: "1234", game_id: "100", game_name: "Twitch title can differ", title: "Private stream title" }, failure: null, unauthorized: 0, createConflict: false,
-    polls: [], pollCalls: [], pollFailure: null, pollPostUncertain: false, pollPostBeforeAccept: false, userValidation: { client_id: "test-client", user_id: "1234", login: "leonifelheim", scopes: ["channel:manage:polls"], expires_in: 7200 } };
+    polls: [], pollCalls: [], pollFailure: null, appTokenFailure: null, pollPostUncertain: false, pollPostBeforeAccept: false, userValidation: { client_id: "test-client", user_id: "1234", login: "leonifelheim", scopes: ["channel:manage:polls"], expires_in: 7200 } };
   const json = (body, status = 200) => new Response(status === 204 ? null : JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });
   fake.fetch = async (raw, init = {}) => {
     const url = new URL(raw); const method = init.method || "GET";
     fake.calls.push({ path: url.pathname, search: url.search, method });
     if (fake.failure) { if (fake.failure === "network") throw new Error("Private credential must never escape"); return json({ message: "private upstream error" }, fake.failure); }
-    if (url.href === "https://id.twitch.tv/oauth2/token") { fake.tokens++; return json({ access_token: `private-token-${fake.tokens}`, refresh_token: `private-refresh-${fake.tokens}`, expires_in: 7200, scope: ["channel:manage:polls"] }); }
+    if (url.href === "https://id.twitch.tv/oauth2/token") { if (fake.appTokenFailure && init.body?.get('grant_type') === 'client_credentials') return json({ message: 'Private application credential error' }, fake.appTokenFailure); fake.tokens++; return json({ access_token: `private-token-${fake.tokens}`, refresh_token: `private-refresh-${fake.tokens}`, expires_in: 7200, scope: ["channel:manage:polls"] }); }
     if (url.href === "https://id.twitch.tv/oauth2/validate") return json({ ...fake.userValidation });
     if (url.origin !== "https://api.twitch.tv") throw new Error("Unexpected test network target");
     if (fake.unauthorized > 0) { fake.unauthorized--; return json({}, 401); }
