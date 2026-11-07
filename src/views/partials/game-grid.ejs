@@ -1,0 +1,25 @@
+<div class="games-grid">
+  <% games.forEach(function(game) { %>
+    <article class="game-card">
+      <div class="game-cover">
+        <img
+          src="<%= game.cover %>"
+          alt="<%= game.title %>"
+          class="<%= game.coverOutline === true ? 'logo-outline' : '' %>"
+          style="transform: scale(<%= game.coverScale ?? 1 %>);"
+          onerror="this.style.display='none'"
+        >
+      </div>
+      <div class="game-body">
+        <h3 class="game-title"><%= game.title %></h3>
+        <div class="game-badges">
+          <% if (showType) { %>
+            <span class="game-type type-<%= game.type %>"><%= (game.type === 'challenge' ? ui.typeChallenge : ui.typePlaythrough)[lang] %></span>
+          <% } %>
+          <span class="game-status status-<%= game.status %>"><%= ({ playing: ui.statusPlaying, completed: ui.statusCompleted, upcoming: ui.statusUpcoming })[game.status][lang] %></span>
+        </div>
+        <p class="game-desc"><%= game.description[lang] %></p>
+      </div>
+    </article>
+  <% }); %>
+</div>

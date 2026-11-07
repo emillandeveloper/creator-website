@@ -49,7 +49,11 @@ Todo el contenido está en `src/models/data.ts`. Edita ese único archivo para:
 - Cambiar tu bio, avatar, banner (`PROFILE`)
 - Actualizar el horario semanal (`SCHEDULE`)
 - Añadir/quitar redes sociales (`SOCIALS`)
-- Cambiar los juegos (`GAMES`): `status: "playing"` aparece en **Now Playing** y `status: "completed"` aparece en **Games**
+- Cambiar los juegos (`GAMES`): cada entrada necesita `type: "challenge"` para retos y randomizers, o `type: "playthrough"` para partidas normales.
+- `status: "playing"` aparece en **Now Playing** y en **In progress / En curso** dentro de su categoría (**Challenges / Desafíos** o **Playthroughs / Partidas**).
+- `status: "completed"` aparece en **Completed / Completados** dentro de su categoría. `status: "upcoming"` sigue reservado y no se muestra.
+
+La categoría describe esa partida concreta: un mismo juego puede tener un playthrough y varios retos como entradas independientes.
 
 El día actual se resalta automáticamente en el horario.
 

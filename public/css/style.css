@@ -269,6 +269,22 @@ body {
 .about-mascot { width: 90px; height: 90px; flex-shrink: 0; image-rendering: pixelated; }
 
 /* ===================== GAMES ===================== */
+.section-intro {
+  margin: -1rem auto 2rem;
+  max-width: 680px;
+  text-align: center;
+  color: var(--text-dim);
+}
+.game-group + .game-group { margin-top: 2.5rem; }
+.game-group-title {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.75rem;
+  line-height: 1.8;
+  color: var(--gold);
+  border-bottom: 1px solid var(--border-glow);
+  padding-bottom: 0.75rem;
+  margin-bottom: 1.5rem;
+}
 .games-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
@@ -306,7 +322,8 @@ body {
   color: var(--text);
   line-height: 1.4;
 }
-.game-status {
+.game-badges { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
+.game-status, .game-type {
   font-family: 'Press Start 2P', monospace;
   font-size: 0.5rem;
   padding: 4px 8px;
@@ -317,6 +334,8 @@ body {
 .status-playing   { background: rgba(58,154,170,0.15); color: #5dcaa5; }
 .status-completed { background: rgba(99,153,34,0.15);  color: #97c459; }
 .status-upcoming  { background: rgba(200,146,10,0.15); color: var(--gold); }
+.type-challenge   { background: rgba(200,146,10,0.15); color: var(--gold); }
+.type-playthrough { background: rgba(58,154,170,0.15); color: #6bb8c5; }
 .game-desc { margin-top: 0.9rem; font-size: 1rem; color: var(--text-dim); }
 .empty-state {
   max-width: 680px;

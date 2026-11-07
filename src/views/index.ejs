@@ -37,8 +37,9 @@
     <button class="nav-btn active" data-slide="0"><%= ui.navSchedule[lang] %></button>
     <button class="nav-btn" data-slide="1"><%= ui.navAbout[lang] %></button>
     <button class="nav-btn" data-slide="2"><%= ui.navNowPlaying[lang] %></button>
-    <button class="nav-btn" data-slide="3"><%= ui.navGames[lang] %></button>
-    <button class="nav-btn" data-slide="4"><%= ui.navSocials[lang] %></button>
+    <button class="nav-btn" data-slide="3"><%= ui.navChallenges[lang] %></button>
+    <button class="nav-btn" data-slide="4"><%= ui.navPlaythroughs[lang] %></button>
+    <button class="nav-btn" data-slide="5"><%= ui.navSocials[lang] %></button>
   </nav>
 
   <!-- ===================== SLIDER ===================== -->
@@ -46,7 +47,7 @@
     <div class="slider-track" id="track">
 
       <!-- SLIDE 0: HORARIO -->
-      <section class="slide">
+      <section class="slide" id="schedule">
         <div class="slide-inner">
           <h2 class="section-title"><%= ui.schedTitle[lang] %></h2>
           <div class="schedule-list">
@@ -91,64 +92,41 @@
       </section>
 
       <!-- SLIDE 2: NOW PLAYING -->
-      <section class="slide">
+      <section class="slide" id="now-playing">
         <div class="slide-inner">
           <h2 class="section-title"><%= ui.nowPlayingTitle[lang] %></h2>
-          <div class="games-grid">
-            <% nowPlayingGames.forEach(function(game) { %>
-              <div class="game-card">
-                <div class="game-cover">
-                  <img
-                    src="<%= game.cover %>"
-                    alt="<%= game.title %>"
-                    class="<%= game.coverOutline === true ? 'logo-outline' : '' %>"
-                    style="transform: scale(<%= game.coverScale ?? 1 %>);"
-                    onerror="this.style.display='none'"
-                  >
-                </div>
-                <div class="game-body">
-                  <h3 class="game-title"><%= game.title %></h3>
-                  <span class="game-status status-<%= game.status %>"><%= game.status %></span>
-                  <p class="game-desc"><%= game.description[lang] %></p>
-                </div>
-              </div>
+          <%- include('partials/game-grid', { games: nowPlayingGames, showType: true }) %>
+        </div>
+      </section>
+
+      <!-- SLIDES 3–4: CHALLENGES / PLAYTHROUGHS -->
+      <% const collections = [
+        { id: 'challenges', title: ui.challengesTitle, intro: ui.challengesIntro, games: challengeGames, empty: ui.noChallenges },
+        { id: 'playthroughs', title: ui.playthroughsTitle, intro: ui.playthroughsIntro, games: playthroughGames, empty: ui.noPlaythroughs }
+      ]; %>
+      <% collections.forEach(function(collection) { %>
+        <section class="slide" id="<%= collection.id %>">
+          <div class="slide-inner">
+            <h2 class="section-title"><%= collection.title[lang] %></h2>
+            <p class="section-intro"><%= collection.intro[lang] %></p>
+            <% if (collection.games.length === 0) { %>
+              <p class="empty-state"><%= collection.empty[lang] %></p>
+            <% } %>
+            <% ['playing', 'completed'].forEach(function(status) {
+              const games = collection.games.filter(function(game) { return game.status === status; });
+              if (games.length === 0) return;
+              const headingId = collection.id + '-' + status;
+            %>
+              <section class="game-group" aria-labelledby="<%= headingId %>">
+                <h3 class="game-group-title" id="<%= headingId %>"><%= (status === 'playing' ? ui.inProgressTitle : ui.completedTitle)[lang] %> · <%= games.length %></h3>
+                <%- include('partials/game-grid', { games: games, showType: false }) %>
+              </section>
             <% }); %>
           </div>
-        </div>
-      </section>
+        </section>
+      <% }); %>
 
-      <!-- SLIDE 3: JUEGOS TERMINADOS -->
-      <section class="slide">
-        <div class="slide-inner">
-          <h2 class="section-title"><%= ui.gamesTitle[lang] %></h2>
-          <% if (completedGames.length === 0) { %>
-            <p class="empty-state"><%= ui.noCompletedGames[lang] %></p>
-          <% } else { %>
-            <div class="games-grid">
-              <% completedGames.forEach(function(game) { %>
-                <div class="game-card">
-                  <div class="game-cover">
-                    <img
-                      src="<%= game.cover %>"
-                      alt="<%= game.title %>"
-                      class="<%= game.coverOutline === true ? 'logo-outline' : '' %>"
-                      style="transform: scale(<%= game.coverScale ?? 1 %>);"
-                      onerror="this.style.display='none'"
-                    >
-                  </div>
-                  <div class="game-body">
-                    <h3 class="game-title"><%= game.title %></h3>
-                    <span class="game-status status-<%= game.status %>"><%= game.status %></span>
-                    <p class="game-desc"><%= game.description[lang] %></p>
-                  </div>
-                </div>
-              <% }); %>
-            </div>
-          <% } %>
-        </div>
-      </section>
-
-      <!-- SLIDE 4: REDES -->
+      <!-- SLIDE 5: REDES -->
       <section class="slide">
         <div class="slide-inner">
           <h2 class="section-title"><%= ui.socialTitle[lang] %></h2>

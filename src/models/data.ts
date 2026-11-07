@@ -27,6 +27,7 @@ export interface ScheduleDay {
 
 export interface GameProject {
   title: string;
+  type: "challenge" | "playthrough";
   status: "playing" | "completed" | "upcoming";
   cover: string;
   coverScale?: number;
@@ -52,15 +53,27 @@ export const UI: Record<string, I18nText> = {
   navSchedule:     { en: "Schedule",    es: "Horario" },
   navAbout:        { en: "About",       es: "Sobre mí" },
   navNowPlaying:   { en: "Now Playing", es: "Jugando ahora" },
-  navGames:        { en: "Games",       es: "Juegos" },
+  navChallenges:   { en: "Challenges",  es: "Desafíos" },
+  navPlaythroughs: { en: "Playthroughs", es: "Partidas" },
   navSocials:      { en: "Socials",     es: "Redes" },
   schedTitle:      { en: "Weekly Schedule", es: "Horario Semanal" },
   aboutTitle:      { en: "About me",        es: "Sobre mí" },
   nowPlayingTitle: { en: "Now Playing",     es: "Jugando ahora" },
-  gamesTitle:      { en: "Completed Games", es: "Juegos terminados" },
+  challengesTitle:{ en: "Challenges", es: "Desafíos" },
+  playthroughsTitle:{ en: "Playthroughs", es: "Partidas" },
+  challengesIntro:{ en: "Randomizers, solo runs and self-imposed restrictions.", es: "Randomizers, partidas en solitario y reglas autoimpuestas." },
+  playthroughsIntro:{ en: "RPG adventures, stories and retro discoveries.", es: "Aventuras RPG, historias y descubrimientos retro." },
+  inProgressTitle:{ en: "In progress", es: "En curso" },
+  completedTitle: { en: "Completed", es: "Completados" },
+  typeChallenge:  { en: "Challenge", es: "Desafío" },
+  typePlaythrough:{ en: "Playthrough", es: "Partida" },
+  statusPlaying:  { en: "Playing", es: "En curso" },
+  statusCompleted:{ en: "Completed", es: "Completado" },
+  statusUpcoming: { en: "Upcoming", es: "Próximamente" },
   socialTitle:     { en: "Follow me",       es: "Sígueme" },
   schedNote:       { en: "* Schedule may vary", es: "* El horario puede variar" },
-  noCompletedGames:{ en: "Completed games will appear here.", es: "Los juegos terminados aparecerán aquí." },
+  noChallenges:   { en: "Challenge runs will appear here.", es: "Los desafíos aparecerán aquí." },
+  noPlaythroughs: { en: "Playthroughs will appear here.", es: "Las partidas aparecerán aquí." },
   footer:          { en: "Jotun's Lair", es: "La Guarida de Jotun" },
 };
 
@@ -207,15 +220,17 @@ export const SCHEDULE: ScheduleDay[] = [
 ];
 
 /* ---------- JUEGOS / PROYECTOS ----------
+   type: "challenge" (retos y randomizers) o "playthrough" (partidas normales)
    status:
-   - "playing"   => aparece en Now Playing
-   - "completed" => aparece en Games
+   - "playing"   => aparece en Now Playing y en su categoría, En curso
+   - "completed" => aparece en su categoría, Completados
    - "upcoming"  => reservado para una futura sección si la quieres
    ---------- */
 export const GAMES: GameProject[] = [
   /* ---------- NOW PLAYING ---------- */
   {
     title: "Final Fantasy VII — Randomizer",
+    type: "challenge",
     status: "playing",
     cover: "/img/logos/ff7.png",
     coverOutline: true,
@@ -226,6 +241,7 @@ export const GAMES: GameProject[] = [
   },
   {
     title: "The Legend of Zelda: Ocarina of Time",
+    type: "playthrough",
     status: "playing",
     cover: "/img/logos/ocarina-of-time.png",
     coverOutline: true,
@@ -236,6 +252,7 @@ export const GAMES: GameProject[] = [
   },
   {
     title: "Final Fantasy Resonance",
+    type: "playthrough",
     status: "playing",
     cover: "/img/logos/ff-resonance.png",
     coverOutline: true,
@@ -246,6 +263,7 @@ export const GAMES: GameProject[] = [
   },
   {
     title: "Suikoden I",
+    type: "playthrough",
     status: "playing",
     cover: "/img/logos/suikoden1.png",
     description: {
@@ -258,6 +276,7 @@ export const GAMES: GameProject[] = [
   /* ---------- COMPLETED GAMES ---------- */
   {
     title: "Final Fantasy IX — Solo Garnet",
+    type: "challenge",
     status: "completed",
     cover: "/img/logos/ff9.png",
     description: {
@@ -267,6 +286,7 @@ export const GAMES: GameProject[] = [
   },
   {
     title: "Final Fantasy V — Crystal Roulette Fiesta",
+    type: "challenge",
     status: "completed",
     cover: "/img/logos/ff5.png",
     coverScale: 0.78,
@@ -277,6 +297,7 @@ export const GAMES: GameProject[] = [
   },
   {
     title: "The Legend of Zelda: Tears of the Kingdom",
+    type: "playthrough",
     status: "completed",
     cover: "/img/logos/zelda.png",
     coverScale: 1,
@@ -287,6 +308,7 @@ export const GAMES: GameProject[] = [
   },
   {
     title: "The Adventures of Elliot: The Millennium Tales",
+    type: "playthrough",
     status: "completed",
     cover: "/img/logos/elliot.png",
     coverScale: 1,
@@ -298,6 +320,7 @@ export const GAMES: GameProject[] = [
   },
   {
     title: "Final Fantasy VI",
+    type: "playthrough",
     status: "completed",
     cover: "/img/logos/ff6.png",
     coverScale: 1.8,
@@ -309,6 +332,7 @@ export const GAMES: GameProject[] = [
   },
   {
     title: "Final Fantasy IX — Lv.1 Challenge Run",
+    type: "challenge",
     status: "completed",
     cover: "/img/logos/ff9.png",
     description: {
@@ -318,6 +342,7 @@ export const GAMES: GameProject[] = [
   },
   {
     title: "Persona 5 Royal",
+    type: "playthrough",
     status: "completed",
     cover: "/img/logos/p5r.png",
     description: {
@@ -327,6 +352,7 @@ export const GAMES: GameProject[] = [
   },
   {
     title: "Lumentale: Memories of Trey",
+    type: "playthrough",
     status: "completed",
     cover: "/img/logos/lumen.png",
     coverOutline: true,
@@ -337,6 +363,7 @@ export const GAMES: GameProject[] = [
   },
   {
     title: "Romancing SaGa: Minstrel Song Remastered",
+    type: "playthrough",
     status: "completed",
     cover: "/img/logos/romancing-saga-minstrel-song.png",
     description: {
@@ -346,6 +373,7 @@ export const GAMES: GameProject[] = [
   },
   {
     title: "Tales of Arise",
+    type: "playthrough",
     status: "completed",
     cover: "/img/logos/tales-of-arise.png",
     description: {
@@ -355,6 +383,7 @@ export const GAMES: GameProject[] = [
   },
   {
     title: "Metaphor: ReFantazio",
+    type: "playthrough",
     status: "completed",
     cover: "/img/logos/metaphor-refantazio.png",
     description: {
@@ -364,6 +393,7 @@ export const GAMES: GameProject[] = [
   },
   {
     title: "Persona 4 Golden",
+    type: "playthrough",
     status: "completed",
     cover: "/img/logos/persona-4-golden.png",
     description: {
@@ -373,6 +403,7 @@ export const GAMES: GameProject[] = [
   },
   {
     title: "Persona 3 Reload",
+    type: "playthrough",
     status: "completed",
     cover: "/img/logos/persona-3-reload.png",
     description: {
@@ -382,6 +413,7 @@ export const GAMES: GameProject[] = [
   },
   {
     title: "Final Fantasy X - No Sphere Grid / No Customization",
+    type: "challenge",
     status: "completed",
     cover: "/img/logos/ff10-x2-hd.png",
     description: {
@@ -391,6 +423,7 @@ export const GAMES: GameProject[] = [
   },
   {
     title: "Final Fantasy VII - No Shops / Fixed Party",
+    type: "challenge",
     status: "completed",
     cover: "/img/logos/ff7.png",
     description: {
@@ -401,6 +434,7 @@ export const GAMES: GameProject[] = [
   },
   {
     title: "Yakuza: Like a Dragon",
+    type: "playthrough",
     status: "completed",
     cover: "/img/logos/yakuza-like-a-dragon.png",
     description: {
@@ -410,6 +444,7 @@ export const GAMES: GameProject[] = [
   },
   {
     title: "Dragon Quest III HD-2D Remake",
+    type: "playthrough",
     status: "completed",
     cover: "/img/logos/dragon-quest-3-hd-2d.png",
     description: {
@@ -419,6 +454,7 @@ export const GAMES: GameProject[] = [
   },
   {
     title: "Legend of Mana",
+    type: "playthrough",
     status: "completed",
     cover: "/img/logos/legend-of-mana.png",
     description: {
@@ -428,6 +464,7 @@ export const GAMES: GameProject[] = [
   },
   {
     title: "La Pucelle: Ragnarok",
+    type: "playthrough",
     status: "completed",
     cover: "/img/logos/la-pucelle-ragnarok.png",
     description: {
@@ -437,6 +474,7 @@ export const GAMES: GameProject[] = [
   },
   {
     title: "Phantom Brave",
+    type: "playthrough",
     status: "completed",
     cover: "/img/logos/phantom-brave.png",
     description: {
@@ -446,6 +484,7 @@ export const GAMES: GameProject[] = [
   },
   {
     title: "Phantom Brave: The Hermuda Triangle",
+    type: "playthrough",
     status: "completed",
     cover: "/img/logos/phantom-brave-hermuda-triangle.png",
     description: {
@@ -455,6 +494,7 @@ export const GAMES: GameProject[] = [
   },
   {
     title: "Phantom Brave: The Lost Hero",
+    type: "playthrough",
     status: "completed",
     cover: "/img/logos/phantom-brave-the-lost-hero.png",
     description: {
@@ -464,6 +504,7 @@ export const GAMES: GameProject[] = [
   },
   {
     title: "Makai Kingdom",
+    type: "playthrough",
     status: "completed",
     cover: "/img/logos/makai-kingdom.png",
     description: {
@@ -474,6 +515,7 @@ export const GAMES: GameProject[] = [
   },
   {
     title: "Rhapsody: A Musical Adventure",
+    type: "playthrough",
     status: "completed",
     cover: "/img/logos/rhapsody-a-musical-adventure.png",
     description: {
@@ -483,6 +525,7 @@ export const GAMES: GameProject[] = [
   },
   {
     title: "Chrono Trigger",
+    type: "playthrough",
     status: "completed",
     cover: "/img/logos/chrono-trigger.png",
     description: {
@@ -493,6 +536,7 @@ export const GAMES: GameProject[] = [
   },
   {
     title: "Monster Hunter Stories",
+    type: "playthrough",
     status: "completed",
     cover: "/img/logos/monster-hunter-stories.png",
     description: {
@@ -502,6 +546,7 @@ export const GAMES: GameProject[] = [
   },
   {
     title: "Monster Hunter Stories 2: Wings of Ruin",
+    type: "playthrough",
     status: "completed",
     cover: "/img/logos/monster-hunter-stories-2.png",
     description: {
@@ -511,6 +556,7 @@ export const GAMES: GameProject[] = [
   },
   {
     title: "Monster Hunter Wilds",
+    type: "playthrough",
     status: "completed",
     cover: "/img/logos/monster-hunter-wilds.png",
     description: {
@@ -520,6 +566,7 @@ export const GAMES: GameProject[] = [
   },
   {
     title: "Final Fantasy XVI",
+    type: "playthrough",
     status: "completed",
     cover: "/img/logos/ff16.png",
     description: {
@@ -529,6 +576,7 @@ export const GAMES: GameProject[] = [
   },
   {
     title: "Final Fantasy X / X-2 HD Remaster",
+    type: "playthrough",
     status: "completed",
     cover: "/img/logos/ff10-x2-hd.png",
     description: {
@@ -538,6 +586,7 @@ export const GAMES: GameProject[] = [
   },
   {
     title: ".hack//G.U. Last Recode",
+    type: "playthrough",
     status: "completed",
     cover: "/img/logos/hack-gu-last-recode.png",
     description: {
@@ -547,6 +596,7 @@ export const GAMES: GameProject[] = [
   },
   {
     title: "Zwei",
+    type: "playthrough",
     status: "completed",
     cover: "/img/logos/zwei.png",
     description: {
@@ -558,6 +608,7 @@ export const GAMES: GameProject[] = [
   /* Campaña conservada para retomarla; fuera del horario actual. */
   {
     title: "Baldur's Gate 3",
+    type: "playthrough",
     status: "upcoming",
     cover: "/img/logos/bg3.png",
     coverScale: 1,
