@@ -140,7 +140,7 @@ export const SCHEDULE: ScheduleDay[] = [
     logo: "/img/logos/ocarina-of-time.png",
     logoScale: 1,
     logoOutline: true,
-    timeStart: "18:00",
+    timeStart: "19:00",
     timeEnd: "22:00"
   },
 
