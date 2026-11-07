@@ -102,10 +102,14 @@ export const SCHEDULE: ScheduleDay[] = [
   {
     name: { en: "Monday", es: "Lunes" },
     category: "challenge",
-    game: "Final Fantasy V",
-    subtitle: { en: "Crystal Roulette Fiesta", es: "Crystal Roulette Fiesta" },
-    logo: "/img/logos/ff5.png",
-    logoScale: 0.78,
+    game: "Final Fantasy VII",
+    subtitle: {
+      en: "Randomizer",
+      es: "Randomizer"
+    },
+    logo: "/img/logos/ff7.png",
+    logoScale: 1,
+    logoOutline: true,
     timeStart: "19:00",
     timeEnd: "22:00"
   },
@@ -113,13 +117,14 @@ export const SCHEDULE: ScheduleDay[] = [
   {
     name: { en: "Tuesday", es: "Martes" },
     category: "main-a",
-    game: "The Legend of Zelda: Tears of the Kingdom",
+    game: "The Legend of Zelda: Ocarina of Time",
     subtitle: {
-      en: "The Legend of Zelda: Tears of the Kingdom",
-      es: "The Legend of Zelda: Tears of the Kingdom"
+      en: "The Legend of Zelda: Ocarina of Time",
+      es: "The Legend of Zelda: Ocarina of Time"
     },
-    logo: "/img/logos/zelda.png",
+    logo: "/img/logos/ocarina-of-time.png",
     logoScale: 1,
+    logoOutline: true,
     timeStart: "19:00",
     timeEnd: "22:00"
   },
@@ -127,13 +132,14 @@ export const SCHEDULE: ScheduleDay[] = [
   {
     name: { en: "Wednesday", es: "Miércoles" },
     category: "main-a",
-    game: "Baldur's Gate 3",
+    game: "The Legend of Zelda: Ocarina of Time",
     subtitle: {
-      en: "Baldur's Gate 3 - Collab",
-      es: "Baldur's Gate 3 - Collab"
+      en: "The Legend of Zelda: Ocarina of Time",
+      es: "The Legend of Zelda: Ocarina of Time"
     },
-    logo: "/img/logos/bg3.png",
+    logo: "/img/logos/ocarina-of-time.png",
     logoScale: 1,
+    logoOutline: true,
     timeStart: "18:00",
     timeEnd: "22:00"
   },
@@ -141,12 +147,12 @@ export const SCHEDULE: ScheduleDay[] = [
   {
     name: { en: "Thursday", es: "Jueves" },
     category: "main-b",
-    game: "The Adventures of Elliot: The Millennium Tales",
+    game: "Final Fantasy Resonance",
     subtitle: {
-      en: "The Adventures of Elliot: The Millennium Tales",
-      es: "The Adventures of Elliot: The Millennium Tales"
+      en: "Final Fantasy Resonance",
+      es: "Final Fantasy Resonance"
     },
-    logo: "/img/logos/elliot.png",
+    logo: "/img/logos/ff-resonance.png",
     logoScale: 1,
     logoOutline: true,
     timeStart: "19:00",
@@ -156,12 +162,12 @@ export const SCHEDULE: ScheduleDay[] = [
   {
     name: { en: "Friday", es: "Viernes" },
     category: "main-b",
-    game: "The Adventures of Elliot: The Millennium Tales",
+    game: "Final Fantasy Resonance",
     subtitle: {
-      en: "The Adventures of Elliot: The Millennium Tales",
-      es: "The Adventures of Elliot: The Millennium Tales"
+      en: "Final Fantasy Resonance",
+      es: "Final Fantasy Resonance"
     },
-    logo: "/img/logos/elliot.png",
+    logo: "/img/logos/ff-resonance.png",
     logoScale: 1,
     logoOutline: true,
     timeStart: "19:00",
@@ -171,13 +177,13 @@ export const SCHEDULE: ScheduleDay[] = [
   {
     name: { en: "Saturday", es: "Sábado" },
     category: "retro",
-    game: "Final Fantasy VI",
+    game: "Suikoden I",
     subtitle: {
-      en: "Final Fantasy VI",
-      es: "Final Fantasy VI"
+      en: "Suikoden I",
+      es: "Suikoden I"
     },
-    logo: "/img/logos/ff6.png",
-    logoScale: 1.8,
+    logo: "/img/logos/suikoden1.png",
+    logoScale: 1,
     logoOutline: true,
     timeStart: "19:00",
     timeEnd: "22:00"
@@ -186,13 +192,13 @@ export const SCHEDULE: ScheduleDay[] = [
   {
     name: { en: "Sunday", es: "Domingo" },
     category: "retro",
-    game: "Final Fantasy VI",
+    game: "Suikoden I",
     subtitle: {
-      en: "Final Fantasy VI",
-      es: "Final Fantasy VI"
+      en: "Suikoden I",
+      es: "Suikoden I"
     },
-    logo: "/img/logos/ff6.png",
-    logoScale: 1.8,
+    logo: "/img/logos/suikoden1.png",
+    logoScale: 1,
     logoOutline: true,
     timeStart: "19:00",
     timeEnd: "22:00"
@@ -209,59 +215,98 @@ export const SCHEDULE: ScheduleDay[] = [
 export const GAMES: GameProject[] = [
   /* ---------- NOW PLAYING ---------- */
   {
-    title: "Final Fantasy V — Crystal Roulette Fiesta",
+    title: "Final Fantasy VII — Randomizer",
     status: "playing",
+    cover: "/img/logos/ff7.png",
+    coverOutline: true,
+    description: {
+      en: "Items, shops, materia, enemies and bosses shuffled, with adjusted stats. Every encounter is a surprise.",
+      es: "Objetos, tiendas, materias, enemigos y jefes aleatorizados, con estadísticas adaptadas. Cada encuentro es una sorpresa."
+    }
+  },
+  {
+    title: "The Legend of Zelda: Ocarina of Time",
+    status: "playing",
+    cover: "/img/logos/ocarina-of-time.png",
+    coverOutline: true,
+    description: {
+      en: "An adventure across Hyrule and through time, following the path of the Hero of Time.",
+      es: "Una aventura por Hyrule y a través del tiempo, siguiendo los pasos del Héroe del Tiempo."
+    }
+  },
+  {
+    title: "Final Fantasy Resonance",
+    status: "playing",
+    cover: "/img/logos/ff-resonance.png",
+    coverOutline: true,
+    description: {
+      en: "A new crystal-filled journey with turn-based battles and HD-2D visuals.",
+      es: "Una nueva aventura entre cristales, combates por turnos y escenarios HD-2D."
+    }
+  },
+  {
+    title: "Suikoden I",
+    status: "playing",
+    cover: "/img/logos/suikoden1.png",
+    description: {
+      en: "The Gate Rune War begins: allies, runes and the 108 Stars of Destiny.",
+      es: "Comienza la Guerra de la Runa de la Puerta: aliados, runas y las 108 Estrellas del Destino."
+    },
+    coverOutline: true
+  },
+
+  /* ---------- COMPLETED GAMES ---------- */
+  {
+    title: "Final Fantasy IX — Solo Garnet",
+    status: "completed",
+    cover: "/img/logos/ff9.png",
+    description: {
+      en: "Completed a solo challenge run with Garnet as the only combatant.",
+      es: "Reto completado con Garnet como única combatiente."
+    }
+  },
+  {
+    title: "Final Fantasy V — Crystal Roulette Fiesta",
+    status: "completed",
     cover: "/img/logos/ff5.png",
     coverScale: 0.78,
     description: {
-      en: "A Crystal Roulette Fiesta challenge where every crystal reshapes the party.",
-      es: "Un reto Crystal Roulette Fiesta donde cada cristal transforma el equipo."
+      en: "Challenge completed: each crystal assigned a different random job to each character, mandatory for that stage. After escaping Castle Exdeath, only their four personal jobs and skills could be combined. No rerolls, Freelancer or Mime (except the forced initial Freelancer).",
+      es: "Reto completado: cada cristal asignó por ruleta un trabajo distinto a cada personaje, obligatorio durante ese tramo. Tras huir del castillo de Exdeath, solo podían combinar sus cuatro trabajos personales y sus habilidades. Sin repetir tiradas, Freelancer ni Mime (salvo Freelancer inicial obligatorio)."
     }
   },
   {
     title: "The Legend of Zelda: Tears of the Kingdom",
-    status: "playing",
+    status: "completed",
     cover: "/img/logos/zelda.png",
     coverScale: 1,
     description: {
-      en: "Exploring Hyrule and its skies one discovery at a time.",
-      es: "Explorando Hyrule y sus cielos, un descubrimiento tras otro."
-    }
-  },
-  {
-    title: "Baldur's Gate 3",
-    status: "playing",
-    cover: "/img/logos/bg3.png",
-    coverScale: 1,
-    description: {
-      en: "A collaborative campaign full of choices, chaos and dice rolls.",
-      es: "Una campaña colaborativa llena de decisiones, caos y tiradas de dados."
+      en: "Completed the adventure across Hyrule, its skies and its depths.",
+      es: "Aventura completada por Hyrule, sus cielos y sus profundidades."
     }
   },
   {
     title: "The Adventures of Elliot: The Millennium Tales",
-    status: "playing",
+    status: "completed",
     cover: "/img/logos/elliot.png",
     coverScale: 1,
     coverOutline: true,
     description: {
-      en: "Journeying through a new HD-2D action RPG adventure.",
-      es: "Recorriendo una nueva aventura de acción RPG en HD-2D."
+      en: "Completed Elliot’s HD-2D action RPG adventure across time.",
+      es: "Completada la aventura de acción RPG de Elliot a través del tiempo en HD-2D."
     }
   },
   {
     title: "Final Fantasy VI",
-    status: "playing",
+    status: "completed",
     cover: "/img/logos/ff6.png",
     coverScale: 1.8,
     coverOutline: true,
     description: {
-      en: "Revisiting a timeless rebellion against the Gestahlian Empire.",
-      es: "Reviviendo una rebelión inolvidable contra el Imperio Gestahliano."
+      en: "Completed the rebellion against the Gestahlian Empire and the battle against Kefka.",
+      es: "Completadas la rebelión contra el Imperio Gestahliano y la batalla contra Kefka."
     }
   },
-
-  /* ---------- COMPLETED GAMES ---------- */
   {
     title: "Final Fantasy IX — Lv.1 Challenge Run",
     status: "completed",
@@ -338,7 +383,7 @@ export const GAMES: GameProject[] = [
   {
     title: "Final Fantasy X - No Sphere Grid / No Customization",
     status: "completed",
-    cover: "/img/logos/ff10-nsgnc.png",
+    cover: "/img/logos/ff10-x2-hd.png",
     description: {
       en: "Completed challenge run: No Sphere Grid and No Customization.",
       es: "Challenge run terminada: sin tablero de esferas y sin personalización."
@@ -347,11 +392,12 @@ export const GAMES: GameProject[] = [
   {
     title: "Final Fantasy VII - No Shops / Fixed Party",
     status: "completed",
-    cover: "/img/logos/ff7-no-shop-fixed-party.png",
+    cover: "/img/logos/ff7.png",
     description: {
       en: "Completed challenge run with Cloud, Tifa and Yuffie. No shops, fixed party.",
       es: "Challenge run terminada con Cloud, Tifa y Yuffie. Sin tiendas y party fija."
-    }
+    },
+    coverOutline: true
   },
   {
     title: "Yakuza: Like a Dragon",
@@ -423,7 +469,8 @@ export const GAMES: GameProject[] = [
     description: {
       en: "Completed NIS tactical RPG playthrough.",
       es: "RPG táctico de NIS terminado en directo."
-    }
+    },
+    coverOutline: true
   },
   {
     title: "Rhapsody: A Musical Adventure",
@@ -441,7 +488,8 @@ export const GAMES: GameProject[] = [
     description: {
       en: "Completed classic JRPG playthrough.",
       es: "JRPG clásico terminado en directo."
-    }
+    },
+    coverOutline: true
   },
   {
     title: "Monster Hunter Stories",
@@ -497,13 +545,25 @@ export const GAMES: GameProject[] = [
       es: "Saga completa de .hack//G.U. terminada en directo."
     }
   },
-   {
+  {
     title: "Zwei",
     status: "completed",
     cover: "/img/logos/zwei.png",
     description: {
       en: "Completed Zwei! The Arges Adventure",
       es: "Zwei! The Arges Adventure terminado en directo."
+    }
+  },
+
+  /* Campaña conservada para retomarla; fuera del horario actual. */
+  {
+    title: "Baldur's Gate 3",
+    status: "upcoming",
+    cover: "/img/logos/bg3.png",
+    coverScale: 1,
+    description: {
+      en: "A collaborative campaign full of choices, chaos and dice rolls.",
+      es: "Una campaña colaborativa llena de decisiones, caos y tiradas de dados."
     }
   }
 ];
