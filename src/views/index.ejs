@@ -55,7 +55,7 @@
     <div class="slider-track" id="track">
 
       <!-- SLIDE 0: HORARIO -->
-      <section class="slide" id="schedule">
+      <section class="slide" id="slide-schedule" data-section="schedule">
         <div class="slide-inner">
           <h2 class="section-title"><%= ui.schedTitle[lang] %></h2>
           <div class="schedule-list">
@@ -89,7 +89,7 @@
       </section>
 
       <!-- SLIDE 1: SOBRE MÍ -->
-      <section class="slide" id="about">
+      <section class="slide" id="slide-about" data-section="about">
         <div class="slide-inner">
           <h2 class="section-title"><%= ui.aboutTitle[lang] %></h2>
           <div class="about-card">
@@ -104,7 +104,7 @@
       </section>
 
       <!-- SLIDE 2: NOW PLAYING -->
-      <section class="slide" id="now-playing">
+      <section class="slide" id="slide-now-playing" data-section="now-playing">
         <div class="slide-inner">
           <h2 class="section-title"><%= ui.nowPlayingTitle[lang] %></h2>
           <%- include('partials/game-grid', { games: nowPlayingGames, showType: true }) %>
@@ -117,7 +117,7 @@
         { id: 'playthroughs', title: ui.playthroughsTitle, intro: ui.playthroughsIntro, games: playthroughGames, empty: ui.noPlaythroughs }
       ]; %>
       <% collections.forEach(function(collection) { %>
-        <section class="slide" id="<%= collection.id %>">
+        <section class="slide" id="slide-<%= collection.id %>" data-section="<%= collection.id %>">
           <div class="slide-inner">
             <h2 class="section-title"><%= collection.title[lang] %></h2>
             <p class="section-intro"><%= collection.intro[lang] %></p>
@@ -139,7 +139,7 @@
       <% }); %>
 
       <!-- SLIDE 5: REDES -->
-      <section class="slide" id="socials">
+      <section class="slide" id="slide-socials" data-section="socials">
         <div class="slide-inner">
           <h2 class="section-title"><%= ui.socialTitle[lang] %></h2>
           <div class="socials-row">

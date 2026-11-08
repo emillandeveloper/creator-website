@@ -4,6 +4,8 @@
 (function () {
   const track   = document.getElementById("track");
   const buttons = Array.from(document.querySelectorAll(".nav-btn"));
+  // URL fragments are routes, not DOM anchors: native fragment scrolling
+  // would add scrollLeft on top of the track transform when returning from a detail.
   const slides = Array.from(track.querySelectorAll(":scope > .slide"));
   const viewport = document.querySelector(".slider-viewport");
   let current   = 0;
@@ -17,7 +19,7 @@
       slide.inert = i !== index;
       slide.setAttribute("aria-hidden", String(i !== index));
     });
-    const hash = `#${slides[index].id}`;
+    const hash = `#${slides[index].dataset.section}`;
     if (record && window.location.hash !== hash) window.history.pushState(null, "", hash);
     document.querySelectorAll(".lang-toggle a").forEach((link) => {
       const url = new URL(link.href);
@@ -28,7 +30,7 @@
   }
 
   function fromLocation() {
-    const index = slides.findIndex((slide) => `#${slide.id}` === window.location.hash);
+    const index = slides.findIndex((slide) => `#${slide.dataset.section}` === window.location.hash);
     goTo(index < 0 ? 0 : index, false);
   }
   window.addEventListener("popstate", fromLocation);

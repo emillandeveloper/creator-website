@@ -20,16 +20,16 @@ test("challenge pages, About and scheduled stream work in both languages without
     const doc = dom.window.document;
     const links = new Set(Array.from(doc.querySelectorAll(".challenge-link"), a => a.getAttribute("href")));
     assert.equal(links.size, 6);
-    assert.equal(doc.querySelectorAll("#about .about-copy p").length, 4);
-    assert.match(doc.querySelector("#about").textContent, /1992/);
-    assert.match(doc.querySelector("#about").textContent, /Jotun/);
+    assert.equal(doc.querySelectorAll("#slide-about .about-copy p").length, 4);
+    assert.match(doc.querySelector("#slide-about").textContent, /1992/);
+    assert.match(doc.querySelector("#slide-about").textContent, /Jotun/);
     assert.equal(doc.querySelector("#stream-spotlight").dataset.mode === "live", false);
     assert.equal(doc.querySelector("[data-stream-link]").href, "https://www.twitch.tv/leonifelheim");
 
     const slider = await fs.readFile(path.join(__dirname, "../public/js/slider.js"), "utf8");
     dom.window.eval(slider);
     assert.ok(doc.querySelector('[data-slide="3"]').classList.contains("active"));
-    assert.equal(doc.querySelector("#challenges").getAttribute("aria-hidden"), "false");
+    assert.equal(doc.querySelector("#slide-challenges").getAttribute("aria-hidden"), "false");
     assert.ok(Array.from(doc.querySelectorAll(".lang-toggle a")).every(a => a.hash === "#challenges"));
     doc.querySelector('[data-slide="4"]').click();
     assert.equal(dom.window.location.hash, "#playthroughs");

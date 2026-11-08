@@ -27,8 +27,8 @@ test("home separates challenges and playthroughs in both languages", async (t) =
     assert.equal(response.status, 200);
     const dom = new JSDOM(await response.text(), { runScripts: "outside-only", url: `${site.origin}/?lang=${lang}` });
     const { document } = dom.window;
-    const challenges = document.querySelector("#challenges");
-    const playthroughs = document.querySelector("#playthroughs");
+    const challenges = document.querySelector("#slide-challenges");
+    const playthroughs = document.querySelector("#slide-playthroughs");
     assert.deepEqual(titles(challenges), challengeTitles);
     assert.equal(titles(playthroughs).length, 30);
     assert.equal(new Set([...titles(challenges), ...titles(playthroughs)]).size, 36);
@@ -39,9 +39,9 @@ test("home separates challenges and playthroughs in both languages", async (t) =
     for (const [id, count] of [["challenges-playing", 1], ["challenges-completed", 5], ["playthroughs-playing", 3], ["playthroughs-completed", 27]]) {
       assert.equal(titles(document.getElementById(id).closest(".game-group")).length, count);
     }
-    assert.equal(document.querySelectorAll("#now-playing .game-card").length, 4);
-    assert.equal(document.querySelectorAll("#now-playing .type-challenge").length, 1);
-    assert.equal(document.querySelectorAll("#now-playing .type-playthrough").length, 3);
+    assert.equal(document.querySelectorAll("#slide-now-playing .game-card").length, 4);
+    assert.equal(document.querySelectorAll("#slide-now-playing .type-challenge").length, 1);
+    assert.equal(document.querySelectorAll("#slide-now-playing .type-playthrough").length, 3);
     assert.equal(challenges.querySelector(".section-title").textContent, lang === "en" ? "Challenges" : "Desafíos");
     assert.equal(playthroughs.querySelector(".section-title").textContent, lang === "en" ? "Playthroughs" : "Partidas");
     assert.equal(document.querySelector(".status-playing").textContent, lang === "en" ? "Playing" : "En curso");
@@ -52,8 +52,8 @@ test("home separates challenges and playthroughs in both languages", async (t) =
     const slides = Array.from(document.querySelectorAll("#track > .slide"));
     assert.equal(buttons.length, 6);
     assert.equal(slides.length, buttons.length);
-    assert.equal(slides[3].id, "challenges");
-    assert.equal(slides[4].id, "playthroughs");
+    assert.equal(slides[3].id, "slide-challenges");
+    assert.equal(slides[4].id, "slide-playthroughs");
     for (const [index, button] of buttons.entries()) {
       assert.equal(button.dataset.slide, String(index));
       button.click();
@@ -85,10 +85,37 @@ test("empty categories show a localized message without empty status groups", as
     });
     const dom = new JSDOM(html);
     for (const id of ["challenges", "playthroughs"]) {
-      const section = dom.window.document.getElementById(id);
+      const section = dom.window.document.getElementById(`slide-${id}`);
       assert.ok(section.querySelector(".empty-state").textContent.trim());
       assert.equal(section.querySelectorAll(".game-group, .game-card").length, 0);
     }
     dom.window.close();
+  }
+});
+
+test("section URLs select the correct slide without native fragment scroll targets", async () => {
+  const slider = await fs.readFile(path.join(__dirname, "../public/js/slider.js"), "utf8");
+  const sections = ["schedule", "about", "now-playing", "challenges", "playthroughs", "socials"];
+  for (const lang of ["en", "es"]) {
+    let locals;
+    HomeController.index({ query: { lang } }, { render: (_view, data) => { locals = data; } });
+    const html = await ejs.renderFile(path.join(__dirname, "../src/views/index.ejs"), locals);
+    for (const [index, section] of sections.entries()) {
+      const dom = new JSDOM(html, {
+        runScripts: "outside-only", url: `https://example.test/?lang=${lang}#${section}`,
+      });
+      const { document } = dom.window;
+      // Native fragment navigation must not scroll the translated track a second time.
+      assert.equal(document.getElementById(section), null);
+      assert.equal(document.querySelector(`a[name="${section}"]`), null);
+      dom.window.eval(slider);
+      assert.equal(document.querySelector(".nav-btn.active").dataset.slide, String(index));
+      assert.equal(document.querySelector("#track").style.transform, `translateX(-${index * 100}%)`);
+      const visible = document.querySelectorAll('.slide[aria-hidden="false"]');
+      assert.equal(visible.length, 1);
+      assert.equal(visible[0].dataset.section, section);
+      assert.ok(Array.from(document.querySelectorAll(".lang-toggle a"), a => a.hash).every(hash => hash === `#${section}`));
+      dom.window.close();
+    }
   }
 });
