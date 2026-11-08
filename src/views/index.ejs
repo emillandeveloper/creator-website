@@ -27,7 +27,15 @@
       <div class="hero-langs">
         <span><%= profile.languages %></span>
         <span class="divider">◆</span>
-        <span><%= profile.timezone %></span>
+        <span><%= timeZoneLabel %></span>
+      </div>
+      <div class="stream-spotlight" id="stream-spotlight" data-mode="<%= spotlight.mode %>">
+        <div class="stream-copy" role="status" aria-live="polite" aria-atomic="true">
+          <p class="stream-label" data-stream-label><%= spotlight.label %></p>
+          <p class="stream-game" data-stream-game><%= spotlight.game %></p>
+          <p class="stream-detail" data-stream-detail><%= spotlight.detail %></p>
+        </div>
+        <a class="action-link twitch-link" data-stream-link href="<%= twitchUrl %>" target="_blank" rel="noopener"><%= spotlight.linkLabel %></a>
       </div>
     </div>
   </header>
@@ -76,17 +84,21 @@
               </div>
             <% }); %>
           </div>
-          <p class="schedule-note"><%= ui.schedNote[lang] %> · <%= profile.timezone %></p>
+          <p class="schedule-note"><%= ui.schedNote[lang] %> · <%= timeZoneLabel %></p>
         </div>
       </section>
 
       <!-- SLIDE 1: SOBRE MÍ -->
-      <section class="slide">
+      <section class="slide" id="about">
         <div class="slide-inner">
           <h2 class="section-title"><%= ui.aboutTitle[lang] %></h2>
           <div class="about-card">
             <img src="<%= profile.mascot %>" alt="Jotun" class="about-mascot" onerror="this.style.display='none'">
-            <p><%= profile.bio[lang] %></p>
+            <div class="about-copy">
+              <% profile.about.forEach(function(paragraph) { %>
+                <p><%= paragraph[lang] %></p>
+              <% }); %>
+            </div>
           </div>
         </div>
       </section>
@@ -127,7 +139,7 @@
       <% }); %>
 
       <!-- SLIDE 5: REDES -->
-      <section class="slide">
+      <section class="slide" id="socials">
         <div class="slide-inner">
           <h2 class="section-title"><%= ui.socialTitle[lang] %></h2>
           <div class="socials-row">
@@ -151,5 +163,6 @@
   </footer>
 
   <script src="/js/slider.js"></script>
+  <script src="/js/stream-status.js"></script>
 </body>
 </html>

@@ -94,6 +94,47 @@ body {
 }
 .hero-langs .divider { color: var(--gold); margin: 0 8px; }
 
+/* Featured stream: a real LIVE state is supplied by Twitch, never the clock. */
+.stream-spotlight {
+  margin: 1.8rem auto 0;
+  max-width: 780px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 1.2rem 1.4rem;
+  text-align: left;
+  background: rgba(12,13,22,0.92);
+  border: 1px solid var(--border-glow);
+  border-left: 3px solid var(--gold);
+  border-radius: 6px;
+}
+.stream-copy { min-width: 0; }
+.stream-label { color: var(--gold); font-family: 'Press Start 2P', monospace; font-size: 0.55rem; line-height: 1.8; }
+.stream-game { color: var(--text); font-size: 1.1rem; font-weight: bold; margin: 0.35rem 0; overflow-wrap: anywhere; }
+.stream-detail { color: var(--text-dim); font-size: 0.85rem; overflow-wrap: anywhere; }
+.stream-spotlight[data-mode="live"] { border-left-color: #ef7979; }
+.stream-spotlight[data-mode="live"] .stream-label { color: #ef7979; }
+.stream-spotlight[data-mode="live"] .stream-label::before { content: '● '; }
+.action-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.9rem 1.1rem;
+  border: 1px solid var(--gold);
+  border-radius: 4px;
+  background: rgba(200,146,10,0.1);
+  color: var(--text);
+  text-decoration: none;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.6rem;
+  line-height: 1.8;
+  text-align: center;
+}
+.twitch-link { border-color: #9570c6; background: rgba(145,70,255,0.15); flex-shrink: 0; }
+.action-link:hover { background: var(--bg-elevated); color: #fff; }
+a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
+
 /* ===================== NAV ===================== */
 .nav {
   position: sticky; top: 0;
@@ -267,6 +308,7 @@ body {
   margin: 0 auto;
 }
 .about-mascot { width: 90px; height: 90px; flex-shrink: 0; image-rendering: pixelated; }
+.about-copy p + p { margin-top: 1rem; }
 
 /* ===================== GAMES ===================== */
 .section-intro {
@@ -337,6 +379,9 @@ body {
 .type-challenge   { background: rgba(200,146,10,0.15); color: var(--gold); }
 .type-playthrough { background: rgba(58,154,170,0.15); color: #6bb8c5; }
 .game-desc { margin-top: 0.9rem; font-size: 1rem; color: var(--text-dim); }
+.game-title-link { color: inherit; text-decoration: none; }
+.game-title-link:hover { color: var(--gold); }
+.challenge-link { display: inline-block; margin-top: 1rem; color: var(--gold); text-underline-offset: 4px; }
 .empty-state {
   max-width: 680px;
   margin: 0 auto;
@@ -384,6 +429,27 @@ body {
 }
 
 /* ===================== FOOTER ===================== */
+.challenge-header {
+  padding: 5rem 1.5rem 2rem;
+  background: linear-gradient(rgba(7,8,12,0.65), var(--bg)), var(--banner) center / cover;
+  text-align: center;
+}
+.back-link { color: var(--text); text-underline-offset: 4px; }
+.challenge-brand { color: var(--text-dim); margin-top: 1rem; }
+.challenge-main { width: 100%; max-width: 850px; margin: 0 auto; padding: 2rem 1.5rem 3rem; }
+.challenge-main .section-title { overflow-wrap: anywhere; }
+.challenge-cover { height: 150px; display: flex; justify-content: center; align-items: center; margin-bottom: 2rem; }
+.challenge-cover img { max-width: min(100%, 360px); max-height: 150px; object-fit: contain; }
+.challenge-meta { justify-content: center; margin: -0.5rem 0 1.5rem; }
+.challenge-meta .game-type { line-height: 1.8; }
+.challenge-description { text-align: center; color: var(--text-dim); margin-bottom: 2rem; }
+.challenge-panel { margin: 1.2rem 0; padding: 1.5rem; background: var(--bg-card); border: 1px solid var(--border-glow); border-radius: 6px; }
+.challenge-panel h2 { font-family: 'Press Start 2P', monospace; font-size: 0.8rem; line-height: 1.8; color: var(--gold); margin-bottom: 1rem; }
+.challenge-panel p, .challenge-rules { color: var(--text-dim); }
+.challenge-rules { padding-left: 1.5rem; }
+.challenge-rules li + li { margin-top: 0.75rem; }
+.challenge-rules li::marker { color: var(--gold); }
+.challenge-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-top: 2rem; }
 .footer {
   text-align: center;
   padding: 1.5rem;
@@ -397,6 +463,9 @@ body {
 
 /* ===================== RESPONSIVE ===================== */
 @media (max-width: 680px) {
+  .stream-spotlight { flex-direction: column; align-items: stretch; gap: 1rem; padding: 1rem; }
+  .stream-game { font-size: 1rem; }
+  .challenge-panel { padding: 1.2rem; }
   .day-row {
     grid-template-columns: 70px 1fr;
     grid-template-areas: "badge info" "logo time";

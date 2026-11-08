@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="<%= lang %>">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= game.title %> — <%= profile.displayName %></title>
+  <meta name="description" content="<%= game.description[lang] %>">
+  <meta property="og:title" content="<%= game.title %> — <%= profile.displayName %>">
+  <meta property="og:description" content="<%= game.description[lang] %>">
+  <meta property="og:image" content="https://leonifelheim.tv<%= game.cover %>">
+  <link rel="icon" type="image/png" href="<%= profile.logoStatic %>">
+  <link rel="stylesheet" href="/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Press+Start+2P&display=swap" rel="stylesheet">
+</head>
+<body class="challenge-page" style="--banner: url('<%= profile.banner %>')">
+  <div class="lang-toggle">
+    <a href="?lang=en" class="<%= lang === 'en' ? 'active' : '' %>">EN</a><span>/</span>
+    <a href="?lang=es" class="<%= lang === 'es' ? 'active' : '' %>">ES</a>
+  </div>
+  <header class="challenge-header">
+    <a class="back-link" href="/?lang=<%= lang %>#challenges">← <%= lang === 'es' ? 'Todos los desafíos' : 'All challenges' %></a>
+    <p class="challenge-brand"><%= profile.lairName[lang] %> · <%= profile.displayName %></p>
+  </header>
+  <main class="challenge-main">
+    <div class="challenge-cover">
+      <img src="<%= game.cover %>" alt="<%= game.title %>" class="<%= game.coverOutline ? 'logo-outline' : '' %>">
+    </div>
+    <h1 class="section-title"><%= game.title %></h1>
+    <div class="challenge-meta game-badges">
+      <span class="game-type type-challenge"><%= challenge.format[lang] %></span>
+      <span class="game-status status-<%= game.status %>"><%= (game.status === 'playing' ? ui.statusPlaying : ui.statusCompleted)[lang] %></span>
+    </div>
+    <p class="challenge-description"><%= game.description[lang] %></p>
+    <section class="challenge-panel" aria-labelledby="rules-title">
+      <h2 id="rules-title"><%= lang === 'es' ? 'Reglas del desafío' : 'Challenge rules' %></h2>
+      <ul class="challenge-rules">
+        <% challenge.rules.forEach(function(rule) { %>
+          <li><%= rule[lang] %></li>
+        <% }); %>
+      </ul>
+    </section>
+    <section class="challenge-panel" aria-labelledby="outcome-title">
+      <h2 id="outcome-title"><%= game.status === 'playing' ? (lang === 'es' ? 'En curso' : 'In progress') : (lang === 'es' ? 'Resultado' : 'Result') %></h2>
+      <p><%= challenge.outcome[lang] %></p>
+    </section>
+    <div class="challenge-actions">
+      <a class="action-link" href="/?lang=<%= lang %>#challenges"><%= lang === 'es' ? 'Explorar desafíos' : 'Explore challenges' %></a>
+      <a class="action-link twitch-link" href="<%= twitchUrl %>" target="_blank" rel="noopener"><%= lang === 'es' ? 'Ver en Twitch' : 'Watch on Twitch' %></a>
+    </div>
+  </main>
+  <footer class="footer">© <%= new Date().getFullYear() %> <%= profile.displayName %> · <%= profile.lairName[lang] %></footer>
+</body>
+</html>

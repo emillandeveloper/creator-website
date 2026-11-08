@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="<%= lang %>">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= lang === 'es' ? 'Desafío no encontrado' : 'Challenge not found' %> — <%= profile.displayName %></title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <main class="challenge-main">
+    <h1 class="section-title"><%= lang === 'es' ? 'Desafío no encontrado' : 'Challenge not found' %></h1>
+    <a class="action-link" href="/?lang=<%= lang %>#challenges"><%= lang === 'es' ? 'Ver todos los desafíos' : 'View all challenges' %></a>
+  </main>
+</body>
+</html>

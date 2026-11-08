@@ -15,17 +15,17 @@ const challengeTitles = [
   "Final Fantasy X - No Sphere Grid / No Customization",
   "Final Fantasy VII - No Shops / Fixed Party",
 ];
-const titles = (element) => Array.from(element.querySelectorAll(".game-title"), (item) => item.textContent);
+const titles = (element) => Array.from(element.querySelectorAll(".game-title"), (item) => item.textContent.trim());
 
 test("home separates challenges and playthroughs in both languages", async (t) => {
-  const site = await startSite();
+  const site = await startSite({ TWITCH_LIVE_ENABLED: "false" });
   t.after(() => site.stop());
   const slider = await fs.readFile(path.join(__dirname, "../public/js/slider.js"), "utf8");
 
   for (const lang of ["en", "es"]) {
     const response = await fetch(`${site.origin}/?lang=${lang}`);
     assert.equal(response.status, 200);
-    const dom = new JSDOM(await response.text(), { runScripts: "outside-only" });
+    const dom = new JSDOM(await response.text(), { runScripts: "outside-only", url: `${site.origin}/?lang=${lang}` });
     const { document } = dom.window;
     const challenges = document.querySelector("#challenges");
     const playthroughs = document.querySelector("#playthroughs");

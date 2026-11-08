@@ -3,11 +3,8 @@ import {
   PROFILE, SOCIALS, SCHEDULE, GAMES, CAT_COLORS, CAT_LABELS, UI, Lang
 } from "../models/data";
 
-function getTodayIndex(): number {
-  const jsDay = new Date().getDay();
-  const map = [6, 0, 1, 2, 3, 4, 5];
-  return map[jsDay];
-}
+import { CHALLENGE_SLUGS } from "../models/challenges";
+import { getMadridDayIndex, getScheduledSpotlight, getTimeZoneLabel, TWITCH_URL } from "../services/stream-schedule";
 
 export const HomeController = {
   index(req: Request, res: Response): void {
@@ -18,6 +15,10 @@ export const HomeController = {
     res.render("index", {
       lang,
       profile: PROFILE,
+      challengeSlugs: CHALLENGE_SLUGS,
+      spotlight: getScheduledSpotlight(lang),
+      twitchUrl: TWITCH_URL,
+      timeZoneLabel: getTimeZoneLabel(),
       socials: SOCIALS,
       schedule: SCHEDULE,
       nowPlayingGames: GAMES.filter((game) => game.status === "playing"),
@@ -26,7 +27,7 @@ export const HomeController = {
       catColors: CAT_COLORS,
       catLabels: CAT_LABELS,
       ui: UI,
-      todayIndex: getTodayIndex(),
+      todayIndex: getMadridDayIndex(),
     });
   },
 };

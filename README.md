@@ -55,6 +55,18 @@ Todo el contenido está en `src/models/data.ts`. Edita ese único archivo para:
 
 La categoría describe esa partida concreta: un mismo juego puede tener un playthrough y varios retos como entradas independientes.
 
+### Fichas de desafíos y presentación
+
+Las fichas viven en `/challenges/<slug>` y sus reglas, formato y resultado en `src/models/challenges.ts`. `gameTitle` enlaza cada ficha con su entrada en `GAMES`. Mantén el `slug` estable para conservar los enlaces compartidos. Solo se publican datos documentados, sin fechas, récords o vídeos inventados.
+
+El About ampliado se edita en `PROFILE.about`, con un párrafo EN/ES por entrada. `PROFILE.bio` queda como resumen y descripción de la página. Los enlaces `/#challenges`, `/#playthroughs` y `/#about` abren directamente esas secciones y conservan el idioma al navegar.
+
+### Directo y próxima emisión
+
+La portada muestra el horario previsto desde el servidor, calculado en `Europe/Madrid`, incluido el cambio de hora. Durante la franja programada dice **Horario de hoy**: el reloj nunca activa **En directo**.
+
+`/api/stream-status?lang=es` consulta el estado real del canal mediante Twitch Helix y lo actualiza en la página cada minuto. Reutiliza las variables existentes `TWITCH_CLIENT_ID` y `TWITCH_CLIENT_SECRET` exclusivamente en el servidor, con autorización de aplicación y caché de 60 segundos. Es independiente de LEVEL 38, EventSub y las encuestas, y no requiere nuevos permisos del broadcaster. `TWITCH_LIVE_ENABLED=false` permite desactivar esta consulta. Si faltan credenciales o Twitch falla, se mantiene el horario previsto y el enlace a Twitch, sin mostrar un estado LIVE antiguo ni errores internos.
+
 El día actual se resalta automáticamente en el horario.
 
 ## 🖼️ Imágenes

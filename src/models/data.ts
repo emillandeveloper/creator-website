@@ -40,6 +40,7 @@ export interface CreatorProfile {
   lairName: I18nText;
   tagline: I18nText;
   bio: I18nText;
+  about: I18nText[];
   logoStatic: string;
   logoFlame: string;
   banner: string;
@@ -70,6 +71,7 @@ export const UI: Record<string, I18nText> = {
   statusPlaying:  { en: "Playing", es: "En curso" },
   statusCompleted:{ en: "Completed", es: "Completado" },
   statusUpcoming: { en: "Upcoming", es: "Próximamente" },
+  viewChallenge:  { en: "View challenge", es: "Ver desafío" },
   socialTitle:     { en: "Follow me",       es: "Sígueme" },
   schedNote:       { en: "* Schedule may vary", es: "* El horario puede variar" },
   noChallenges:   { en: "Challenge runs will appear here.", es: "Los desafíos aparecerán aquí." },
@@ -82,21 +84,37 @@ export const PROFILE: CreatorProfile = {
   displayName: "Leo Nifelheim",
   lairName: { en: "Jotun's Lair", es: "La Guarida de Jotun" },
   tagline: {
-    en: "JRPG / RPG  \u25C6  ENG / ESP  \u25C6  Chat-driven playthroughs",
-    es: "JRPG / RPG  \u25C6  ENG / ESP  \u25C6  Partidas decididas por el chat",
+    en: "JRPG / RPG  ◆  Challenges & randomizers  ◆  ENG / ESP",
+    es: "JRPG / RPG  ◆  Desafíos y randomizers  ◆  ENG / ESP",
   },
   bio: {
-    en: "RPG and JRPG streamer. Epic adventures decided by chat, impossible " +
-        "challenge runs and forgotten retro gems. Welcome to the wolf's den.",
-    es: "Streamer de RPGs y JRPGs. Aventuras \u00e9picas decididas por el chat, " +
-        "challenge runs imposibles y joyas retro olvidadas. Bienvenido a la guarida del lobo.",
+    en: "JRPGs, RPGs, challenge runs, randomizers and retro discoveries. Streams in English and Spanish, with plenty of chat and dark humour. Welcome to Jotun's Lair!",
+    es: "JRPGs, RPGs, desafíos, randomizers y descubrimientos retro. Directos en inglés y español, con mucha charla y humor negro. ¡Bienvenido a la Guarida de Jotun!",
   },
+  about: [
+    {
+      en: "Hey, I'm Leo, a software developer, lifelong gamer and occasional artist. I've been gaming since 1992, starting with my dad's old laptop and the SEGA Master System. My first game was Prince of Persia.",
+      es: "¡Buenas! Soy Leo, desarrollador de software, jugador de toda la vida y dibujante ocasional. Juego desde 1992, cuando empecé con el viejo portátil de mi padre y la SEGA Master System. Mi primer juego fue Prince of Persia.",
+    },
+    {
+      en: "JRPGs and RPGs are at the heart of the channel, with a special love for Final Fantasy, tactical RPGs and overlooked classics. Some days we follow a story; on others, we give a familiar game a new twist with solo runs, job restrictions or a randomizer.",
+      es: "Los JRPGs y RPGs son el centro del canal, con especial cariño por Final Fantasy, los RPGs tácticos y los clásicos menos conocidos. Unos días seguimos una historia; otros, le damos otra vuelta a un juego con retos de un solo personaje, restricciones de trabajos o un randomizer.",
+    },
+    {
+      en: "Streams are in English and Spanish, with plenty of conversation, opinions and dark humour, always with respect. Join the chat or settle in and lurk: you're welcome either way.",
+      es: "Los directos son en inglés y español, con mucha conversación, opiniones y humor negro, siempre desde el respeto. Puedes participar en el chat o quedarte de lurk: eres bienvenido de las dos formas.",
+    },
+    {
+      en: "Outside gaming, I'm into anime, manga and drawing. And the husky giving this place its name is Jotun. Welcome to Jotun's Lair!",
+      es: "Fuera de los videojuegos, me gustan el anime, el manga y dibujar. Y el husky que da nombre a este rincón es Jotun. ¡Bienvenido a la Guarida de Jotun!",
+    },
+  ],
   logoStatic: "/img/logo-static.png",
   logoFlame:  "/img/logo-flame.gif",
   banner:     "/img/banner.png",
   mascot:     "/img/jotun-happy.gif",
   languages: "English / Espa\u00f1ol",
-  timezone: "UTC+2 / CET",
+  timezone: "Madrid · CET / CEST",
 };
 
 /* ---------- REDES SOCIALES ---------- */

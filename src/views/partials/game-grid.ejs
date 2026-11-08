@@ -11,7 +11,13 @@
         >
       </div>
       <div class="game-body">
-        <h3 class="game-title"><%= game.title %></h3>
+        <h3 class="game-title">
+          <% if (game.type === 'challenge' && challengeSlugs[game.title]) { %>
+            <a class="game-title-link" href="/challenges/<%= challengeSlugs[game.title] %>?lang=<%= lang %>"><%= game.title %></a>
+          <% } else { %>
+            <%= game.title %>
+          <% } %>
+        </h3>
         <div class="game-badges">
           <% if (showType) { %>
             <span class="game-type type-<%= game.type %>"><%= (game.type === 'challenge' ? ui.typeChallenge : ui.typePlaythrough)[lang] %></span>
@@ -19,6 +25,9 @@
           <span class="game-status status-<%= game.status %>"><%= ({ playing: ui.statusPlaying, completed: ui.statusCompleted, upcoming: ui.statusUpcoming })[game.status][lang] %></span>
         </div>
         <p class="game-desc"><%= game.description[lang] %></p>
+        <% if (game.type === 'challenge' && challengeSlugs[game.title]) { %>
+          <a class="challenge-link" href="/challenges/<%= challengeSlugs[game.title] %>?lang=<%= lang %>"><%= ui.viewChallenge[lang] %> →</a>
+        <% } %>
       </div>
     </article>
   <% }); %>
