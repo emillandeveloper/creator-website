@@ -27,10 +27,11 @@ export function isOwner(role: string): boolean {
 }
 
 export class Level38Auth {
-  constructor(private readonly db: PrismaClient, private readonly config: Level38Config) {}
+  constructor(private readonly db: PrismaClient, private readonly config: Level38Config,
+    private readonly namespace: { cookieName: string; path: string; ownerOnly?: boolean } = { cookieName: OPERATOR_COOKIE, path: "/level38" }) {}
 
   private cookieOptions(operator: boolean): CookieOptions {
-    return { httpOnly: true, secure: this.config.secureCookies, sameSite: operator ? "strict" : "lax", path: "/level38" };
+    return { httpOnly: true, secure: this.config.secureCookies, sameSite: operator ? "strict" : "lax", path: operator ? this.namespace.path : "/level38" };
   }
 
   async viewer(req: Request) {
@@ -49,13 +50,13 @@ export class Level38Auth {
   }
 
   async operator(req: Request) {
-    const token = cookieToken(req, OPERATOR_COOKIE);
+    const token = cookieToken(req, this.namespace.cookieName);
     if (!token) return null;
     const session = await this.db.operatorSession.findFirst({
       where: { tokenHash: hashToken(token), expiresAt: { gt: new Date() }, operator: { disabled: false } },
       include: { operator: true },
     });
-    return session && canOperate(session.operator.role) ? session.operator : null;
+    return session && canOperate(session.operator.role) && (!this.namespace.ownerOnly || isOwner(session.operator.role)) ? session.operator : null;
   }
 
   async requireOperator(req: Request) {
@@ -75,23 +76,23 @@ export class Level38Auth {
       throw new Level38Error(401, "Invalid operator access key.");
     }
     const operator = await this.db.operator.findUnique({ where: { keyHash: hashToken(key) } });
-    if (!operator || operator.disabled || !canOperate(operator.role)) {
+    if (!operator || operator.disabled || !canOperate(operator.role) || (this.namespace.ownerOnly && !isOwner(operator.role))) {
       throw new Level38Error(401, "Invalid operator access key.");
     }
     const token = newToken();
-    const previous = cookieToken(req, OPERATOR_COOKIE);
+    const previous = cookieToken(req, this.namespace.cookieName);
     await this.db.$transaction(async (tx) => {
       if (previous) await tx.operatorSession.deleteMany({ where: { tokenHash: hashToken(previous) } });
       await tx.operatorSession.create({
         data: { operatorId: operator.id, tokenHash: hashToken(token), expiresAt: new Date(Date.now() + OPERATOR_TTL) },
       });
     });
-    res.cookie(OPERATOR_COOKIE, token, { ...this.cookieOptions(true), maxAge: OPERATOR_TTL });
+    res.cookie(this.namespace.cookieName, token, { ...this.cookieOptions(true), maxAge: OPERATOR_TTL });
   }
 
   async logout(req: Request, res: Response): Promise<void> {
-    const token = cookieToken(req, OPERATOR_COOKIE);
+    const token = cookieToken(req, this.namespace.cookieName);
     if (token) await this.db.operatorSession.deleteMany({ where: { tokenHash: hashToken(token) } });
-    res.clearCookie(OPERATOR_COOKIE, this.cookieOptions(true));
+    res.clearCookie(this.namespace.cookieName, this.cookieOptions(true));
   }
 }

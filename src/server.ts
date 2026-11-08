@@ -2,7 +2,8 @@ import "dotenv/config";
 import express, { Application } from "express";
 import { createServer } from "http";
 import path from "path";
-import routes from "./routes";
+import createRoutes from "./routes";
+import { mountCatalog } from "./services/catalog-runtime";
 import { mountLevel38 } from "./modules/level38";
 import { readLevel38Config } from "./modules/level38/config";
 
@@ -17,14 +18,16 @@ app.set("views", path.join(__dirname, "..", "src", "views"));
 app.use(express.static(path.join(__dirname, "..", "public")));
 
 /* Rutas */
-app.use("/", routes);
+const catalog = mountCatalog(app);
+app.use("/", createRoutes(catalog.store));
 
 const server = createServer(app);
 const level38 = mountLevel38(app, server, readLevel38Config());
 
 app.get("/healthz", (_req, res) => {
   res.set("Cache-Control", "no-store");
-  void level38.ready().then((ready) => {
+  void Promise.all([level38.ready(), catalog.ready()]).then((checks) => {
+    const ready = checks.every(Boolean);
     res.status(ready ? 200 : 503).json({ status: ready ? "ok" : "unavailable" });
   }).catch(() => {
     // Health checks must not disclose database errors, credentials, or event data.
@@ -40,7 +43,7 @@ for (const signal of ["SIGINT", "SIGTERM"] as const) {
   process.once(signal, () => {
     const deadline = setTimeout(() => process.exit(1), 10_000);
     deadline.unref();
-    void level38.close().then(() => {
+    void Promise.all([level38.close(), catalog.close()]).then(() => {
       server.close(() => { clearTimeout(deadline); process.exit(0); });
     }).catch(() => process.exit(1));
   });

@@ -198,6 +198,17 @@ a:focus-visible, button:focus-visible { outline: 2px solid var(--gold); outline-
   margin: 0 auto;
 }
 
+.catalog-toolbar { display: flex; align-items: end; flex-wrap: wrap; gap: 16px; margin: 0 0 28px; }
+.catalog-search-field { flex: 1; min-width: 200px; }
+.catalog-toolbar label { display: block; color: #b9b5cc; font-size: .85rem; margin-bottom: 8px; }
+.catalog-toolbar input, .catalog-toolbar select { width: 100%; background: #10111b; border: 1px solid #45435b; color: #e0d8c0; border-radius: 4px; padding: 11px 12px; font: .95rem/1.5 system-ui, sans-serif; }
+.catalog-toolbar input::placeholder { color: #9690ad; }
+.catalog-toolbar :is(input,select):focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.catalog-count { width: 100%; font-size: .8rem; color: #a5a0b9; }
+.search-empty { text-align: center; padding: 35px 16px; color: #b9b5cc; border: 1px dashed #45435b; border-radius: 4px; }
+[data-catalog] [hidden] { display: none !important; }
+@media (max-width: 480px) { .catalog-toolbar > div { width: 100%; } }
+
 .section-title {
   font-family: 'Press Start 2P', monospace;
   font-size: 1.2rem;

@@ -7,6 +7,32 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// Creator catalog overrides are independent of the LEVEL 38 event and its games.
+model CatalogGame {
+  id            String   @id
+  title         String
+  type          String
+  status        String
+  descriptionEn String
+  descriptionEs String
+  cover         String
+  coverScale    Float    @default(1)
+  coverOutline  Boolean  @default(false)
+  details       Json?
+  revision      Int      @default(1)
+  updatedBy     String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  logo          CatalogLogo?
+}
+
+model CatalogLogo {
+  gameId    String      @id
+  game      CatalogGame @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  data      Bytes
+  mimeType  String
+}
+
 enum OperatorRole {
   MODERATOR
   OWNER

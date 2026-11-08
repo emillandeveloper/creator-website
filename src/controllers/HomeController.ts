@@ -1,9 +1,10 @@
 import { Request, Response } from "express";
 import {
-  PROFILE, SOCIALS, SCHEDULE, GAMES, CAT_COLORS, CAT_LABELS, UI, Lang
+  PROFILE, SOCIALS, SCHEDULE, CAT_COLORS, CAT_LABELS, UI, Lang
 } from "../models/data";
 
 import { CHALLENGE_SLUGS } from "../models/challenges";
+import { DEFAULT_CATALOG, CatalogEntry } from "../services/catalog";
 import { getMadridDayIndex, getScheduledSpotlight, getTimeZoneLabel, TWITCH_URL } from "../services/stream-schedule";
 
 export const HomeController = {
@@ -11,6 +12,7 @@ export const HomeController = {
     /* Idioma: ?lang=es lo fuerza; por defecto inglés */
     const q = (req.query.lang as string) || "";
     const lang: Lang = q === "es" ? "es" : "en";
+    const games: CatalogEntry[] = res.locals?.catalogGames ?? DEFAULT_CATALOG;
 
     res.render("index", {
       lang,
@@ -21,9 +23,9 @@ export const HomeController = {
       timeZoneLabel: getTimeZoneLabel(),
       socials: SOCIALS,
       schedule: SCHEDULE,
-      nowPlayingGames: GAMES.filter((game) => game.status === "playing"),
-      challengeGames: GAMES.filter((game) => game.type === "challenge" && game.status !== "upcoming"),
-      playthroughGames: GAMES.filter((game) => game.type === "playthrough" && game.status !== "upcoming"),
+      nowPlayingGames: games.filter((game) => game.status === "playing"),
+      challengeGames: games.filter((game) => game.type === "challenge" && game.status !== "upcoming"),
+      playthroughGames: games.filter((game) => game.type === "playthrough" && game.status !== "upcoming"),
       catColors: CAT_COLORS,
       catLabels: CAT_LABELS,
       ui: UI,

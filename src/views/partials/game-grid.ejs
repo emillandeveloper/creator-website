@@ -1,6 +1,7 @@
 <div class="games-grid">
   <% games.forEach(function(game) { %>
-    <article class="game-card">
+    <% const challengeSlug = game.challengeSlug || challengeSlugs[game.title]; %>
+    <article class="game-card" data-status="<%= game.status %>">
       <div class="game-cover">
         <img
           src="<%= game.cover %>"
@@ -12,8 +13,8 @@
       </div>
       <div class="game-body">
         <h3 class="game-title">
-          <% if (game.type === 'challenge' && challengeSlugs[game.title]) { %>
-            <a class="game-title-link" href="/challenges/<%= challengeSlugs[game.title] %>?lang=<%= lang %>"><%= game.title %></a>
+          <% if (game.type === 'challenge' && challengeSlug) { %>
+            <a class="game-title-link" href="/challenges/<%= challengeSlug %>?lang=<%= lang %>"><%= game.title %></a>
           <% } else { %>
             <%= game.title %>
           <% } %>
@@ -25,8 +26,8 @@
           <span class="game-status status-<%= game.status %>"><%= ({ playing: ui.statusPlaying, completed: ui.statusCompleted, upcoming: ui.statusUpcoming })[game.status][lang] %></span>
         </div>
         <p class="game-desc"><%= game.description[lang] %></p>
-        <% if (game.type === 'challenge' && challengeSlugs[game.title]) { %>
-          <a class="challenge-link" href="/challenges/<%= challengeSlugs[game.title] %>?lang=<%= lang %>"><%= ui.viewChallenge[lang] %> →</a>
+        <% if (game.type === 'challenge' && challengeSlug) { %>
+          <a class="challenge-link" href="/challenges/<%= challengeSlug %>?lang=<%= lang %>"><%= ui.viewChallenge[lang] %> →</a>
         <% } %>
       </div>
     </article>

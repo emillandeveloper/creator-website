@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Gestionar juegos — Leo Nifelheim</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/admin.css">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Press+Start+2P&display=swap" rel="stylesheet">
+</head>
+<body class="catalog-admin" data-authenticated="<%= authenticated %>">
+  <header class="admin-header">
+    <a class="back-link" href="/?lang=es#challenges">← Volver a la web</a>
+    <div class="admin-heading"><div><p class="admin-eyebrow">Leo Nifelheim · La Guarida de Jotun</p><h1>Tu catálogo</h1></div>
+      <% if (authenticated) { %><button id="logout" class="admin-secondary" type="button">Cerrar sesión</button><% } %>
+    </div>
+    <p>Añade tus próximas aventuras y guarda las que ya has completado.</p>
+  </header>
+  <main class="admin-main">
+    <p id="admin-message" role="status" aria-live="polite" hidden></p>
+    <% if (!configured) { %>
+      <section class="admin-panel"><h2>Panel no disponible</h2><p>No se ha podido conectar con el catálogo. Vuelve a intentarlo en unos momentos.</p></section>
+    <% } else if (!authenticated) { %>
+      <section class="admin-panel admin-login">
+        <h2>Acceso de propietario</h2>
+        <p>Entra con tu clave de propietario de LEVEL 38.</p>
+        <form id="login-form">
+          <label for="access-key">Clave de acceso</label>
+          <input id="access-key" type="password" autocomplete="current-password" required spellcheck="false">
+          <button class="admin-primary" type="submit">Entrar al panel</button>
+        </form>
+      </section>
+    <% } else { %>
+      <div class="admin-layout">
+        <aside class="admin-panel admin-catalog">
+          <div class="admin-list-heading"><h2>Juegos <span id="game-count"></span></h2><button id="new-game" class="admin-primary" type="button">+ Añadir</button></div>
+          <label class="sr-only" for="admin-search">Buscar en tu catálogo</label>
+          <input id="admin-search" type="search" placeholder="Buscar juego…" autocomplete="off">
+          <p id="admin-empty" hidden>No hay juegos con ese nombre.</p>
+          <div id="admin-games" aria-label="Juegos del catálogo"><p>Cargando catálogo…</p></div>
+        </aside>
+        <section class="admin-panel admin-editor">
+          <h2 id="editor-title">Añadir juego</h2>
+          <form id="game-form">
+            <label for="game-title">Nombre del juego o desafío</label>
+            <input id="game-title" name="title" maxlength="160" required placeholder="Ej.: Final Fantasy VII — Randomizer">
+            <div class="admin-field-row">
+              <div><label for="game-type">Tipo</label><select id="game-type"><option value="playthrough">Playthrough</option><option value="challenge">Challenge</option></select></div>
+              <div><label for="game-status">Estado</label><select id="game-status"><option value="playing">En curso</option><option value="completed">Completado</option><option value="upcoming">Oculto / próximamente</option></select></div>
+            </div>
+            <p class="field-hint">Los juegos ocultos se conservan aquí y no aparecen en el catálogo público.</p>
+            <label for="game-logo">Logo del juego</label>
+            <div class="admin-logo-row"><div class="admin-logo-preview"><img id="logo-preview" alt="Vista previa del logo" hidden><span id="logo-placeholder">Vista previa</span></div>
+              <div><input id="game-logo" type="file" accept="image/png,image/jpeg,image/webp"><p class="field-hint">PNG, JPG o WebP · hasta 5 MB. Si editas un juego, deja este campo vacío para conservar su logo.</p></div>
+            </div>
+            <details class="admin-details"><summary>Ajustar cómo se ve el logo</summary>
+              <label for="logo-scale">Tamaño dentro de la tarjeta</label><input id="logo-scale" type="number" min="0.5" max="2" step="0.01" value="1">
+              <label class="admin-check"><input id="logo-outline" type="checkbox"> Añadir contorno claro</label>
+            </details>
+            <label for="description-es">Descripción en español</label>
+            <textarea id="description-es" maxlength="4000" rows="4" placeholder="De qué va la partida, las restricciones del reto…"></textarea>
+            <label for="description-en">Descripción en inglés <span class="field-hint">(opcional)</span></label>
+            <textarea id="description-en" maxlength="4000" rows="4" placeholder="English description"></textarea>
+            <p class="field-hint">Rellena al menos un idioma. Si dejas el otro vacío, se mostrará el mismo texto en ambos.</p>
+            <details id="challenge-fields" class="admin-details" hidden><summary>Ficha del desafío (opcional)</summary>
+              <div class="admin-field-row"><div><label for="format-es">Formato · ES</label><input id="format-es" maxlength="100" placeholder="Ej.: Un solo personaje"></div><div><label for="format-en">Formato · EN</label><input id="format-en" maxlength="100" placeholder="E.g. Solo character"></div></div>
+              <label for="rules-es">Reglas en español · una por línea</label><textarea id="rules-es" rows="4" maxlength="8000"></textarea>
+              <label for="rules-en">Reglas en inglés · una por línea</label><textarea id="rules-en" rows="4" maxlength="8000"></textarea>
+              <label for="outcome-es">Resultado o progreso · ES</label><textarea id="outcome-es" rows="2" maxlength="4000"></textarea>
+              <label for="outcome-en">Resultado o progreso · EN</label><textarea id="outcome-en" rows="2" maxlength="4000"></textarea>
+            </details>
+            <div class="admin-save-row"><button id="save-game" class="admin-primary" type="submit" disabled>Guardar juego</button><a id="view-game" href="/?lang=es#playthroughs" target="_blank" rel="noopener" hidden>Ver en la web ↗</a></div>
+            <p class="field-hint">Al guardar, los cambios se publican en tu web.</p>
+          </form>
+        </section>
+      </div>
+    <% } %>
+  </main>
+  <% if (configured) { %><script src="/js/admin.js"></script><% } %>
+</body>
+</html>

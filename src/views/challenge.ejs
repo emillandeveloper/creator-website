@@ -31,6 +31,7 @@
       <span class="game-status status-<%= game.status %>"><%= (game.status === 'playing' ? ui.statusPlaying : ui.statusCompleted)[lang] %></span>
     </div>
     <p class="challenge-description"><%= game.description[lang] %></p>
+    <% if (challenge.rules.length) { %>
     <section class="challenge-panel" aria-labelledby="rules-title">
       <h2 id="rules-title"><%= lang === 'es' ? 'Reglas del desafío' : 'Challenge rules' %></h2>
       <ul class="challenge-rules">
@@ -39,10 +40,13 @@
         <% }); %>
       </ul>
     </section>
+    <% } %>
+    <% if (challenge.outcome[lang]) { %>
     <section class="challenge-panel" aria-labelledby="outcome-title">
       <h2 id="outcome-title"><%= game.status === 'playing' ? (lang === 'es' ? 'En curso' : 'In progress') : (lang === 'es' ? 'Resultado' : 'Result') %></h2>
       <p><%= challenge.outcome[lang] %></p>
     </section>
+    <% } %>
     <div class="challenge-actions">
       <a class="action-link" href="/?lang=<%= lang %>#challenges"><%= lang === 'es' ? 'Explorar desafíos' : 'Explore challenges' %></a>
       <a class="action-link twitch-link" href="<%= twitchUrl %>" target="_blank" rel="noopener"><%= lang === 'es' ? 'Ver en Twitch' : 'Watch on Twitch' %></a>

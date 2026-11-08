@@ -117,10 +117,18 @@
         { id: 'playthroughs', title: ui.playthroughsTitle, intro: ui.playthroughsIntro, games: playthroughGames, empty: ui.noPlaythroughs }
       ]; %>
       <% collections.forEach(function(collection) { %>
-        <section class="slide" id="slide-<%= collection.id %>" data-section="<%= collection.id %>">
+        <section class="slide" id="slide-<%= collection.id %>" data-section="<%= collection.id %>" data-catalog>
           <div class="slide-inner">
             <h2 class="section-title"><%= collection.title[lang] %></h2>
             <p class="section-intro"><%= collection.intro[lang] %></p>
+            <div class="catalog-toolbar">
+              <div class="catalog-search-field"><label for="search-<%= collection.id %>"><%= lang === 'es' ? 'Buscar juego' : 'Search games' %></label>
+                <input id="search-<%= collection.id %>" type="search" data-catalog-search placeholder="<%= lang === 'es' ? 'Nombre o descripción…' : 'Name or description…' %>" autocomplete="off"></div>
+              <div><label for="status-<%= collection.id %>"><%= lang === 'es' ? 'Estado' : 'Status' %></label>
+                <select id="status-<%= collection.id %>" data-catalog-status><option value="all"><%= lang === 'es' ? 'Todos' : 'All' %></option><option value="playing"><%= ui.statusPlaying[lang] %></option><option value="completed"><%= ui.statusCompleted[lang] %></option></select></div>
+              <p class="catalog-count" data-catalog-count role="status" aria-live="polite"></p>
+            </div>
+            <p class="search-empty" data-catalog-empty hidden><%= lang === 'es' ? 'No hay juegos que coincidan con tu búsqueda.' : 'No games match your search.' %></p>
             <% if (collection.games.length === 0) { %>
               <p class="empty-state"><%= collection.empty[lang] %></p>
             <% } %>
@@ -163,6 +171,7 @@
   </footer>
 
   <script src="/js/slider.js"></script>
+  <script src="/js/catalog-search.js"></script>
   <script src="/js/stream-status.js"></script>
 </body>
 </html>
