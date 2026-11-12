@@ -33,6 +33,31 @@ model CatalogLogo {
   mimeType  String
 }
 
+// Twitch Chaos is separate from the one-off LEVEL 38 birthday event.
+// Rewards remain disabled until the broadcaster explicitly configures them.
+model ChaosReward {
+  id              String   @id
+  cost            Int
+  cooldownSeconds Int      @default(60)
+  enabled         Boolean  @default(false)
+  twitchRewardId  String?  @unique
+  updatedAt       DateTime @updatedAt
+}
+
+// Keep an idempotency key ready for Twitch EventSub redemptions in a later phase.
+// Test events are explicitly marked and must never be treated as real canjes.
+model ChaosActivity {
+  id           String   @id @default(cuid())
+  redemptionId String?  @unique
+  rewardId     String
+  viewer       String
+  source       String
+  status       String
+  occurredAt   DateTime @default(now())
+
+  @@index([occurredAt])
+}
+
 enum OperatorRole {
   MODERATOR
   OWNER

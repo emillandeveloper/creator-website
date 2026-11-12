@@ -5,6 +5,10 @@
 .admin-header .back-link { font-size: .85rem; }
 .admin-heading { display: flex; justify-content: space-between; align-items: center; gap: 24px; margin-top: 28px; }
 .admin-heading h1 { font-family: 'Press Start 2P', monospace; font-size: 1.5rem; line-height: 1.7; color: var(--text); }
+.admin-tabs { display: flex; flex-wrap: wrap; gap: 10px; margin: 24px 0 12px; }
+.admin-tabs a { display: inline-flex; align-items: center; border: 1px solid #484255; border-radius: 5px; padding: 10px 14px; color: #c6bdd2; background: #14121d; font: 600 .84rem system-ui,sans-serif; text-decoration: none; }
+.admin-tabs a:hover, .admin-tabs a:focus-visible { border-color: #c8920a; color: #f2e3bc; }
+.admin-tabs a.active { border-color: #c8920a; color: #f4d48c; background: #231c12; }
 .admin-eyebrow, .admin-header > p, .field-hint { color: #a4a4bc; font-size: .84rem; line-height: 1.6; }
 .admin-eyebrow { margin-bottom: 8px; color: var(--gold); }
 .admin-main { padding: 24px 0 60px; }

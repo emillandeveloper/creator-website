@@ -6,6 +6,7 @@ import { readLevel38Config } from "../modules/level38/config";
 import { Level38Error } from "../modules/level38/errors";
 import { CatalogStore, catalogInput } from "./catalog";
 import { catalogLogo } from "./catalog-logo";
+import { ChaosStore } from "./chaos";
 
 const wrap = (handler: (req: Request, res: Response) => Promise<void>): express.RequestHandler =>
   (req, res, next) => { handler(req, res).catch(next); };
@@ -14,6 +15,7 @@ export function mountCatalog(app: Application) {
   const configured = Boolean(process.env.DATABASE_URL && process.env.LEVEL38_ORIGIN);
   const db = configured ? new PrismaClient() : undefined;
   const store = new CatalogStore(db);
+  const chaos = db ? new ChaosStore(db) : undefined;
   const router = express.Router();
   router.use((_req, res, next) => {
     res.set({ "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff", "X-Robots-Tag": "noindex, nofollow",
@@ -40,6 +42,10 @@ export function mountCatalog(app: Application) {
     router.get("/", wrap(async (req, res) => {
       res.render("admin", { configured: true, authenticated: Boolean(await auth.operator(req)) });
     }));
+    router.get("/chaos", wrap(async (req, res) => {
+      if (!await auth.operator(req)) { res.redirect(302, "/admin"); return; }
+      res.render("chaos-admin");
+    }));
     router.post("/api/login", limited(10, 15 * 60 * 1000), express.json({ limit: "4kb", inflate: false }), wrap(async (req, res) => {
       try { await auth.login(req, res, req.body?.key); }
       catch (error) { if (error instanceof Level38Error && error.status === 401) throw new Level38Error(401, "La clave de propietario no es válida."); throw error; }
@@ -47,6 +53,13 @@ export function mountCatalog(app: Application) {
     }));
     router.post("/api/logout", express.json({ limit: "1kb", inflate: false }), wrap(async (req, res) => { await auth.logout(req, res); res.json({ ok: true }); }));
     router.use((req, res, next) => { auth.requireOwner(req).then(owner => { res.locals.owner = owner; next(); }).catch(next); });
+    router.get("/api/chaos/state", wrap(async (_req, res) => { res.json(await chaos!.state()); }));
+    router.post("/api/chaos/rewards/:id", limited(40, 60 * 1000), express.json({ limit: "2kb", inflate: false }), wrap(async (req, res) => {
+      res.json(await chaos!.saveReward(req.params.id, req.body));
+    }));
+    router.post("/api/chaos/test/:id", limited(20, 60 * 1000), express.json({ limit: "1kb", inflate: false }), wrap(async (req, res) => {
+      res.status(201).json({ event: await chaos!.simulate(req.params.id) });
+    }));
     router.get("/api/games", wrap(async (_req, res) => { res.json({ games: await store.list() }); }));
     router.post(["/api/games", "/api/games/:id"], limited(30, 60 * 1000), express.json({ limit: "7mb", inflate: false }), wrap(async (req, res) => {
       const id = req.params.id;
@@ -65,6 +78,15 @@ export function mountCatalog(app: Application) {
   };
   router.use(errors);
   app.use("/admin", router);
+  app.get("/chaos/overlay", (_req, res) => {
+    res.set({ "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff", "X-Robots-Tag": "noindex, nofollow",
+      "Content-Security-Policy": "default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'none'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'" });
+    res.render("chaos-overlay");
+  });
+  app.get("/chaos/api/latest", rateLimit({ windowMs: 60 * 1000, limit: 150, standardHeaders: "draft-7", legacyHeaders: false }), wrap(async (_req, res) => {
+    res.set({ "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff" });
+    res.json({ event: chaos ? await chaos.currentOverlay() : null });
+  }));
   app.get("/media/catalog/:id", wrap(async (req, res) => {
     try {
       const logo = /^[a-z0-9-]{1,120}$/.test(req.params.id) ? await db?.catalogLogo.findUnique({ where: { gameId: req.params.id } }) : null;
@@ -77,6 +99,8 @@ export function mountCatalog(app: Application) {
     if (!db) return true;
     await db.catalogGame.findFirst({ select: { id: true } });
     await db.catalogLogo.findFirst({ select: { gameId: true } });
+    await db.chaosReward.findFirst({ select: { id: true } });
+    await db.chaosActivity.findFirst({ select: { id: true } });
     return true;
   }, close: async () => { await db?.$disconnect(); } };
 }

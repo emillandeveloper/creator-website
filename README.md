@@ -6,6 +6,10 @@ Página web de creador con arquitectura **MVC** en **Node.js + Express + TypeScr
 
 La base del evento de cumpleaños vive en `/level38`, con panel de control en `/level38/control`. Está desactivada por defecto y necesita PostgreSQL para activarse. Consulta [la guía de arquitectura, configuración y desarrollo de LEVEL 38](docs/level38.md).
 
+## Twitch Chaos (prototipo)
+
+El enlace discreto `⚙ Admin` del pie de página abre el panel privado `/admin`, ahora con las secciones **Juegos** y **Twitch Chaos** (`/admin/chaos`). El panel de Chaos permite configurar recompensas y simular avisos en `/chaos/overlay` para OBS. **Todavía no se conecta a puntos de canal ni modifica un juego**: la integración real espera la elección de Final Fantasy y su conector local. Consulta [la guía de Twitch Chaos](docs/twitch-chaos.md).
+
 ## 📁 Estructura (MVC)
 
 ```

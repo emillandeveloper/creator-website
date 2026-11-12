@@ -1,0 +1,29 @@
+.chaos-admin .chaos-overlay-link { display: inline-flex; align-items: center; padding: 10px 15px; text-decoration: none; white-space: nowrap; border-radius: 4px; }
+.chaos-header-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.chaos-lab { display: flex; justify-content: space-between; gap: 22px; align-items: center; border-color: #645126; background: #1a1712; margin-bottom: 22px; }
+.chaos-lab strong { color: #e9c479; }
+.chaos-lab p { color: #aaa2b2; font: .9rem/1.6 system-ui,sans-serif; margin-top: 6px; }
+.chaos-connections { display: flex; flex-wrap: wrap; gap: 8px; }
+.chaos-connection { background: #27212e; color: #d1c2d8; padding: 7px 10px; border: 1px solid #51455e; border-radius: 30px; font: 600 .75rem system-ui,sans-serif; white-space: nowrap; }
+.chaos-layout { display: grid; grid-template-columns: minmax(0, 2fr) minmax(270px, 1fr); gap: 22px; align-items: start; }
+.chaos-section-title { display: flex; align-items: baseline; flex-wrap: wrap; justify-content: space-between; gap: 10px; margin-bottom: 16px; }
+.chaos-section-title h2 { margin: 0; }
+.chaos-section-title span { color: #9894a9; font: .8rem system-ui,sans-serif; }
+.chaos-rewards { display: grid; gap: 12px; }
+.chaos-reward { background: #0c0d15; border: 1px solid #33354a; border-radius: 6px; padding: 16px; }
+.chaos-reward-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.chaos-reward h3 { color: #e7dfcc; font: 700 1rem system-ui,sans-serif; }
+.chaos-reward p { color: #9f9aad; font: .84rem/1.5 system-ui,sans-serif; margin-top: 4px; }
+.chaos-tag { display: inline-block; padding: 5px 9px; background: #262037; color: #d6b5f0; border-radius: 4px; font: .7rem system-ui,sans-serif; }
+.chaos-tag.help { background: #15271f; color: #a3deb7; }
+.chaos-tag.sabotage { background: #321d25; color: #efa6ad; }
+.chaos-reward-fields { display: grid; grid-template-columns: 1fr 1fr auto; align-items: end; gap: 12px; }
+.chaos-reward-fields label { margin: 12px 0 0; }
+.chaos-reward-fields input { margin-top: 6px; }
+.chaos-reward .admin-check { margin-top: 12px; }
+.chaos-reward-actions { display: flex; justify-content: flex-end; gap: 9px; margin-top: 16px; }
+.chaos-history ol { padding-left: 20px; color: #b6aec8; font: .85rem/1.5 system-ui,sans-serif; }
+.chaos-history li { margin-top: 12px; }
+.chaos-history li small { display: block; color: #928ca3; }
+@media (max-width: 950px) { .chaos-layout { grid-template-columns: 1fr; } .chaos-lab { flex-direction: column; align-items: flex-start; } }
+@media (max-width: 520px) { .chaos-reward-fields { grid-template-columns: 1fr 1fr; } .chaos-reward-fields .chaos-enabled { grid-column: 1 / -1; } .chaos-reward-head { flex-wrap: wrap; } }

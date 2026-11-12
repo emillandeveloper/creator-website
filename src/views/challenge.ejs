@@ -52,6 +52,6 @@
       <a class="action-link twitch-link" href="<%= twitchUrl %>" target="_blank" rel="noopener"><%= lang === 'es' ? 'Ver en Twitch' : 'Watch on Twitch' %></a>
     </div>
   </main>
-  <footer class="footer">© <%= new Date().getFullYear() %> <%= profile.displayName %> · <%= profile.lairName[lang] %></footer>
+  <footer class="footer">© <%= new Date().getFullYear() %> <%= profile.displayName %> · <%= profile.lairName[lang] %><%- include('partials/admin-link') %></footer>
 </body>
 </html>

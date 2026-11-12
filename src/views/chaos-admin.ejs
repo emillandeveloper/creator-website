@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Twitch Chaos — Administración de Leo Nifelheim</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/admin.css">
+  <link rel="stylesheet" href="/css/chaos-admin.css">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Press+Start+2P&display=swap" rel="stylesheet">
+</head>
+<body class="catalog-admin chaos-admin">
+  <header class="admin-header">
+    <a class="back-link" href="/">← Volver a la web</a>
+    <div class="admin-heading">
+      <div><p class="admin-eyebrow">La Guarida de Jotun · Herramientas de directo</p><h1>⚡ Twitch Chaos</h1></div>
+      <div class="chaos-header-actions"><a class="admin-secondary chaos-overlay-link" href="/chaos/overlay" target="_blank" rel="noopener">Abrir overlay ↗</a>
+        <button id="chaos-logout" class="admin-secondary" type="button">Cerrar sesión</button></div>
+    </div>
+    <nav class="admin-tabs" aria-label="Secciones de administración">
+      <a href="/admin">🎮 Juegos</a>
+      <a class="active" aria-current="page" href="/admin/chaos">⚡ Twitch Chaos</a>
+    </nav>
+    <p>Configura las futuras recompensas del chat y prueba cómo se verán durante el directo.</p>
+  </header>
+
+  <main class="admin-main">
+    <p id="admin-message" role="status" aria-live="polite" hidden></p>
+    <section class="admin-panel chaos-lab" aria-label="Estado de la integración">
+      <div><strong>Laboratorio · primera fase</strong><p>Las pruebas solo activan el overlay. No gastan puntos de canal y todavía no modifican ningún Final Fantasy.</p></div>
+      <div class="chaos-connections"><span id="chaos-twitch" class="chaos-connection">Twitch: pendiente</span><span id="chaos-game" class="chaos-connection">Juego: pendiente</span></div>
+    </section>
+
+    <section class="chaos-layout">
+      <div class="admin-panel">
+        <div class="chaos-section-title"><h2>Recompensas</h2><span>Prepara precios y cooldowns antes de elegir el FF.</span></div>
+        <div id="chaos-rewards" class="chaos-rewards" aria-live="polite"><p>Cargando recompensas…</p></div>
+      </div>
+      <aside class="admin-panel chaos-history">
+        <h2>Actividad de pruebas</h2>
+        <p class="field-hint">Puedes abrir el overlay en otra ventana y pulsar «Probar» en una recompensa.</p>
+        <ol id="chaos-activity"><li>Todavía no hay pruebas.</li></ol>
+        <p class="field-hint">Las recompensas reales de Twitch y el conector local se activarán más adelante, cuando elijamos el juego.</p>
+      </aside>
+    </section>
+  </main>
+  <script src="/js/chaos-admin.js"></script>
+</body>
+</html>

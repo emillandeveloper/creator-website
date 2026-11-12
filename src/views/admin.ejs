@@ -15,6 +15,12 @@
     <div class="admin-heading"><div><p class="admin-eyebrow">Leo Nifelheim · La Guarida de Jotun</p><h1>Tu catálogo</h1></div>
       <% if (authenticated) { %><button id="logout" class="admin-secondary" type="button">Cerrar sesión</button><% } %>
     </div>
+    <% if (authenticated) { %>
+      <nav class="admin-tabs" aria-label="Secciones de administración">
+        <a class="active" aria-current="page" href="/admin">🎮 Juegos</a>
+        <a href="/admin/chaos">⚡ Twitch Chaos</a>
+      </nav>
+    <% } %>
     <p>Añade tus próximas aventuras y guarda las que ya has completado.</p>
   </header>
   <main class="admin-main">
