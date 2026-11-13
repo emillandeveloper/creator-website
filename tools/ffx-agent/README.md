@@ -86,3 +86,14 @@ El 13 de noviembre hemos contrastado **HP y MP de los siete personajes** con el 
 5. El script comprueba el ejecutable, la presencia de Wakka en el grupo y sus HP/MP. Al confirmar, vuelve a verificar que no han cambiado y modifica **solo 4 bytes**: Wakka pasa de **9.999 a 10.099 HP**, dejando intactos los MP y los HP maximos. Comprueba el resultado cerrando y reabriendo el menu de FFX.
 
 Esta version requiere precisamente el estado **9.999/99.999 HP** para evitar segundas aplicaciones accidentales. No toca los guardados ni aplica efectos durante un combate. **Si hay una discrepancia, no repitas la prueba ni guardes sobre tu partida habitual; comparte la captura del resultado.**
+
+## Diagnostico de HP durante un combate (lectura solamente)
+
+La prueba de Wakka confirma que la escritura fuera de combate funciona, pero FFX mantiene otras estructuras de HP y MP mientras se lucha. Para poder curar o sabotear **durante** los combates, primero tenemos que comprobar como se representan esas estructuras en tu version de Steam.
+
+1. Actualiza `inspect-battle-hp.ps1` y `inspect-battle-hp.bat` desde esta carpeta.
+2. Entra en un combate facil de FFX y espera en el menu de comandos de un personaje. No necesitas gastar nada ni hacerte dano.
+3. Sin salir del combate, ejecuta `inspect-battle-hp.bat`.
+4. El programa buscara los tres posibles huecos de personajes en batalla y mostrara **dos variantes candidatas** (`Historico` y `Menos4`) de HP/MP. Comparalas con los valores que ves en pantalla y comparte la captura de la consola.
+
+Este inspector solo solicita permisos de lectura. El puntero de combate, los offsets y el orden de las posiciones provienen inicialmente de [Farplane FFX/Data/Battle.cs](https://github.com/topher-au/Farplane/blob/master/FFX/Data/Battle.cs) y [Farplane FFX/Values/BattleEntity.cs](https://github.com/topher-au/Farplane/blob/master/FFX/Values/BattleEntity.cs). **No estan validados todavia en tu build:** si ambos conjuntos de numeros resultan incorrectos o el programa da error, paramos y los investigamos sin escribir nada en la memoria de batalla.
