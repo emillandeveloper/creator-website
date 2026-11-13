@@ -65,8 +65,10 @@
 
     const actions = element('div', 'chaos-reward-actions');
     const test = element('button', 'admin-secondary', 'Probar overlay'); test.type = 'button';
+    const agentTest = element('button', 'admin-secondary', 'Probar en PC');
+    agentTest.type = 'button'; agentTest.dataset.agentTest = '1'; agentTest.disabled = true;
     const save = element('button', 'admin-primary', 'Guardar'); save.type = 'button';
-    actions.append(test, save); card.append(actions);
+    actions.append(test, agentTest, save); card.append(actions);
     const run = async (button, operation) => {
       button.disabled = true;
       try { await operation(); } catch (error) { message(error.message, true); } finally { button.disabled = false; }
@@ -82,7 +84,20 @@
       message('Prueba enviada al overlay: ' + reward.name + '.');
       renderActivity((await api('state')).activity);
     }));
+    agentTest.addEventListener('click', () => run(agentTest, async () => {
+      await api('agent/test/' + encodeURIComponent(reward.id), {});
+      message('Orden de prueba enviada al PC. El conector la confirmará sin modificar FFX.');
+    }));
     return card;
+  }
+
+  async function refreshAgent() {
+    try {
+      const state = await api('agent/status');
+      byId('chaos-agent-status').textContent = !state.paired ? 'Sin vincular' : !state.connected ? 'Vinculado · PC desconectado' : state.gameRunning ? 'Conectado · FFX.exe detectado' : 'Conectado · esperando a FFX.exe';
+      byId('chaos-game').textContent = state.gameRunning ? 'FFX: ejecutándose' : 'FFX: sin detectar';
+      document.querySelectorAll('[data-agent-test]').forEach(button => { button.disabled = !state.connected; });
+    } catch (error) { byId('chaos-agent-status').textContent = 'Conexión no disponible'; }
   }
 
   async function load() {
@@ -92,8 +107,25 @@
       byId('chaos-game').textContent = state.gameConnected ? 'Juego: conectado' : 'Juego: pendiente';
       const list = byId('chaos-rewards'); list.replaceChildren(...state.rewards.map(renderReward));
       renderActivity(state.activity);
+      await refreshAgent();
     } catch (error) { message(error.message, true); }
   }
+  byId('chaos-pair').addEventListener('click', async () => {
+    if (!window.confirm('Se invalidará cualquier clave de conector anterior. ¿Continuar?')) return;
+    const button = byId('chaos-pair'); button.disabled = true;
+    try {
+      const { token } = await api('agent/pair', {});
+      byId('chaos-token').value = token;
+      byId('chaos-pair-result').hidden = false;
+      message('Clave generada. Cópiala en tu PC; solo se mostrará ahora.');
+      await refreshAgent();
+    } catch (error) { message(error.message, true); }
+    finally { button.disabled = false; }
+  });
+  byId('chaos-copy').addEventListener('click', async () => {
+    try { await navigator.clipboard.writeText(byId('chaos-token').value); message('Clave copiada. Pégala únicamente en tu PC.'); }
+    catch { byId('chaos-token').select(); message('Selecciona y copia la clave manualmente.'); }
+  });
   byId('chaos-logout').addEventListener('click', async () => {
     try {
       const response = await fetch('/admin/api/logout', { method: 'POST', credentials: 'same-origin',
@@ -103,4 +135,5 @@
     } catch (error) { message(error.message, true); }
   });
   load();
+  setInterval(refreshAgent, 5000);
 })();

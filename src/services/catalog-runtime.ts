@@ -7,6 +7,7 @@ import { Level38Error } from "../modules/level38/errors";
 import { CatalogStore, catalogInput } from "./catalog";
 import { catalogLogo } from "./catalog-logo";
 import { ChaosStore } from "./chaos";
+import { ChaosAgentBridge } from "./chaos-agent";
 
 const wrap = (handler: (req: Request, res: Response) => Promise<void>): express.RequestHandler =>
   (req, res, next) => { handler(req, res).catch(next); };
@@ -16,6 +17,7 @@ export function mountCatalog(app: Application) {
   const db = configured ? new PrismaClient() : undefined;
   const store = new CatalogStore(db);
   const chaos = db ? new ChaosStore(db) : undefined;
+  const agent = db ? new ChaosAgentBridge(db) : undefined;
   const router = express.Router();
   router.use((_req, res, next) => {
     res.set({ "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff", "X-Robots-Tag": "noindex, nofollow",
@@ -54,6 +56,14 @@ export function mountCatalog(app: Application) {
     router.post("/api/logout", express.json({ limit: "1kb", inflate: false }), wrap(async (req, res) => { await auth.logout(req, res); res.json({ ok: true }); }));
     router.use((req, res, next) => { auth.requireOwner(req).then(owner => { res.locals.owner = owner; next(); }).catch(next); });
     router.get("/api/chaos/state", wrap(async (_req, res) => { res.json(await chaos!.state()); }));
+    router.get("/api/chaos/agent/status", wrap(async (_req, res) => { res.json(await agent!.status()); }));
+    router.post("/api/chaos/agent/pair", limited(5, 60 * 60 * 1000), express.json({ limit: "1kb", inflate: false }), wrap(async (_req, res) => {
+      res.json({ token: await agent!.pair() });
+    }));
+    router.post("/api/chaos/agent/test/:id", limited(20, 60 * 1000), express.json({ limit: "1kb", inflate: false }), wrap(async (req, res) => {
+      const command = await agent!.queueTest(req.params.id);
+      res.status(201).json({ commandId: command.id });
+    }));
     router.post("/api/chaos/rewards/:id", limited(40, 60 * 1000), express.json({ limit: "2kb", inflate: false }), wrap(async (req, res) => {
       res.json(await chaos!.saveReward(req.params.id, req.body));
     }));
@@ -87,6 +97,28 @@ export function mountCatalog(app: Application) {
     res.set({ "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff" });
     res.json({ event: chaos ? await chaos.currentOverlay() : null });
   }));
+  const agentRouter = express.Router();
+  agentRouter.use(rateLimit({ windowMs: 60 * 1000, limit: 120, standardHeaders: "draft-7", legacyHeaders: false }));
+  agentRouter.use((_req, res, next) => {
+    res.set({ "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff" }); next();
+  });
+  agentRouter.post("/heartbeat", express.json({ limit: "1kb", inflate: false }), wrap(async (req, res) => {
+    if (!agent) { res.sendStatus(503); return; }
+    res.json(await agent.heartbeat(req.get("Authorization"), req.body));
+  }));
+  agentRouter.get("/next", wrap(async (req, res) => {
+    if (!agent) { res.sendStatus(503); return; }
+    res.json({ command: await agent.claim(req.get("Authorization")) });
+  }));
+  agentRouter.post("/ack", express.json({ limit: "1kb", inflate: false }), wrap(async (req, res) => {
+    if (!agent) { res.sendStatus(503); return; }
+    res.json(await agent.acknowledge(req.get("Authorization"), req.body));
+  }));
+  agentRouter.use((error: unknown, _req: Request, res: Response, _next: express.NextFunction) => {
+    const status = error instanceof Level38Error ? error.status : 503;
+    res.status(status).json({ error: error instanceof Level38Error ? error.message : "Local agent temporarily unavailable." });
+  });
+  app.use("/chaos/agent", agentRouter);
   app.get("/media/catalog/:id", wrap(async (req, res) => {
     try {
       const logo = /^[a-z0-9-]{1,120}$/.test(req.params.id) ? await db?.catalogLogo.findUnique({ where: { gameId: req.params.id } }) : null;
@@ -101,6 +133,8 @@ export function mountCatalog(app: Application) {
     await db.catalogLogo.findFirst({ select: { gameId: true } });
     await db.chaosReward.findFirst({ select: { id: true } });
     await db.chaosActivity.findFirst({ select: { id: true } });
+    await db.chaosAgent.findFirst({ select: { id: true } });
+    await db.chaosCommand.findFirst({ select: { id: true } });
     return true;
   }, close: async () => { await db?.$disconnect(); } };
 }

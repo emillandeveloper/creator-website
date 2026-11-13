@@ -5,6 +5,14 @@
 .chaos-lab p { color: #aaa2b2; font: .9rem/1.6 system-ui,sans-serif; margin-top: 6px; }
 .chaos-connections { display: flex; flex-wrap: wrap; gap: 8px; }
 .chaos-connection { background: #27212e; color: #d1c2d8; padding: 7px 10px; border: 1px solid #51455e; border-radius: 30px; font: 600 .75rem system-ui,sans-serif; white-space: nowrap; }
+.chaos-agent-panel { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 14px; margin-bottom: 22px; }
+.chaos-agent-panel h2 { margin-bottom: 6px; }
+.chaos-agent-status { margin-top: 12px; font: 600 .85rem system-ui,sans-serif; color: #c9bfdc; }
+.chaos-pair-actions { padding-top: 4px; }
+.chaos-pair-result { width: 100%; border-top: 1px solid #33354a; margin-top: 8px; padding-top: 8px; }
+.chaos-token-row { display: flex; gap: 10px; align-items: center; }
+.chaos-token-row button { flex: 0 0 auto; }
+.chaos-token-row input { min-width: 0; }
 .chaos-layout { display: grid; grid-template-columns: minmax(0, 2fr) minmax(270px, 1fr); gap: 22px; align-items: start; }
 .chaos-section-title { display: flex; align-items: baseline; flex-wrap: wrap; justify-content: space-between; gap: 10px; margin-bottom: 16px; }
 .chaos-section-title h2 { margin: 0; }

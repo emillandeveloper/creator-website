@@ -58,6 +58,29 @@ model ChaosActivity {
   @@index([occurredAt])
 }
 
+// The private local game agent authenticates separately from browser sessions.
+// Only a hash of its one-time pairing token is stored.
+model ChaosAgent {
+  id          String   @id
+  tokenHash   String   @unique
+  gameRunning Boolean  @default(false)
+  lastSeenAt  DateTime?
+  updatedAt   DateTime @updatedAt
+}
+
+// Short-lived dry-run commands: expired commands are never replayed.
+model ChaosCommand {
+  id             String   @id @default(cuid())
+  rewardId       String
+  status         String   @default("PENDING")
+  createdAt      DateTime @default(now())
+  expiresAt      DateTime
+  claimedAt      DateTime?
+  acknowledgedAt DateTime?
+
+  @@index([status, createdAt])
+}
+
 enum OperatorRole {
   MODERATOR
   OWNER

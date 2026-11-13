@@ -32,16 +32,30 @@
       <div class="chaos-connections"><span id="chaos-twitch" class="chaos-connection">Twitch: pendiente</span><span id="chaos-game" class="chaos-connection">Juego: pendiente</span></div>
     </section>
 
+    <section class="admin-panel chaos-agent-panel" aria-labelledby="chaos-agent-title">
+      <div>
+        <h2 id="chaos-agent-title">Conector local · Final Fantasy X</h2>
+        <p class="field-hint">Este paso prueba la conexión con tu PC y detecta <code>FFX.exe</code>. No modifica el juego. <a href="https://github.com/emillandeveloper/creator-website/tree/main/tools/ffx-agent" target="_blank" rel="noopener noreferrer">Descarga el conector y sigue sus instrucciones.</a></p>
+        <p id="chaos-agent-status" class="chaos-agent-status" role="status">Comprobando conexión…</p>
+      </div>
+      <div class="chaos-pair-actions"><button id="chaos-pair" class="admin-secondary" type="button">Generar clave para mi PC</button></div>
+      <div id="chaos-pair-result" class="chaos-pair-result" hidden>
+        <label for="chaos-token">Clave del conector (solo se muestra una vez)</label>
+        <div class="chaos-token-row"><input id="chaos-token" type="password" readonly autocomplete="off" spellcheck="false"><button id="chaos-copy" class="admin-secondary" type="button">Copiar</button></div>
+        <p class="field-hint">Guárdala únicamente en tu PC. Al generar otra, la anterior deja de funcionar. No la compartas por Twitch ni por chat.</p>
+      </div>
+    </section>
+
     <section class="chaos-layout">
       <div class="admin-panel">
-        <div class="chaos-section-title"><h2>Recompensas</h2><span>Prepara precios y cooldowns antes de elegir el FF.</span></div>
+        <div class="chaos-section-title"><h2>Recompensas</h2><span>Primera prueba: FFX HD Remaster de Steam.</span></div>
         <div id="chaos-rewards" class="chaos-rewards" aria-live="polite"><p>Cargando recompensas…</p></div>
       </div>
       <aside class="admin-panel chaos-history">
         <h2>Actividad de pruebas</h2>
         <p class="field-hint">Puedes abrir el overlay en otra ventana y pulsar «Probar» en una recompensa.</p>
         <ol id="chaos-activity"><li>Todavía no hay pruebas.</li></ol>
-        <p class="field-hint">Las recompensas reales de Twitch y el conector local se activarán más adelante, cuando elijamos el juego.</p>
+        <p class="field-hint">Las recompensas reales de Twitch siguen pendientes. «Probar en PC» solo comprueba la conexión con el conector FFX, sin cambiar HP, inventario ni comandos.</p>
       </aside>
     </section>
   </main>

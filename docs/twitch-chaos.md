@@ -10,6 +10,7 @@ This module is **independent of the LEVEL 38 birthday event**. It lives in the e
 - A **Probar overlay** action that logs a clearly labeled `TEST`/`SIMULATED` event. It does not contact Twitch and cannot touch the game.
 - Public, read-only OBS overlay `/chaos/overlay` (transparent 1920×1080 browser source), which polls `/chaos/api/latest` for the most recent test event. An event disappears after 10 seconds and is not replayed indefinitely on reconnect.
 - Additive Prisma migration `202611130015_twitch_chaos_foundation` for `ChaosReward` and `ChaosActivity`. The `redemptionId` column is reserved for future Twitch event deduplication.
+- A second additive migration, `202611130016_ffx_chaos_agent`, stores the hash of a pairing token and short-lived test commands. The owner-only `/admin/chaos` panel pairs a Windows agent and shows its heartbeats and FFX process status. The agent runs from [`tools/ffx-agent`](../tools/ffx-agent/README.md), detecting `FFX.exe` without reading or writing memory. **Probar en PC** queues a `DRY_RUN`; only a successful agent acknowledgement creates an overlay test event. No real game action or Twitch redemption is supported yet.
 
 ## Deployment
 
@@ -19,9 +20,9 @@ The site remains safe if `LEVEL38_ENABLED=false`. The Chaos prototype deliberate
 
 ## Next phase (not yet implemented)
 
-1. Decide which Final Fantasy and version to support. Implement a local Windows agent that connects *outbound* to Render; never expose the game process or open a router port to the internet. Authenticate the agent separately from browser admin sessions.
+1. Build and test the **FFX HD Remaster Steam** game adapter for real effects. The local Windows process-detection and authenticated transport is ready; it currently **never accesses game memory**. Test one safe command at a time, beginning with reading non-sensitive state before attempting any modifications.
 2. Add a dedicated Twitch Channel Points EventSub subscription and an app-created reward flow. This requires the broadcaster's `channel:manage:redemptions` OAuth scope. The existing LEVEL 38 polling scope alone is insufficient. Do not alter Hebe's credentials without an explicitly authorized credential rotation.
-3. Persist unique redemption IDs, command acknowledgements and expiration timestamps; guarantee no double application on Twitch retries, and cancel/refund unfulfillable redemptions where permitted.
+3. Persist unique redemption IDs and guarantee no double application on Twitch retries; cancel/refund unfulfillable redemptions where permitted. The existing queue has an expiry and one-time acknowledgment for dry-runs only.
 4. Enable a real reward only when the local agent is authenticated, a compatible game adapter is active, and the stream owner has armed that reward. Explicitly disable or expire pending effects on disconnect; do not surprise the next stream with old sabotages.
 5. Wire the live acknowledgement state into the overlay. The current overlay displays only simulations.
 
@@ -30,5 +31,5 @@ The site remains safe if `LEVEL38_ENABLED=false`. The Chaos prototype deliberate
 ```sh
 npm ci --include=dev
 npm run build
-node --test tests/twitch-chaos.test.cjs
+node --test tests/twitch-chaos.test.cjs tests/ffx-agent.test.cjs
 ```
