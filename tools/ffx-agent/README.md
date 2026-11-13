@@ -29,3 +29,11 @@ Esta es **solo una prueba de conexión** entre el panel privado de Leo y su PC. 
 - **El juego no se detecta**: confirma en el Administrador de tareas que existe un proceso llamado `FFX.exe`. Esta versión no detecta FFX-2.
 
 La siguiente fase será implementar y verificar **un adaptador específico del FFX HD Remaster** capaz de ejecutar acciones reales, con protecciones para evitar dañar guardados o afectar a partidas no deseadas. Esa fase no se activa aquí.
+
+## Diagnostico del inventario (fase siguiente)
+
+Si la comunicacion ya funciona, haz una **partida guardada en un slot separado** y consigue al menos un objeto, preferiblemente una Pocion. Con FFX abierto, ejecuta `inspect-inventory.bat` en esta carpeta. Este inspector usa PowerShell de Windows y solo lee 336 bytes de la memoria del proceso: no necesita Node, no escribe en el juego ni toca los guardados.
+
+Compara el numero de Pociones detectado con el que aparece en el inventario del juego. Si coinciden, comparte unicamente el resultado del inspector (PID, hash del ejecutable, cantidad y slot). **No pegues tu clave del conector.** Si ves un error o un numero distinto al del juego, detente: las direcciones de memoria historicas pueden no ser compatibles con tu version de Steam.
+
+Referencia tecnica: [Farplane, FFX/Offsets.cs](https://github.com/topher-au/Farplane/blob/master/FFX/Offsets.cs) y [Farplane, FFX/Data/Item.cs](https://github.com/topher-au/Farplane/blob/master/FFX/Data/Item.cs). Un resultado correcto es una comprobacion inicial, no garantia de seguridad para futuras escrituras; primero validaremos cuidadosamente esa segunda fase.
