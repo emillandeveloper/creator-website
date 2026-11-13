@@ -1,7 +1,8 @@
 # Twitch Chaos / FFX HD Steam: READ-ONLY in-battle HP/MP layout probe.
 # This does not write memory, send Twitch events or modify save data.
 # Historical layout: Farplane FFX/Data/Battle.cs and FFX/Values/BattleEntity.cs.
-# Battle offsets have NOT yet been validated on Leo's Steam executable.
+# Read-only evidence showed the original battle HP/MP layout works for slots 0..2.
+# Battle records are indexed by character; slots 0..2 are NOT the active trio.
 $ErrorActionPreference = 'Stop'
 
 $nativeCode = @'
@@ -134,18 +135,14 @@ try {
         throw ('Battle pointer storage contains 0x{0:X8}, even during battle. This build needs further mapping.' -f $battlePointer)
     }
 
-    # From Farplane's BattleEntityData structure, original 32-bit offsets:
-    #   hp_max 0x594, mp_max 0x598, hp_current 0x5D0, mp_current 0x5D4.
-    # Out of battle we observed the Steam layout shifted by -4 bytes.
-    # Do not presume the same shift in battle: show BOTH read-only candidates.
-    $layouts = @(
-        [PSCustomObject]@{ Name = 'Historico'; Delta = 0 },
-        [PSCustomObject]@{ Name = 'Menos4'; Delta = -4 }
-    )
+    # Farplane's BattleEntityData offsets worked for character slots 0..2.
+    # The -4 alternative was disproved by the first battle inspection.
+    # Index is a character record, not a place in the active trio.
+    $characterNames = @('Tidus', 'Yuna', 'Auron', 'Kimahri', 'Wakka', 'Lulu', 'Rikku')
     $rows = @()
     $plausibleCount = 0
 
-    for ($slot = 0; $slot -lt 3; $slot++) {
+    for ($slot = 0; $slot -lt $characterNames.Length; $slot++) {
         $entityAddress = [long]$battlePointer + ($slot * 0xF90)
         try {
             $entity = [FfxBattleHpReader]::Read($gameProcess.Id, $entityAddress, 0x600)
@@ -155,28 +152,25 @@ try {
             continue
         }
 
-        foreach ($layout in $layouts) {
-            $delta = [int]$layout.Delta
-            $hpMax = [BitConverter]::ToInt32($entity, 0x594 + $delta)
-            $mpMax = [BitConverter]::ToInt32($entity, 0x598 + $delta)
-            $hp = [BitConverter]::ToInt32($entity, 0x5D0 + $delta)
-            $mp = [BitConverter]::ToInt32($entity, 0x5D4 + $delta)
+        $hpMax = [BitConverter]::ToInt32($entity, 0x594)
+        $mpMax = [BitConverter]::ToInt32($entity, 0x598)
+        $hp = [BitConverter]::ToInt32($entity, 0x5D0)
+        $mp = [BitConverter]::ToInt32($entity, 0x5D4)
 
-            $plausible = ($hpMax -ge 1 -and $hpMax -le 99999 -and
-                          $mpMax -ge 1 -and $mpMax -le 999 -and
-                          $hp -ge 0 -and $hp -le $hpMax -and
-                          $mp -ge 0 -and $mp -le $mpMax)
-            if ($plausible) { $plausibleCount++ }
+        $plausible = ($hpMax -ge 1 -and $hpMax -le 99999 -and
+                      $mpMax -ge 1 -and $mpMax -le 999 -and
+                      $hp -ge 0 -and $hp -le $hpMax -and
+                      $mp -ge 0 -and $mp -le $mpMax)
+        if ($plausible) { $plausibleCount++ }
 
-            $rows += [PSCustomObject]@{
-                Slot = $slot
-                Variante = $layout.Name
-                HP_actual = $hp
-                HP_maximo = $hpMax
-                MP_actual = $mp
-                MP_maximo = $mpMax
-                Plausible = $(if ($plausible) { 'SI' } else { 'NO' })
-            }
+        $rows += [PSCustomObject]@{
+            Slot = $slot
+            Personaje = $characterNames[$slot]
+            HP_actual = $hp
+            HP_maximo = $hpMax
+            MP_actual = $mp
+            MP_maximo = $mpMax
+            Plausible = $(if ($plausible) { 'SI' } else { 'NO' })
         }
     }
 
@@ -189,7 +183,8 @@ try {
         Write-Host 'No plausible party HP layout found. Do not use these offsets for writes.' -ForegroundColor Yellow
     }
     Write-Host 'READ ONLY: no game memory or save data was changed.' -ForegroundColor Green
-    Write-Host 'Compare the possible HP/MP values with the combat screen; slot order is not yet verified.'
+    Write-Host 'Slots are character indexes, NOT the three active party positions.'
+    Write-Host 'Compare Wakka, Rikku and Tidus with the current combat screen.'
     Write-Host 'Do not attempt battle edits yet, even if one layout looks correct.' -ForegroundColor Yellow
 } catch {
     Write-Host ('Inspection stopped: ' + $_.Exception.Message) -ForegroundColor Red
