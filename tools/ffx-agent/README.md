@@ -97,3 +97,16 @@ La prueba de Wakka confirma que la escritura fuera de combate funciona, pero FFX
 4. El programa busca los **siete registros de personajes** (Tidus, Yuna, Auron, Kimahri, Wakka, Lulu y Rikku) y muestra HP/MP de cada uno. Los registros no son las tres posiciones del equipo activo. Compara los valores de los personajes **que si estan luchando** con la pantalla y comparte la captura de la consola.
 
 Este inspector solo solicita permisos de lectura. El puntero de combate, los offsets y la estructura inicial provienen de [Farplane FFX/Data/Battle.cs](https://github.com/topher-au/Farplane/blob/master/FFX/Data/Battle.cs) y [Farplane FFX/Values/BattleEntity.cs](https://github.com/topher-au/Farplane/blob/master/FFX/Values/BattleEntity.cs). La direccion fija del puntero estaba vacia durante el combate; la version actual utiliza la firma original de [Farplane Memory/OffsetScanner.cs](https://github.com/topher-au/Farplane/blob/master/Memory/OffsetScanner.cs) para encontrarla dinamicamente. La primera lectura confirmo que el esquema historico da valores coherentes para Tidus, Yuna y Auron; la variante desplazada cuatro bytes producia valores incorrectos. **Falta verificar los registros de Wakka y Rikku contra el combate real** antes de cualquier escritura en batalla.
+
+## Primera prueba de curacion REAL en combate: Wakka +100 HP
+
+La segunda inspeccion de batalla coincide con la pantalla de juego: Tidus 99.967 HP / 801 MP, Wakka 10.076 HP / 969 MP y Rikku 9.999 HP / 999 MP. Aun necesitamos comprobar una escritura de HP en la estructura de combate antes de habilitar cualquier efecto remoto.
+
+1. Antes de hacer nada, utiliza una partida de prueba guardada en otro slot. Mantente en **el mismo combate**, detenido en el menu de comandos.
+2. Descarga `heal-wakka-battle-once.ps1` y `heal-wakka-battle-once.bat` desde este repositorio a tu carpeta `ffx-agent`.
+3. Ejecuta el `.bat`. Para evitar aplicar el efecto a otra pelea, el script exige **exactamente** los HP y MP que vimos en los tres personajes. Si no coinciden, termina sin escribir. No ajustes tu partida para forzar la coincidencia si ya ha cambiado: lo revisaremos.
+4. Si los tres datos coinciden y quieres probar la escritura, escribe `CURAR`. Cualquier otro texto cancela.
+5. La modificacion escribe **solo cuatro bytes** correspondientes a los HP actuales de Wakka en combate: **10.076 → 10.176**. Antes de escribir comprueba otra vez el puntero de batalla y los HP/MP de Wakka, y despues verifica que los MP y limites no han cambiado.
+6. Comprueba el resultado **en el propio combate**, sin terminarlo ni guardar antes de mirar. Si algo no coincide o aparece cualquier error, no repitas la prueba; envia una captura.
+
+Esta es una prueba **manual, de un solo uso para el estado exacto**. No esta conectada a Twitch ni al panel admin. No toca los guardados ni afecta los HP fuera de combate hasta que el propio juego sincronice sus datos.
