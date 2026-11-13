@@ -1,8 +1,9 @@
 #!/usr/bin/env node
-// Read-only Steam FFX process detector + authenticated Twitch Chaos dry-run bridge.
-// This script NEVER opens, patches or writes to the game's memory.
+// Steam FFX process detector and authenticated Twitch Chaos bridge.
+// Live memory writes are restricted to ONE locally armed, owner-requested Potion.
 const { execFile } = require('node:child_process');
 const { promisify } = require('node:util');
+const path = require('node:path');
 
 const execFileAsync = promisify(execFile);
 const token = process.env.CHAOS_AGENT_TOKEN || '';
@@ -10,6 +11,7 @@ const server = process.env.CHAOS_SERVER_ORIGIN || 'https://leonifelheim.tv';
 const INTERVAL_MS = 2200;
 const API_TIMEOUT_MS = 6000;
 let stopping = false;
+let livePotionArmed = process.env.CHAOS_LIVE_POTION === 'YES';
 
 if (process.platform !== 'win32') {
   process.stderr.write('El conector necesita Windows (para detectar FFX.exe).\n');
@@ -59,6 +61,18 @@ async function ffxRunning() {
   return /(?:^|\r?\n)"FFX\.exe",/im.test(stdout);
 }
 
+async function addOnePotion() {
+  const scriptPath = path.join(__dirname, 'give-potion-once.ps1');
+  const { stdout } = await execFileAsync('powershell.exe',
+    ['-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File', scriptPath, '-NonInteractive'],
+    { windowsHide: true, timeout: 20000, maxBuffer: 64 * 1024 });
+  const match = /CHAOS_POTION_APPLIED:(\d+):(\d+)/.exec(stdout);
+  if (!match || Number(match[2]) !== Number(match[1]) + 1) {
+    throw new Error('La escritura no se confirmó. Revisa la partida antes de volver a intentarlo.');
+  }
+  return { before: Number(match[1]), after: Number(match[2]) };
+}
+
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 let lastRunning;
 let lastError = '';
@@ -69,13 +83,38 @@ async function poll() {
     process.stdout.write(running ? '✅ FFX.exe detectado.\n' : '⏳ Esperando a que abras Final Fantasy X…\n');
     lastRunning = running;
   }
-  await request('/chaos/agent/heartbeat', { gameRunning: running });
+  await request('/chaos/agent/heartbeat', { gameRunning: running, livePotionArmed: livePotionArmed && running });
   const { command } = await request('/chaos/agent/next');
   if (command) {
-    if (command.mode !== 'DRY_RUN' || typeof command.id !== 'string') throw new Error('Comando no reconocido.');
-    process.stdout.write('🧪 Prueba recibida: ' + command.rewardId + '. No se modifica FFX.\n');
-    await request('/chaos/agent/ack', { id: command.id });
-    process.stdout.write('✅ Prueba confirmada. Debería aparecer en el overlay de OBS.\n');
+    if (typeof command.id !== 'string') throw new Error('Comando no reconocido.');
+    if (command.mode === 'DRY_RUN') {
+      process.stdout.write('🧪 Prueba recibida: ' + command.rewardId + '. No se modifica FFX.\n');
+      await request('/chaos/agent/ack', { id: command.id });
+      process.stdout.write('✅ Prueba confirmada. Debería aparecer en el overlay de OBS.\n');
+    } else if (command.mode === 'LIVE' && command.rewardId === 'give-potion') {
+      // This switch is ONE-SHOT. An additional write requires restarting the connector.
+      const permitted = livePotionArmed && running;
+      livePotionArmed = false;
+      let applied = false;
+      if (permitted) {
+        try {
+          const { before, after } = await addOnePotion();
+          applied = true;
+          process.stdout.write('✅ POCIÓN REAL aplicada: ' + before + ' -> ' + after + '. El permiso local se ha desactivado.\n');
+        } catch (error) {
+          process.stderr.write('⚠️ Falló la prueba real: ' + (error instanceof Error ? error.message : 'error') + '\n');
+        }
+      } else {
+        process.stderr.write('⚠️ Orden real rechazada: la escritura no estaba habilitada localmente.\n');
+      }
+      try {
+        await request('/chaos/agent/ack', { id: command.id, result: applied ? 'APPLIED' : 'FAILED' });
+      } catch (error) {
+        process.stderr.write('⚠️ No se pudo confirmar al servidor. Comprueba el inventario antes de repetir la prueba.\n');
+      }
+    } else {
+      throw new Error('Comando no autorizado para este conector.');
+    }
   }
 }
 
@@ -83,7 +122,10 @@ process.once('SIGINT', () => { stopping = true; });
 process.once('SIGTERM', () => { stopping = true; });
 
 (async () => {
-  process.stdout.write('🐺 Twitch Chaos · FFX Steam · conector seguro (modo prueba)\n');
+  process.stdout.write('🐺 Twitch Chaos · FFX Steam · pruebas y poción real supervisada\n');
+  process.stdout.write(livePotionArmed
+    ? '⚠️ POCIÓN REAL ARMADA: UNA SOLA APLICACIÓN. Usa un guardado de prueba.\n'
+    : '🔒 Escritura real desactivada. El resto de las pruebas siguen siendo simulaciones.\n');
   process.stdout.write('Conectando con ' + origin + ' · Ctrl+C para salir.\n');
   while (!stopping) {
     try { await poll(); lastError = ''; }

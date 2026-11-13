@@ -1,7 +1,8 @@
 # Twitch Chaos / FFX HD Steam - FIRST WRITE TEST (one Potion maximum).
 # IMPORTANT: Back up the save in another slot before running. Do not use on a valuable save.
 # This tool only writes ONE byte of FFX.exe memory after validating the game, inventory and user confirmation.
-# It does NOT listen for Twitch commands. It is never started automatically by the agent.
+# It does not listen for Twitch. NonInteractive mode requires a separately armed local agent.
+param([switch]$NonInteractive)
 $ErrorActionPreference = 'Stop'
 
 $nativeCode = @'
@@ -134,11 +135,18 @@ try {
     Write-Host ('Pociones detectadas: ' + $potionCount + ' (slot ' + $potionSlot + ')')
     Write-Host ('Propuesta: ' + $potionCount + ' -> ' + ($potionCount + 1)) -ForegroundColor Yellow
     Write-Host 'IMPORTANTE: utiliza un guardado de prueba en otro slot.' -ForegroundColor Yellow
-    Write-Host 'No se modificara nada si no confirmas.'
-    $confirmation = Read-Host 'Escribe SUMAR para anadir exactamente una Pocion; otra cosa cancela'
-    if ($confirmation -cne 'SUMAR') {
-        Write-Host 'Cancelado. No se ha modificado el juego.' -ForegroundColor Yellow
-        exit 0
+    if ($NonInteractive) {
+        if ($env:CHAOS_LIVE_POTION -cne 'YES') {
+            throw 'Local LIVE Potion opt-in is disabled. No changes made.'
+        }
+        Write-Host 'Autorizado por el conector local armado y una orden del propietario.'
+    } else {
+        Write-Host 'No se modificara nada si no confirmas.'
+        $confirmation = Read-Host 'Escribe SUMAR para anadir exactamente una Pocion; otra cosa cancela'
+        if ($confirmation -cne 'SUMAR') {
+            Write-Host 'Cancelado. No se ha modificado el juego.' -ForegroundColor Yellow
+            exit 0
+        }
     }
 
     if ($gameProcess.HasExited) { throw 'FFX closed before the edit. No changes made.' }
@@ -154,6 +162,7 @@ try {
 
     $after = [FfxPotionMemory]::AddExactlyOne($gameProcess.Id, ($baseAddress + 0xD30B5C + $potionSlot), [byte]$potionCount)
     Write-Host ('OK - Pociones: ' + $potionCount + ' -> ' + $after) -ForegroundColor Green
+    Write-Output ('CHAOS_POTION_APPLIED:' + $potionCount + ':' + $after)
     Write-Host 'Cierra y vuelve a abrir el inventario en el juego para verlo actualizado.'
     Write-Host 'Este programa no ha guardado la partida; comprueba el cambio antes de guardar.'
 } catch {

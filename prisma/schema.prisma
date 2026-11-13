@@ -64,14 +64,16 @@ model ChaosAgent {
   id          String   @id
   tokenHash   String   @unique
   gameRunning Boolean  @default(false)
+  livePotionArmed Boolean @default(false)
   lastSeenAt  DateTime?
   updatedAt   DateTime @updatedAt
 }
 
-// Short-lived dry-run commands: expired commands are never replayed.
+// Short-lived, at-most-once commands: expired commands are never replayed.
 model ChaosCommand {
   id             String   @id @default(cuid())
   rewardId       String
+  mode           String   @default("DRY_RUN")
   status         String   @default("PENDING")
   createdAt      DateTime @default(now())
   expiresAt      DateTime

@@ -53,6 +53,23 @@ test('Chaos test events are explicitly simulated and rewards are disabled by def
   await assert.rejects(store.saveReward('unknown-reward', { cost: 1, cooldownSeconds: 0, enabled: false }));
 });
 
+test('Chaos overlay accepts acknowledged local Potion writes but never failed writes', async () => {
+  const activity = { id: 'live-potion-1', rewardId: 'give-potion', viewer: 'Leo · prueba real FFX',
+    source: 'LOCAL', status: 'APPLIED', occurredAt: new Date() };
+  const db = {
+    chaosActivity: {
+      findFirst: async ({ where }) => {
+        assert.deepEqual(where.OR, [{ source: 'TEST', status: 'SIMULATED' }, { source: 'LOCAL', status: 'APPLIED' }]);
+        return activity;
+      },
+    },
+  };
+  const event = await new ChaosStore(db).currentOverlay();
+  assert.equal(event.name, 'Regalar una poción');
+  assert.equal(event.source, 'LOCAL');
+  assert.equal(event.status, 'APPLIED');
+});
+
 test('Discreet admin button is available in home, challenge and portfolio', async (t) => {
   const site = await startSite({ TWITCH_LIVE_ENABLED: 'false' });
   t.after(() => site.stop());

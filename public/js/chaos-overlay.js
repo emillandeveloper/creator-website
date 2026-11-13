@@ -17,7 +17,7 @@
       lastId = event.id;
       card.className = 'chaos-alert ' + (['help', 'sabotage', 'random'].includes(event.category) ? event.category : '');
       type.textContent = event.category === 'help' ? 'AYUDA' : event.category === 'sabotage' ? 'SABOTAJE' : 'RULETA DEL CAOS';
-      test.hidden = event.source !== 'TEST';
+      test.hidden = event.source !== 'TEST' && event.source !== 'LOCAL';
       name.textContent = event.name;
       viewer.textContent = event.viewer + ' ha activado este efecto';
       card.hidden = false;

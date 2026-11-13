@@ -28,15 +28,16 @@
   <main class="admin-main">
     <p id="admin-message" role="status" aria-live="polite" hidden></p>
     <section class="admin-panel chaos-lab" aria-label="Estado de la integración">
-      <div><strong>Laboratorio · primera fase</strong><p>Las pruebas solo activan el overlay. No gastan puntos de canal y todavía no modifican ningún Final Fantasy.</p></div>
+      <div><strong>Laboratorio · prueba supervisada</strong><p>No gastan puntos de canal. Solo la prueba explícita «Aplicar +1 poción REAL» modifica FFX si tu PC está armado; todas las demás son simulaciones.</p></div>
       <div class="chaos-connections"><span id="chaos-twitch" class="chaos-connection">Twitch: pendiente</span><span id="chaos-game" class="chaos-connection">Juego: pendiente</span></div>
     </section>
 
     <section class="admin-panel chaos-agent-panel" aria-labelledby="chaos-agent-title">
       <div>
         <h2 id="chaos-agent-title">Conector local · Final Fantasy X</h2>
-        <p class="field-hint">Este paso prueba la conexión con tu PC y detecta <code>FFX.exe</code>. No modifica el juego. <a href="https://github.com/emillandeveloper/creator-website/tree/main/tools/ffx-agent" target="_blank" rel="noopener noreferrer">Descarga el conector y sigue sus instrucciones.</a></p>
+        <p class="field-hint">El conector detecta <code>FFX.exe</code>. La conexión por sí sola no modifica la partida. <a href="https://github.com/emillandeveloper/creator-website/tree/main/tools/ffx-agent" target="_blank" rel="noopener noreferrer">Descarga el conector actualizado y sigue sus instrucciones.</a></p>
         <p id="chaos-agent-status" class="chaos-agent-status" role="status">Comprobando conexión…</p>
+        <p id="chaos-live-status" class="field-hint">Poción real: desactivada. Para probarla, crea un guardado separado, configura <code>CHAOS_LIVE_POTION=YES</code> en el <code>.env</code> del PC y reinicia el conector actualizado.</p>
       </div>
       <div class="chaos-pair-actions"><button id="chaos-pair" class="admin-secondary" type="button">Generar clave para mi PC</button></div>
       <div id="chaos-pair-result" class="chaos-pair-result" hidden>
@@ -55,7 +56,7 @@
         <h2>Actividad de pruebas</h2>
         <p class="field-hint">Puedes abrir el overlay en otra ventana y pulsar «Probar» en una recompensa.</p>
         <ol id="chaos-activity"><li>Todavía no hay pruebas.</li></ol>
-        <p class="field-hint">Las recompensas reales de Twitch siguen pendientes. «Probar en PC» solo comprueba la conexión con el conector FFX, sin cambiar HP, inventario ni comandos.</p>
+        <p class="field-hint">Los canjes reales de Twitch siguen desactivados. «Probar en PC» es una simulación; solo «Aplicar +1 poción REAL» puede modificar el inventario y requiere activación local y confirmación.</p>
       </aside>
     </section>
   </main>

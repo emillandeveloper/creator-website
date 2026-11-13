@@ -6,6 +6,7 @@ import { chaosReward } from "./chaos";
 const AGENT_ID = "ffx";
 const HEARTBEAT_TTL_MS = 15_000;
 const COMMAND_TTL_MS = 30_000;
+const LIVE_POTION_REWARD = "give-potion";
 
 const tokenHash = (token: string): string => createHash("sha256").update(token).digest("hex");
 
@@ -14,10 +15,15 @@ export class ChaosAgentBridge {
 
   async pair(): Promise<string> {
     const token = randomBytes(32).toString("base64url");
+    // Rotating a key must never leave a real write waiting for the next PC session.
+    await this.db.chaosCommand.updateMany({
+      where: { mode: "LIVE", status: { in: ["PENDING", "CLAIMED"] } },
+      data: { status: "CANCELLED" },
+    });
     await this.db.chaosAgent.upsert({
       where: { id: AGENT_ID },
       create: { id: AGENT_ID, tokenHash: tokenHash(token) },
-      update: { tokenHash: tokenHash(token), gameRunning: false, lastSeenAt: null },
+      update: { tokenHash: tokenHash(token), gameRunning: false, livePotionArmed: false, lastSeenAt: null },
     });
     return token; // Shown once to the authenticated OWNER; never persisted in plaintext.
   }
@@ -25,7 +31,9 @@ export class ChaosAgentBridge {
   async status() {
     const agent = await this.db.chaosAgent.findUnique({ where: { id: AGENT_ID } });
     const connected = Boolean(agent?.lastSeenAt && Date.now() - agent.lastSeenAt.getTime() < HEARTBEAT_TTL_MS);
-    return { paired: Boolean(agent), connected, gameRunning: connected && Boolean(agent?.gameRunning), lastSeenAt: agent?.lastSeenAt ?? null };
+    const gameRunning = connected && Boolean(agent?.gameRunning);
+    return { paired: Boolean(agent), connected, gameRunning,
+      livePotionArmed: gameRunning && Boolean(agent?.livePotionArmed), lastSeenAt: agent?.lastSeenAt ?? null };
   }
 
   private async authenticate(authorization: string | undefined): Promise<string> {
@@ -42,9 +50,13 @@ export class ChaosAgentBridge {
     if (!data || typeof data !== "object" || Array.isArray(data) || typeof (data as { gameRunning?: unknown }).gameRunning !== "boolean") {
       throw new Level38Error(400, "Invalid heartbeat.");
     }
+    const update = data as { gameRunning: boolean; livePotionArmed?: unknown };
+    if (update.livePotionArmed !== undefined && typeof update.livePotionArmed !== "boolean") {
+      throw new Level38Error(400, "Invalid live potion status.");
+    }
     const result = await this.db.chaosAgent.updateMany({
       where: { id: AGENT_ID, tokenHash: hash },
-      data: { gameRunning: (data as { gameRunning: boolean }).gameRunning, lastSeenAt: new Date() },
+      data: { gameRunning: update.gameRunning, livePotionArmed: update.gameRunning && update.livePotionArmed === true, lastSeenAt: new Date() },
     });
     if (result.count !== 1) throw new Level38Error(401, "Unauthorized local agent.");
     return { ok: true };
@@ -54,7 +66,23 @@ export class ChaosAgentBridge {
     if (!chaosReward(rewardId)) throw new Level38Error(404, "Recompensa no encontrada.");
     if (!(await this.status()).connected) throw new Level38Error(409, "Conecta primero el agente local de FFX.");
     return this.db.chaosCommand.create({
-      data: { rewardId, expiresAt: new Date(Date.now() + COMMAND_TTL_MS) },
+      data: { rewardId, mode: "DRY_RUN", expiresAt: new Date(Date.now() + COMMAND_TTL_MS) },
+    });
+  }
+
+  async queueLivePotion() {
+    const state = await this.status();
+    if (!state.livePotionArmed) {
+      throw new Level38Error(409, "Activa primero la prueba real de poción en el conector local de FFX.");
+    }
+    // A live effect requires an explicit owner click, a locally armed agent and a running game.
+    // Do not allow two live commands to be outstanding in the same session.
+    const pending = await this.db.chaosCommand.findFirst({
+      where: { mode: "LIVE", status: { in: ["PENDING", "CLAIMED"] }, expiresAt: { gt: new Date() } },
+    });
+    if (pending) throw new Level38Error(409, "Ya hay una orden real pendiente. Espera a que termine.");
+    return this.db.chaosCommand.create({
+      data: { rewardId: LIVE_POTION_REWARD, mode: "LIVE", expiresAt: new Date(Date.now() + COMMAND_TTL_MS) },
     });
   }
 
@@ -71,7 +99,8 @@ export class ChaosAgentBridge {
         where: { id: command.id, status: "PENDING", expiresAt: { gt: new Date() } },
         data: { status: "CLAIMED", claimedAt: new Date() },
       });
-      if (changed.count === 1) return { id: command.id, rewardId: command.rewardId, mode: "DRY_RUN" as const };
+      if (changed.count === 1) return { id: command.id, rewardId: command.rewardId,
+        mode: command.mode === "LIVE" ? "LIVE" as const : "DRY_RUN" as const };
     }
     return null;
   }
@@ -83,13 +112,22 @@ export class ChaosAgentBridge {
     const id = (data as { id: string }).id;
     const command = await this.db.chaosCommand.findUnique({ where: { id } });
     if (!command) throw new Level38Error(404, "Command not found.");
-    const updated = await this.db.chaosCommand.updateMany({
-      where: { id, status: "CLAIMED", expiresAt: { gt: new Date() } },
-      data: { status: "DRY_RUN", acknowledgedAt: new Date() },
-    });
-    if (updated.count !== 1) throw new Level38Error(409, "Command has expired or was already acknowledged.");
-    await this.db.chaosActivity.create({
-      data: { rewardId: command.rewardId, viewer: "Leo · conector FFX", source: "TEST", status: "SIMULATED" },
+    const result = (data as { result?: unknown }).result;
+    if (command.mode === "LIVE" && result !== "APPLIED" && result !== "FAILED") {
+      throw new Level38Error(400, "A live command requires an explicit result.");
+    }
+    const nextStatus = command.mode === "LIVE" ? result as "APPLIED" | "FAILED" : "DRY_RUN";
+    await this.db.$transaction(async (tx) => {
+      const updated = await tx.chaosCommand.updateMany({
+        where: { id, status: "CLAIMED", expiresAt: { gt: new Date() } },
+        data: { status: nextStatus, acknowledgedAt: new Date() },
+      });
+      if (updated.count !== 1) throw new Level38Error(409, "Command has expired or was already acknowledged.");
+      await tx.chaosActivity.create({
+        data: command.mode === "LIVE"
+          ? { rewardId: command.rewardId, viewer: "Leo · prueba real FFX", source: "LOCAL", status: nextStatus }
+          : { rewardId: command.rewardId, viewer: "Leo · conector FFX", source: "TEST", status: "SIMULATED" },
+      });
     });
     return { ok: true };
   }

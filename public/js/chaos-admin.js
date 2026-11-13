@@ -34,7 +34,8 @@
     if (!events.length) { list.append(element('li', '', 'Todavía no hay pruebas.')); return; }
     events.forEach((event) => {
       const item = element('li', '', event.viewer + ' · ' + event.rewardId);
-      item.append(element('small', '', (event.source === 'TEST' ? 'Simulación' : event.status) + ' · ' + new Date(event.occurredAt).toLocaleTimeString('es-ES')));
+      const label = event.source === 'TEST' ? 'Simulación' : event.status === 'APPLIED' ? 'Aplicado en FFX' : event.status === 'FAILED' ? 'Falló en PC' : event.status;
+      item.append(element('small', '', label + ' · ' + new Date(event.occurredAt).toLocaleTimeString('es-ES')));
       list.append(item);
     });
   }
@@ -88,6 +89,25 @@
       await api('agent/test/' + encodeURIComponent(reward.id), {});
       message('Orden de prueba enviada al PC. El conector la confirmará sin modificar FFX.');
     }));
+    if (reward.id === 'give-potion') {
+      const live = element('button', 'admin-primary', '⚠ Aplicar +1 poción REAL');
+      live.type = 'button'; live.dataset.livePotion = '1'; live.disabled = true;
+      actions.insertBefore(live, save);
+      let submitting = false;
+      live.addEventListener('click', async () => {
+        if (submitting) return;
+        if (!window.confirm('Esto SUMARÁ UNA POCIÓN a tu partida abierta de FFX. ¿Has guardado en otro slot y comprobado el inventario?')) return;
+        submitting = true; live.disabled = true;
+        try {
+          await api('agent/live-potion', {});
+          message('Orden REAL enviada. Comprueba el inventario de FFX; no vuelvas a pulsar mientras se ejecuta.');
+          setTimeout(async () => {
+            try { renderActivity((await api('state')).activity); } catch { /* Next refresh can retry. */ }
+          }, 4500);
+        } catch (error) { message(error.message, true); }
+        finally { submitting = false; setTimeout(refreshAgent, 1500); }
+      });
+    }
     return card;
   }
 
@@ -96,8 +116,15 @@
       const state = await api('agent/status');
       byId('chaos-agent-status').textContent = !state.paired ? 'Sin vincular' : !state.connected ? 'Vinculado · PC desconectado' : state.gameRunning ? 'Conectado · FFX.exe detectado' : 'Conectado · esperando a FFX.exe';
       byId('chaos-game').textContent = state.gameRunning ? 'FFX: ejecutándose' : 'FFX: sin detectar';
+      byId('chaos-live-status').textContent = state.livePotionArmed
+        ? '⚠ Poción real ARMADA en este PC. Solo se aplicará si confirmas el botón correspondiente.'
+        : 'Poción real: desactivada. Para probarla, crea un guardado separado, configura CHAOS_LIVE_POTION=YES en el .env del PC y reinicia el conector actualizado.';
       document.querySelectorAll('[data-agent-test]').forEach(button => { button.disabled = !state.connected; });
-    } catch (error) { byId('chaos-agent-status').textContent = 'Conexión no disponible'; }
+      document.querySelectorAll('[data-live-potion]').forEach(button => { button.disabled = !state.livePotionArmed; });
+    } catch (error) {
+      byId('chaos-agent-status').textContent = 'Conexión no disponible';
+      document.querySelectorAll('[data-live-potion]').forEach(button => { button.disabled = true; });
+    }
   }
 
   async function load() {
@@ -109,6 +136,9 @@
       renderActivity(state.activity);
       await refreshAgent();
     } catch (error) { message(error.message, true); }
+  }
+  async function refreshActivity() {
+    try { renderActivity((await api('state')).activity); } catch { /* A later refresh can retry. */ }
   }
   byId('chaos-pair').addEventListener('click', async () => {
     if (!window.confirm('Se invalidará cualquier clave de conector anterior. ¿Continuar?')) return;
@@ -136,4 +166,5 @@
   });
   load();
   setInterval(refreshAgent, 5000);
+  setInterval(refreshActivity, 7000);
 })();

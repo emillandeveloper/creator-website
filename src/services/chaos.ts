@@ -75,7 +75,8 @@ export class ChaosStore {
   async currentOverlay() {
     // Never replay old redemptions when OBS reconnects.
     const event = await this.db.chaosActivity.findFirst({
-      where: { source: "TEST", status: "SIMULATED", occurredAt: { gte: new Date(Date.now() - 11_000) } },
+      where: { OR: [{ source: "TEST", status: "SIMULATED" }, { source: "LOCAL", status: "APPLIED" }],
+        occurredAt: { gte: new Date(Date.now() - 11_000) } },
       orderBy: { occurredAt: "desc" },
     });
     if (!event) return null;

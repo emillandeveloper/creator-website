@@ -64,6 +64,10 @@ export function mountCatalog(app: Application) {
       const command = await agent!.queueTest(req.params.id);
       res.status(201).json({ commandId: command.id });
     }));
+    router.post("/api/chaos/agent/live-potion", limited(1, 60 * 1000), express.json({ limit: "1kb", inflate: false }), wrap(async (_req, res) => {
+      const command = await agent!.queueLivePotion();
+      res.status(201).json({ commandId: command.id });
+    }));
     router.post("/api/chaos/rewards/:id", limited(40, 60 * 1000), express.json({ limit: "2kb", inflate: false }), wrap(async (req, res) => {
       res.json(await chaos!.saveReward(req.params.id, req.body));
     }));
@@ -133,8 +137,8 @@ export function mountCatalog(app: Application) {
     await db.catalogLogo.findFirst({ select: { gameId: true } });
     await db.chaosReward.findFirst({ select: { id: true } });
     await db.chaosActivity.findFirst({ select: { id: true } });
-    await db.chaosAgent.findFirst({ select: { id: true } });
-    await db.chaosCommand.findFirst({ select: { id: true } });
+    await db.chaosAgent.findFirst({ select: { id: true, livePotionArmed: true } });
+    await db.chaosCommand.findFirst({ select: { id: true, mode: true } });
     return true;
   }, close: async () => { await db?.$disconnect(); } };
 }
