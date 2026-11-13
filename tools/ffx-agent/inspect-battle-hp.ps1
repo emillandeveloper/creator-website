@@ -13,6 +13,14 @@ public static class FfxBattleHpReader
 {
     private const uint VM_READ = 0x0010;
     private const uint QUERY_INFORMATION = 0x0400;
+    private const int PAGE_SIZE = 0x1000;
+
+    // Farplane/Memory/OffsetScanner.cs: FFX_BattlePointerParty x86 signature.
+    // Four wildcard bytes at positions 13..16 encode the pointer storage address.
+    private static readonly byte[] BattleSignature = {
+        0x83, 0xF8, 0x1F, 0x7D, 0x0E, 0x69, 0xC0, 0x90, 0x0F, 0x00,
+        0x00, 0x03, 0x05, 0x00, 0x00, 0x00, 0x00, 0x5D, 0xC3
+    };
 
     [DllImport("kernel32.dll", SetLastError = true)]
     private static extern IntPtr OpenProcess(uint access, bool inheritHandle, int processId);
@@ -44,6 +52,55 @@ public static class FfxBattleHpReader
         }
         finally { CloseHandle(handle); }
     }
+
+    public static long FindBattlePartyPointerAddress(int pid, long moduleBase, int moduleSize)
+    {
+        // Scan only the main executable image; do not enumerate other processes or memory.
+        if (moduleBase < 0x10000 || moduleSize < PAGE_SIZE || moduleSize > 128 * 1024 * 1024)
+            throw new ArgumentOutOfRangeException("moduleSize", "Unexpected FFX module layout");
+
+        IntPtr handle = OpenProcess(VM_READ | QUERY_INFORMATION, false, pid);
+        if (handle == IntPtr.Zero)
+            throw new Win32Exception(Marshal.GetLastWin32Error(), "Cannot open FFX for signature inspection");
+        try
+        {
+            byte[] buffer = new byte[PAGE_SIZE + BattleSignature.Length - 1];
+            for (int offset = 0; offset < moduleSize; offset += PAGE_SIZE)
+            {
+                int length = Math.Min(buffer.Length, moduleSize - offset);
+                UIntPtr bytesRead;
+                bool ok = ReadProcessMemory(handle, new IntPtr(moduleBase + offset), buffer,
+                    new UIntPtr((uint)length), out bytesRead);
+
+                // Try just the current page if reading into the next one failed.
+                if (!ok || bytesRead.ToUInt64() != (ulong)length)
+                {
+                    length = Math.Min(PAGE_SIZE, moduleSize - offset);
+                    ok = ReadProcessMemory(handle, new IntPtr(moduleBase + offset), buffer,
+                        new UIntPtr((uint)length), out bytesRead);
+                    if (!ok || bytesRead.ToUInt64() != (ulong)length) continue;
+                }
+
+                for (int i = 0; i <= length - BattleSignature.Length; i++)
+                {
+                    bool matched = true;
+                    for (int k = 0; k < BattleSignature.Length; k++)
+                    {
+                        if (k >= 13 && k <= 16) continue;
+                        if (buffer[i + k] != BattleSignature[k]) { matched = false; break; }
+                    }
+                    if (!matched) continue;
+
+                    // The instruction directly references the address of a
+                    // 32-bit battle-party pointer; it is NOT an RVA.
+                    uint storageAddress = BitConverter.ToUInt32(buffer, i + 13);
+                    if (storageAddress >= 0x10000) return (long)storageAddress;
+                }
+            }
+            return 0;
+        }
+        finally { CloseHandle(handle); }
+    }
 }
 '@
 
@@ -61,12 +118,20 @@ try {
 
     Add-Type -TypeDefinition $nativeCode -ErrorAction Stop
 
-    # Farplane: module-relative battle party pointer +D334CC (32-bit).
-    # Each party battle entity occupies 0xF90 bytes.
-    $pointerBytes = [FfxBattleHpReader]::Read($gameProcess.Id, $baseAddress + 0xD334CC, 4)
+    # The old fixed offset +D334CC returned zero inside Leo's FFX battle.
+    # Farplane resolves the pointer's *storage address* by signature scanning
+    # the executable code. It is an absolute address, not base + an old RVA.
+    $moduleSize = $gameProcess.MainModule.ModuleMemorySize
+    Write-Host 'Buscando la firma del puntero de combate (solo lectura)...' -ForegroundColor Cyan
+    $pointerStorage = [FfxBattleHpReader]::FindBattlePartyPointerAddress($gameProcess.Id, $baseAddress, $moduleSize)
+    if ($pointerStorage -eq 0) {
+        throw 'Historical battle pointer signature not found in this FFX.exe. No memory changed.'
+    }
+    Write-Host ('Battle pointer storage found at: 0x{0:X8}' -f $pointerStorage) -ForegroundColor Cyan
+    $pointerBytes = [FfxBattleHpReader]::Read($gameProcess.Id, $pointerStorage, 4)
     $battlePointer = [BitConverter]::ToUInt32($pointerBytes, 0)
     if ($battlePointer -lt 0x10000) {
-        throw 'No active battle pointer found. Start an encounter and pause at the battle command menu.'
+        throw ('Battle pointer storage contains 0x{0:X8}, even during battle. This build needs further mapping.' -f $battlePointer)
     }
 
     # From Farplane's BattleEntityData structure, original 32-bit offsets:
