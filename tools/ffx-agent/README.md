@@ -64,3 +64,13 @@ Esta prueba manual no contacta la web, no introduce canjes reales y no guarda la
 8. Cuando termines, cambia de nuevo `CHAOS_LIVE_POTION=NO` y reinicia el conector para dejarlo en modo seguro. No es necesario regenerar la clave privada.
 
 **Ningún espectador puede activar esta operación desde Twitch.** Si ves un error, un resultado distinto o no aparece la confirmación, no hagas una segunda prueba hasta que revisemos el estado de la partida. El conector no reintenta escrituras por su cuenta.
+
+## Siguiente etapa: HP de los personajes (lectura solamente)
+
+La prueba supervisada de Poción ya funciona. Para preparar «Curación de emergencia» hay un nuevo `inspect-hp.bat` que usa solo permisos de lectura para mostrar los HP actuales y máximos de Tidus, Yuna, Auron, Kimahri, Wakka, Lulu y Rikku, indicando cuáles están en el grupo. **No cambia los HP ni los guardados.**
+
+1. Abre FFX y entra en el menú del grupo, **fuera de un combate**. Si es posible, deja que un personaje reciba daño antes, para que sus HP actuales sean distintos de los máximos.
+2. Ejecuta `inspect-hp.bat` desde esta carpeta actualizada.
+3. Compara los HP mostrados en la consola con los del menú de FFX y envía una captura **sin ninguna clave privada**.
+
+La lectura usa la estructura de personaje documentada en [Farplane FFX/Data/Party.cs](https://github.com/topher-au/Farplane/blob/master/FFX/Data/Party.cs). Si los números no coinciden, detente y no intentes modificar HP: tendremos que resolver los offsets y quizá adaptar por separado los datos de combate.
