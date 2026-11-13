@@ -1,6 +1,6 @@
 # Conector local para Final Fantasy X HD Remaster (Steam / Windows)
 
-El conector identifica si `FFX.exe` está abierto, recibe órdenes de prueba desde la web y las confirma al overlay de OBS. Por defecto es **solo simulación**: no cambia HP, objetos ni comandos. Hay un único efecto real opcional, **sumar una Poción**, que requiere habilitación local deliberada, confirmación en el panel de propietario y una partida guardada de prueba. **Twitch Channel Points no activa todavía efectos reales.**
+El conector identifica si `FFX.exe` está abierto, recibe órdenes de prueba desde la web y las confirma al overlay de OBS. Por defecto es **solo simulación**: no cambia HP, objetos ni comandos. Hay un único efecto real opcional **desde la web**, **sumar una Poción**, que requiere habilitación local deliberada, confirmación en el panel de propietario y una partida guardada de prueba. Aparte, existen pruebas manuales controladas para Poción y Wakka. **Twitch Channel Points no activa todavía efectos reales.**
 
 ## Preparación en Windows
 
@@ -28,7 +28,7 @@ El conector identifica si `FFX.exe` está abierto, recibe órdenes de prueba des
 - **«Conexión no disponible»**: comprueba el servicio web de Render, que tienes Internet y el valor exacto de `CHAOS_SERVER_ORIGIN`.
 - **El juego no se detecta**: confirma en el Administrador de tareas que existe un proceso llamado `FFX.exe`. Esta versión no detecta FFX-2.
 
-Las acciones de curación, reducción de HP, bloqueo de Atacar y ruleta siguen siendo exclusivamente simulaciones.
+Desde la web y Twitch, las acciones de curación, reducción de HP, bloqueo de Atacar y ruleta siguen siendo exclusivamente simulaciones. Las pruebas manuales de escritura descritas mas abajo no escuchan canjes.
 
 ## Diagnostico del inventario
 
@@ -73,4 +73,16 @@ La prueba supervisada de Poción ya funciona. Para preparar «Curación de emerg
 2. Ejecuta `inspect-hp.bat` desde esta carpeta actualizada.
 3. Compara los HP mostrados en la consola con los del menú de FFX y envía una captura **sin ninguna clave privada**.
 
-La lectura usa la estructura de personaje documentada en [Farplane FFX/Data/Party.cs](https://github.com/topher-au/Farplane/blob/master/FFX/Data/Party.cs). **La primera versión mostró MP en lugar de HP** en el ejecutable Steam comprobado. La versión corregida enseña **HP y MP juntos** usando desplazamientos candidatos de HP (`+0x18` y `+0x20`) y los desplazamientos de MP ya confirmados (`+0x1C` y `+0x24`). Compara las cuatro columnas con el menú: si alguna no coincide, detente y no intentes modificar HP. No se habilitarán escrituras hasta verificar los datos; los de combate requerirán comprobaciones separadas.
+La lectura usa la estructura de personaje documentada en [Farplane FFX/Data/Party.cs](https://github.com/topher-au/Farplane/blob/master/FFX/Data/Party.cs). **La primera versión mostró MP en lugar de HP** en el ejecutable Steam comprobado. La versión corregida enseña **HP y MP juntos** usando desplazamientos de HP (`+0x18` y `+0x20`) y MP (`+0x1C` y `+0x24`) contrastados con el juego. Si alguna columna no coincide, detente y no intentes modificar HP. Por ahora la escritura de HP solo se permite en la prueba manual acotada de Wakka; los datos de combate requerirán comprobaciones separadas.
+
+## Primera prueba manual de curacion: Wakka +100 HP
+
+El 13 de noviembre hemos contrastado **HP y MP de los siete personajes** con el menu real de FFX. Wakka tiene 9.999/99.999 HP en esa partida, de modo que hay margen para una prueba pequena y visible. Esta herramienta es **independiente del conector de Twitch** y no habilita canjes reales.
+
+1. Haz una copia del guardado en otro slot. Abre la partida de prueba de FFX, **fuera de combate**, y entra en el menu de personajes.
+2. Descarga los dos archivos nuevos `heal-wakka-once.ps1` y `heal-wakka-once.bat` a tu carpeta local `ffx-agent`.
+3. Ejecuta `heal-wakka-once.bat`. Comprueba que indica Wakka **9.999/99.999 HP**. Si muestra otro valor o un error, detente.
+4. Solo si los valores coinciden y quieres realizar la prueba real, escribe exactamente `CURAR` y pulsa Intro. Otro texto cancela sin modificar nada.
+5. El script comprueba el ejecutable, la presencia de Wakka en el grupo y sus HP/MP. Al confirmar, vuelve a verificar que no han cambiado y modifica **solo 4 bytes**: Wakka pasa de **9.999 a 10.099 HP**, dejando intactos los MP y los HP maximos. Comprueba el resultado cerrando y reabriendo el menu de FFX.
+
+Esta version requiere precisamente el estado **9.999/99.999 HP** para evitar segundas aplicaciones accidentales. No toca los guardados ni aplica efectos durante un combate. **Si hay una discrepancia, no repitas la prueba ni guardes sobre tu partida habitual; comparte la captura del resultado.**
