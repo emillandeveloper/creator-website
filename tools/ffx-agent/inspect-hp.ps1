@@ -1,6 +1,7 @@
 # Twitch Chaos / FFX HD Steam: READ-ONLY character HP diagnostic.
 # No writes, no Twitch requests, no save modifications.
-# Layout: Farplane FFX/Offsets.cs and FFX/Data/Party.cs (historical Steam build).
+# Layout: Farplane FFX/Offsets.cs and FFX/Data/Party.cs, adjusted for Leo's
+# verified Steam executable: the historical HP offsets actually returned MP.
 $ErrorActionPreference = 'Stop'
 
 $nativeCode = @'
@@ -64,7 +65,10 @@ try {
     Add-Type -TypeDefinition $nativeCode -ErrorAction Stop
 
     # Farplane: PartyList = FFX.exe + D307E8; PartyStatsBase = FFX.exe + D32060.
-    # PartyMember is 0x94 bytes; CurrentHp at +0x1C, CurrentHpMax at +0x24.
+    # PartyMember size is 0x94. In Leo's Steam build, +0x1C and +0x24
+    # empirically returned CurrentMp and CurrentMpMax, not HP.
+    # Candidate neighboring HP fields are therefore +0x18 and +0x20;
+    # confirm BOTH HP and MP against the in-game menu before any write.
     $partyIds = [FfxHpReader]::Read($gameProcess.Id, $baseAddress + 0xD307E8, 8)
     $memberSize = 0x94
     $members = [FfxHpReader]::Read($gameProcess.Id, $baseAddress + 0xD32060, 7 * $memberSize)
@@ -80,19 +84,26 @@ try {
     $rows = @()
     for ($i = 0; $i -lt $names.Length; $i++) {
         $start = $i * $memberSize
-        $hp = [BitConverter]::ToInt32($members, $start + 0x1C)
-        $hpMax = [BitConverter]::ToInt32($members, $start + 0x24)
+        $hp = [BitConverter]::ToInt32($members, $start + 0x18)
+        $mp = [BitConverter]::ToInt32($members, $start + 0x1C)
+        $hpMax = [BitConverter]::ToInt32($members, $start + 0x20)
+        $mpMax = [BitConverter]::ToInt32($members, $start + 0x24)
         $active = $partyIds -contains [byte]$i
 
-        if ($hpMax -eq 0 -and $hp -eq 0 -and -not $active) { continue }
+        if ($hpMax -eq 0 -and $hp -eq 0 -and $mpMax -eq 0 -and $mp -eq 0 -and -not $active) { continue }
         if ($hpMax -lt 1 -or $hpMax -gt 99999 -or $hp -lt 0 -or $hp -gt $hpMax) {
             throw ('HP fuera del rango esperado para ' + $names[$i] + ': ' + $hp + '/' + $hpMax + '. No changes made.')
+        }
+        if ($mpMax -lt 1 -or $mpMax -gt 999 -or $mp -lt 0 -or $mp -gt $mpMax) {
+            throw ('MP fuera del rango esperado para ' + $names[$i] + ': ' + $mp + '/' + $mpMax + '. No changes made.')
         }
         if ($active) { $activeCount++ }
         $rows += [PSCustomObject]@{
             Personaje = $names[$i]
             HP_actual = $hp
             HP_maximo = $hpMax
+            MP_actual = $mp
+            MP_maximo = $mpMax
             En_grupo = $(if ($active) { 'SI' } else { 'NO' })
         }
     }
@@ -100,12 +111,12 @@ try {
         throw 'No recognized playable character appears in the current party. No conclusions can be drawn.'
     }
 
-    Write-Host 'Twitch Chaos - FFX HD / read-only HP inspection' -ForegroundColor Cyan
+    Write-Host 'Twitch Chaos - FFX HD / read-only HP and MP inspection' -ForegroundColor Cyan
     Write-Host ('FFX.exe PID: ' + $gameProcess.Id)
     Write-Host ('Executable SHA256: ' + $gameHash)
     $rows | Format-Table -AutoSize | Out-Host
     Write-Host 'READ ONLY: no game memory or save data was changed.' -ForegroundColor Green
-    Write-Host 'Compare the HP of the characters currently in your party with the in-game menu.'
+    Write-Host 'IMPORTANT: these are CANDIDATE HP offsets. Confirm HP AND MP against the in-game menu.'
     Write-Host 'Outside combat is best for this test; combat uses a separate HP structure.' -ForegroundColor Yellow
 } catch {
     Write-Host ('Inspection stopped: ' + $_.Exception.Message) -ForegroundColor Red
