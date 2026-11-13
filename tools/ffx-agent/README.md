@@ -37,3 +37,15 @@ Si la comunicacion ya funciona, haz una **partida guardada en un slot separado**
 Compara el numero de Pociones detectado con el que aparece en el inventario del juego. Si coinciden, comparte unicamente el resultado del inspector (PID, hash del ejecutable, cantidad y slot). **No pegues tu clave del conector.** Si ves un error o un numero distinto al del juego, detente: las direcciones de memoria historicas pueden no ser compatibles con tu version de Steam.
 
 Referencia tecnica: [Farplane, FFX/Offsets.cs](https://github.com/topher-au/Farplane/blob/master/FFX/Offsets.cs) y [Farplane, FFX/Data/Item.cs](https://github.com/topher-au/Farplane/blob/master/FFX/Data/Item.cs). Un resultado correcto es una comprobacion inicial, no garantia de seguridad para futuras escrituras; primero validaremos cuidadosamente esa segunda fase.
+
+## Primera prueba de escritura: UNA Pocion (solo manual)
+
+**Requiere haber comprobado antes con `inspect-inventory.bat` que el numero de Pociones coincide exactamente con el juego.** Usa exclusivamente una partida de prueba en un slot de guardado separado y manten FFX abierto, con el inventario sin cambios.
+
+1. Con al menos una Pocion y menos de 99, ejecuta `give-potion-once.bat` directamente en tu PC.
+2. La ventana muestra el numero actual y el esperado (+1). Si no coinciden con lo que ves en el juego, no continúes.
+3. Solo si todo coincide, escribe `SUMAR` y pulsa Intro. Cualquier otro texto cancela sin escribir.
+4. El script valida el hash conocido del ejecutable, las 112 posiciones y cantidades del inventario y que nada haya cambiado mientras confirmabas. Solo entonces intenta cambiar **un byte**: la cantidad de la pila de Pociones. Lee ese byte otra vez para comprobar el resultado.
+5. Cierra y vuelve a abrir el inventario de FFX. Comprueba visualmente el cambio y dime si ha pasado, por ejemplo, de 4 a 5 Pociones.
+
+**No lo hace automaticamente Twitch Chaos.** Esta prueba no cambia el codigo del agente, no introduce canjes reales, no guarda la partida y no envia ninguna orden desde la web. Si algo falla, no repitas el script sin revisar primero el estado del inventario. Tras verificarlo conectaremos esta operacion al panel con habilitacion manual y limites estrictos.
